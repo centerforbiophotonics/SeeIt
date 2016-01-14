@@ -11,6 +11,11 @@
 // about supported directives.
 //
 //= require jquery
-//= require jquery_ujs
 //= require turbolinks
-//= require_tree .
+//= require goldenlayout
+//= require SeeIt/init
+//= require SeeIt/data
+//= require SeeIt/dataset
+//= require SeeIt/data_menu
+//= require SeeIt/graph_container
+//= require SeeIt/app

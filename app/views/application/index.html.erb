@@ -1,0 +1,9 @@
+<div id="left-region" style="min-height: 100%"></div>
+<div id="right-region"></div>
+
+<%= javascript_tag do %>
+  $(function() {
+    app1 = new SeeIt.Application("#left-region");
+  });
+
+<% end %>
