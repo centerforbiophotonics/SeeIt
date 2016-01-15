@@ -1,10 +1,12 @@
 @SeeIt.Application = (->
   class Application
     constructor: (@container) ->
+      @layoutContainers = {}
       @initLayout()
-      @graphContainer = new SeeIt.GraphContainer()
-      @dataMenu = new SeeIt.DataMenu()
+      @graphContainer = new SeeIt.GraphContainer(@layoutContainers['Graphs'])
+      @dataMenu = new SeeIt.DataMenu(@layoutContainers['Data'])
       @dataSet = new SeeIt.Dataset(["test"], [["I am data"]])
+      @globals = new SeeIt.Globals(@layoutContainers['Globals'])
 
     initLayout: ->
       config = {
@@ -38,10 +40,11 @@
       }
 
       @layout = new GoldenLayout(config, @container)
+
       app = @
       ['Options', 'Data', 'Graphs'].forEach (type) ->
         app.layout.registerComponent type, (container, state) ->
-          container.getElement().html ''
+          app.layoutContainers[type] = $(container.getElement())
         
 
       @layout.init()

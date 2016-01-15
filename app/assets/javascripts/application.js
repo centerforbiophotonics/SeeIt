@@ -14,8 +14,10 @@
 //= require turbolinks
 //= require goldenlayout
 //= require SeeIt/init
+//= require SeeIt/globals
 //= require SeeIt/data
 //= require SeeIt/dataset
 //= require SeeIt/data_menu
+//= require SeeIt/graph
 //= require SeeIt/graph_container
 //= require SeeIt/app
