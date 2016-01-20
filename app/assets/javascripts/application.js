@@ -12,7 +12,8 @@
 //
 //= require jquery
 //= require turbolinks
-//= require goldenlayout
+//= require twitter/bootstrap
+//= require bootstrap.js
 //= require SeeIt/init
 //= require SeeIt/globals
 //= require SeeIt/data

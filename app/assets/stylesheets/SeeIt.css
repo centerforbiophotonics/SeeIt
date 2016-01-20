@@ -7,17 +7,60 @@
 }
 
 .SeeIt.graph-container{
-  position: absolute;
-  margin-left: 20%;
-  width: 80%;
-  height: 100%;
-  background-color: blue;
-  display: inline-block;
+  margin: 2%;
+  width: 96%;
+  height: 96%;
+  overflow-y: auto;
 }
 
-h2{
-  font: 14px Arial, sans-serif;
-  color:#fff;
-  padding: 10px;
-  text-align: center;
+.SeeIt.page-container {
+  height: 100%;
+  width: 100%;
+}
+
+.SeeIt.row {
+  height: 100%;
+}
+
+.SeeIt.col-md-2, .SeeIt.col-md-10, .SeeIt.col-md-12 {
+  height: 100%;
+}
+
+.SeeIt.container-fluid {
+  height: calc(100% - 52px);
+}
+
+.SeeIt.dataset a.SeeIt.selected {
+  color: white;
+}
+
+.SeeIt.Data {
+  padding-left: 0;
+  padding-right: 0;
+  border-top-right-radius: 4px;
+  border-top-left-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+.SeeIt.Data .SeeIt.list-group{
+    max-height: 100%;
+    overflow-y: auto; 
+}
+
+.SeeIt.Graphs {
+  max-height: calc(100% - 52px);
+  overflow-y: auto;
+}
+
+.SeeIt.graph-list {
+  height: 100%;
+}
+
+.SeeIt.graph {
+  height: 25%;
+  min-height: 300px;
+}
+
+.SeeIt.graph-panel {
+  height: 100%;
 }
