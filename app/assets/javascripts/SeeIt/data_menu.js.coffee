@@ -1,6 +1,7 @@
 @SeeIt.DataMenu = (->
   class DataMenu
     constructor: (@container) ->
+      @datasets = []
       @init()
       @visible = true
 
@@ -29,6 +30,11 @@
 
       @registerEvents()
 
+    addDataset: (data) ->
+      if SeeIt.Dataset.validateData(data)
+        datasets.push([["label"]],[[1]])
+
+        
     registerEvents: ->
       toggleData = ->
         $(@).toggleClass('active')
@@ -41,6 +47,6 @@
     toggleVisible: ->
       @container.toggle()
       @visible = !@visible
-      
+
   DataMenu
 ).call(@)

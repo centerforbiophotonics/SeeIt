@@ -10,7 +10,8 @@
       @dataSet = new SeeIt.Dataset(["test"], [["I am data"]])
       @globals = new SeeIt.Globals(@layoutContainers['Globals'], 
         [
-          {class: "toggleData", title: "Show/Hide Data", handler: @handlers.toggleDataVisible}
+          {class: "toggleData", title: "Show/Hide Data", handler: @handlers.toggleDataVisible},
+          {class: "addGraph", title: "Add graph", handler: @handlers.addGraph, icon: "<span class='glyphicon glyphicon-plus'></span>"}  
         ]
       )
 
@@ -20,6 +21,8 @@
       app.handlers = {
         toggleDataVisible: ->
           app.toggleDataVisible.call(app)
+        addGraph: ->
+          app.graphContainer.addGraph()
       }
 
     initLayout: ->

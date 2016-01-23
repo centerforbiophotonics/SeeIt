@@ -20,8 +20,9 @@
     buildNav: ->
       htmlStr = '<ul class="nav navbar-nav">'
       @navElements.forEach (el) ->
+        icon = if el.icon then "<div class='iconContainer'>#{el.icon}</div>" else ''
         htmlStr += """
-            <li class="#{el.class}"><a href="#">#{el.title}</a></li>         
+            <li class="#{el.class}">#{icon}<a href="#">#{el.title}</a></li>         
         """
 
       return htmlStr+"</ul>"

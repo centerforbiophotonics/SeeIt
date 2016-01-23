@@ -57,10 +57,40 @@
 }
 
 .SeeIt.graph {
-  height: 25%;
+/*  height: 25%;
+  min-height: 300px;
+*/}
+
+.SeeIt.graph-panel {
+  height: 100%;
+}
+
+.addGraph .iconContainer {
+  display: inline-block;
+  padding-top: 15px;
+  padding-bottom: 15px;
+  padding-left: 10px;
+}
+
+.addGraph a {
+  display: inline-block !important;
+  padding-left: 5px !important;
+}
+
+.SeeIt.panel-heading {
+  font-size: 20px;
+  min-height: 54px;
+}
+
+.SeeIt.panel-heading .glyphicon {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.SeeIt.graph-panel .panel-collapse {
   min-height: 300px;
 }
 
-.SeeIt.graph-panel {
+.SeeIt.maximized {
   height: 100%;
 }
