@@ -1,13 +1,24 @@
 @SeeIt.Application = (->
   class Application
+    _.extend(@prototype, Backbone.Events)
+
     constructor: (@container) ->
       @layoutContainers = {}
       @initLayout()
       @initHandlers()
       @dataVisible = true
       @graphContainer = new SeeIt.GraphContainer(@layoutContainers['Graphs'])
-      @dataMenu = new SeeIt.DataMenu(@layoutContainers['Data'])
-      @dataSet = new SeeIt.Dataset(["test"], [["I am data"]])
+      @dataMenu = new SeeIt.DataMenu(
+        @layoutContainers['Data'],
+        [{
+          title: "Dataset 1", 
+          dataset: [
+            ['', 'Header 1'],
+            ['Label 1', 1]
+          ],
+          hasLabels: true
+        }]
+      )
       @globals = new SeeIt.Globals(@layoutContainers['Globals'], 
         [
           {class: "toggleData", title: "Show/Hide Data", handler: @handlers.toggleDataVisible},

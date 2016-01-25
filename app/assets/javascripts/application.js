@@ -14,6 +14,8 @@
 //= require turbolinks
 //= require twitter/bootstrap
 //= require bootstrap.js
+//= require underscore.js
+//= require backbone-events.js
 //= require SeeIt/init
 //= require SeeIt/globals
 //= require SeeIt/data

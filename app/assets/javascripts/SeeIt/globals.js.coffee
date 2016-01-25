@@ -1,5 +1,7 @@
 @SeeIt.Globals = (->
   class Globals
+    _.extend(@prototype, Backbone.Events)
+    
     constructor: (@container, @navElements) ->
       @init()
 

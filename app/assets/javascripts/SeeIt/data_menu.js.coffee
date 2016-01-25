@@ -1,48 +1,29 @@
 @SeeIt.DataMenu = (->
   class DataMenu
-    constructor: (@container) ->
+    _.extend(@prototype, Backbone.Events)
+    
+    constructor: (@container, @data) ->
       @datasets = []
       @init()
       @visible = true
 
     init: ->
       @container.html("""
-        <ul class="SeeIt list-group">
-          <div>
-            <li class="SeeIt dataset list-group-item">
-              <a class="SeeIt">Dataset 1</a>
-            </li>
-            <div class="SeeIt data-columns list-group-item" style="padding: 5px; display: none">
-              <ul class='SeeIt list-group'>
-                <li class='SeeIt list-group-item'><a>Content 1</a></li>
-                <li class='SeeIt list-group-item'><a>Content 2</a></li> 
-              </ul>
-            </div>
-          </div>
-          <div>
-            <li class="SeeIt dataset list-group-item"><a class="SeeIt">Dataset 2</a></li>
-          </div>
-          <div>
-            <li class="SeeIt dataset list-group-item"><a class="SeeIt">Dataset 3</a></li>
-          </div>
+        <ul class="SeeIt dataset-list list-group">
         </ul>
       """)
 
-      @registerEvents()
+      @initDatasets()
 
-    addDataset: (data) ->
-      if SeeIt.Dataset.validateData(data)
-        datasets.push([["label"]],[[1]])
+    initDatasets: ->
+      for i in [0...@data.length]
+        @addDataset(@data[i].title, @data[i].dataset, @data[i].hasLabels)
 
-        
-    registerEvents: ->
-      toggleData = ->
-        $(@).toggleClass('active')
-        $(@).find('a').toggleClass('selected')
-        $(@).parent().find('.data-columns').slideToggle()
+    addDataset: (title, dataset, hasLabels) ->
+      if SeeIt.Dataset.validateData(dataset)
+        @container.find('.dataset-list').append("<div class='SeeIt dataset-container'></div>")
+        @datasets.push(new SeeIt.Dataset(@container.find(".SeeIt.dataset-container").last(),"Dataset 1", dataset, hasLabels))
 
-
-      @container.find('.dataset').off('click', toggleData).on('click', toggleData)
 
     toggleVisible: ->
       @container.toggle()

@@ -1,5 +1,7 @@
 @SeeIt.Graph = (->
   class Graph
+    _.extend(@prototype, Backbone.Events)
+    
     constructor: (@id, @container, @destroyCallback) ->
       @maximized = false
       @collapsed = false
