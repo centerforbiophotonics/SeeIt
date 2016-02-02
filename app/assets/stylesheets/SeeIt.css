@@ -53,6 +53,15 @@
   overflow-y: auto;
 }
 
+.SeeIt.Spreadsheet.hidden {
+  display: none;
+}
+
+.SeeIt.Graphs.spreadsheet-visible, .SeeIt.Spreadsheet {
+  max-height: calc(50% - 26px);
+  overflow-y: auto;
+}
+
 .SeeIt.graph-list {
   height: 100%;
 }

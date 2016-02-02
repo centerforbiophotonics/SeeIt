@@ -1,6 +1,6 @@
-@SeeIt.GraphContainer = (->
-  class GraphContainer
-    constructor: (@container) ->
+@SeeIt.GraphCollectionView = (->
+  class GraphCollectionView
+    constructor: (@app, @container) ->
       @graphs = {}
       @graphId = 1
       @handlers = {}
@@ -28,7 +28,7 @@
         </li>
         """)
 
-        @graphs[@graphId.toString()] = new SeeIt.Graph(@graphId, @container.find("#graph_#{@graphId}"), @handlers.removeGraph)
+        @graphs[@graphId.toString()] = new SeeIt.GraphView(@app, @graphId, @container.find("#graph_#{@graphId}"), @handlers.removeGraph)
         @graphId++
 
     toggleFullscreen: ->
@@ -39,5 +39,5 @@
 
       @isFullscreen = !@isFullscreen
 
-  GraphContainer
+  GraphCollectionView
 ).call(@)

@@ -1,16 +1,16 @@
-@SeeIt.Globals = (->
-  class Globals
+@SeeIt.ToolbarView = (->
+  class ToolbarView
     _.extend(@prototype, Backbone.Events)
-    
-    constructor: (@container, @navElements) ->
+
+    constructor: (@app, @container, @navElements) ->
       @init()
 
     init: ->
       @container.html(
-        """<nav class='navbar navbar-default'>
-          <div class='container-fluid'>
-            <div class='navbar-header'>
-              <a class='navbar-brand' href='#'>Global Options</a>
+        """<nav class='SeeIt navbar navbar-default'>
+          <div class='SeeIt container-fluid'>
+            <div class='SeeIt navbar-header'>
+              <a class='SeeIt navbar-brand' href='#'>Global Options</a>
             </div>
             #{@buildNav()}
           </div>
@@ -30,10 +30,10 @@
       return htmlStr+"</ul>"
 
     registerEvents: ->
-      globals  = @
+      toolbar  = @
       @navElements.forEach (el) ->
         if el.handler
-          globals.container.find(".#{el.class}").on('click', el.handler)
+          toolbar.container.find(".#{el.class}").on('click', el.handler)
 
-  Globals
+  ToolbarView
 ).call(@)

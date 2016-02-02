@@ -1,106 +1,118 @@
 @SeeIt.Dataset = (->
   class Dataset
     _.extend(@prototype, Backbone.Events)
-    
-    constructor: (@container, @title, dataset, @hasLabels, @labelKey) ->
-      @dataset = dataset || []
+    @Validators = {}
+    _.extend(@Validators, SeeIt.Modules.Validators)
+
+    constructor: (@app, data, @title, @isLabeled) ->
+      #Data will be an array of DataColumns
+      @labels = []
+      @headers = []
+      @rawFormat = "array"
       @data = []
-      @dataFormat = if @dataIsArray() then "array" else "json"
-      @labels = if @hasLabels then @getLabels() else null
-      @headers = @getHeaders()
-      @initLayout()
-      console.log "dataset built"
+      @loadData(data)
 
-    initLayout: ->
-      @container.html("""
-        <li class="SeeIt dataset list-group-item">
-          <a class="SeeIt">#{@title}</a>
-        </li>
-        <div class="SeeIt data-columns list-group-item" style="padding: 5px; display: none">
-          <ul class='SeeIt list-group data-list'>
-          </ul>
-        </div>
-      """)
+    loadData: (data) ->
+      if Dataset.validateData(data)
+        #Data in spreadsheet format
+        @rawData = data
+        @formatRawData()
+        @initData()
+        @trigger("data:loaded")
+      else
+        alert "Error: Invalid data format"
 
-      @initData()
-      @registerEvents()
-
-    getLabels: ->
-      labels = []
-      if @dataset.length
-        if @dataFormat == "array"
-            for i in [1...@dataset.length]
-              labels.push @dataset[i][0]
+    formatRawData: ->
+      #Array of arrays
+      if @rawFormat == "array"
+        if !@isLabeled
+          privateMethods.addLabels.call(@)
         else
-          for i in [1...@dataset.length]
-            labels.push @dataset[i][@labelKey]
+          privateMethods.stringifyLabels.call(@)
 
-      return labels
-
-    getHeaders: ->
-      headers = []
-      if @dataset.length
-        if @dataFormat == "array"
-          headers = if @hasLabels then @dataset[0].slice(1, @dataset[0].length) else @dataset[0]
-        else
-          headers = Object.keys(@dataset[0])
-
-      return headers
-
-    dataIsArray: ->
-      return (if @dataset.length then $.isArray(@dataset[0]) else undefined)
+        maxCols = privateMethods.maxNumCols.call(@)
+        privateMethods.padRows.call(@,maxCols)
+        @initHeaders()
+      else
+        #array of json
 
     initData: ->
-      if @dataFormat == "array"
-        start = (if @hasLabels then 1 else 0)
-        for i in [start...@dataset[0].length]
-          console.log i
-          @addData(@headers[i - start], @buildData(i))
-      else
-        for header in @headers
-          @addData(header, @buildData(header))
+      # Assume data is already in array of arrays format and is uniformly padded with 'undefined's
+      for i in [1...@rawDataCols()]
+        @data.push(SeeIt.DataColumn.new(@app, @rawData, i))
 
+    rawDataRows: ->
+      @rawData.length
 
-    #Takes either a key or a column index (depending on data format)
-    # and returns array of elements in that column
-    buildData: (id) ->
-      data = []
-      for i in [(if @dataFormat == "array" then 1 else 0)...@dataset.length]
-        data.push(@dataset[i][id])
+    rawDataCols: ->
+      if @rawData.length then @rawData[0].length else 0
 
-      return data
+    updateColumn: (idx, column) ->
+      for i in [1...@getNumRows()]
+        @data[i][idx] = column[i - 1]
 
-    addData: (header, data) ->
-      console.log "adding data"
-      @container.find(".data-list").append("<li class='SeeIt list-group-item data-container'></li>")
-      @data.push(new SeeIt.Data(@container.find(".data-container").last(),header, data))
+    updateRow: (idx, row) ->
+      start = (if @isLabeled then 1 else 0)
+      for i in [start...@getNumCols()]
+        @data[idx][i] = row[i - start]
 
-    registerEvents: ->
-      toggleData = ->
-        $(@).toggleClass('active')
-        $(@).find('a').toggleClass('selected')
-        $(@).parent().find('.data-columns').slideToggle()
+    updateLabel: (idx, label) ->
 
+    updateHeader: (idx, header) ->
 
-      @container.find('.dataset').off('click', toggleData).on('click', toggleData)
+    initHeaders: ->
+      for i in [1...@rawDataCols()]
+        @headers.push(@rawData[0][i])
 
-    #Static method that validates data format
     @validateData: (data) ->
-      isArray = false
-      if $.isArray(data)
-        for i in [0...data.length]
-          if i == 0
-            if $.isArray(data[i])
-              isArray = true
-            else if !(typeof data[i] == "object")
-              return false
-          else
-            if isArray && !$.isArray(data[i])
-              return false
-            else if !isArray && !(typeof data[i] == "object") 
-              return false
+      valid = true
 
-      return true
+      for key in @Validators
+        valid = valid && @Validators[key](@rawData)
+
+      return valid
+
+  #privateMethods: methods for Dataset class
+  privateMethods = {
+    toString: (val) ->
+      return val + ''
+
+    stringifyLabels: ->
+      for i in [1...@rawDataRows()]
+        @rawData[i][0] = privateMethods.toString.call(@,@rawData[i][0])
+        @labels.push(@rawData[i][0])
+
+      @isLabeled = true
+
+    addLabels: ->
+      @rawData[0][0].unshift('')
+
+      for i in [1...@rawDataRows()]
+        @rawData.unshift(privateMethods.toString.call(@, i + 1))
+        @labels.push(@rawData[i][0])
+
+      @isLabeled = true
+
+    maxNumCols: ->
+      maxCols = @rawData[0].length
+      for i in [1...@rawDataRows()]
+        if @rawData[i].length > maxCols
+          maxCols = @rawData[i].length
+
+      maxCols
+
+    padRows: (maxCols) ->
+      for i in [0...@rawDataRows()]
+        if @rawData[i].length < maxCols
+          @rawData[i] = privateMethods.fillWithUndefined(@rawData[i], maxCols - @rawData[i].length)
+
+    fillWithUndefined: (arr,count) ->
+      for i in [0...count]
+        arr.push(undefined)
+
+      arr
+
+  }
 
   Dataset
 ).call(@)

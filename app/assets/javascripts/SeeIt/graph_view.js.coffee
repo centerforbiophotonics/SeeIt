@@ -1,8 +1,8 @@
-@SeeIt.Graph = (->
-  class Graph
+@SeeIt.GraphView = (->
+  class GraphView
     _.extend(@prototype, Backbone.Events)
-    
-    constructor: (@id, @container, @destroyCallback) ->
+
+    constructor: (@app, @id, @container, @destroyCallback) ->
       @maximized = false
       @collapsed = false
       @initHandlers()
@@ -63,5 +63,5 @@
       @container.find('.collapse-btn .glyphicon').toggleClass('glyphicon-collapse-down glyphicon-collapse-up')
       @collapsed = !@collapsed
 
-  Graph
+  GraphView
 ).call(@)
