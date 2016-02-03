@@ -3,8 +3,11 @@
     _.extend(@prototype, Backbone.Events)
     constructor: (@app, @header, @data) ->
 
-    changeData: (idx, value) ->
-      @data[idx] = value
+    setValue: (idx, value) ->
+      @data[idx].value = value
+
+    getValue: (idx) ->
+      return @data[idx].value
 
     @new: (app, dataset, column) ->
       header = dataset[0][column]

@@ -1,5 +1,7 @@
 @SeeIt.GraphCollectionView = (->
   class GraphCollectionView
+    _.extend(@prototype, Backbone.Events)
+
     constructor: (@app, @container) ->
       @graphs = {}
       @graphId = 1
@@ -21,6 +23,11 @@
         removeGraph: (graphId) ->
           delete graphContainer.graphs[graphId]
       }
+
+      graphContainer.listenTo(@app, 'data:changed', (origin) ->
+        for graphId, graph of graphContainer.graphs
+          graph.updateGraph.call(graph)
+      )
 
     addGraph: ->
         @container.find(".graph-list").append("""

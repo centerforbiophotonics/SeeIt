@@ -10,8 +10,21 @@
       testData = [{
         title: "Dataset 1", 
         dataset: [
-          ['', 'Header 1'],
-          ['Label 1', 1]
+          ['', 'Kia', 'Nissan', 'Toyota', 'Honda', 'Mazda', 'Ford'],
+          ['2012', 10, 11, 12, 13, 15, 16],
+          ['2013', 10, 11, 12, 13, 15, 16],
+          ['2014', 10, 11, 12, 13, 15, 16],
+          ['2015', 10, 11, 12, 13, 15, 16],
+          ['2016', 10, 11, 12, 13, 15, 16]
+        ],
+        isLabeled: true
+      },{
+        title: "Dataset 2",
+        dataset: [
+          ["", "Ford", "Volvo", "Toyota", "Honda"],
+          ["2016", 10, 11, 12, 13],
+          ["2017", 20, 11, 14, 13],
+          ["2018", 30, 15, 12, 13]
         ],
         isLabeled: true
       }]
@@ -30,7 +43,7 @@
         @model
       )
 
-      @spreadsheetView = new SeeIt.SpreadsheetView(@, @layoutContainers['Spreadsheet'], null)
+      @spreadsheetView = new SeeIt.SpreadsheetView(@, @layoutContainers['Spreadsheet'], @model.datasets[0])
 
       @toolbarView = new SeeIt.ToolbarView(@, @layoutContainers['Globals'], 
         [
@@ -39,6 +52,11 @@
           {class: "addGraph", title: "Add graph", handler: @handlers.addGraph, icon: "<span class='glyphicon glyphicon-plus'></span>"}  
         ]
       )
+
+      @registerListeners()
+
+    showDatasetInSpreadsheet: (dataset) ->
+      @spreadsheetView.updateDataset(dataset)
 
     initHandlers: ->
       app = @
@@ -50,7 +68,22 @@
           app.toggleSpreadsheetVisible.call(app)
         addGraph: ->
           app.graphCollectionView.addGraph()
+          #DEMO PATCH
+          app.dataCollectionView.datasetViewCollection.forEach (datasetView) ->
+            datasetView.dataColumnViews.forEach (dataView) ->
+              dataView.init.call(dataView)
       }
+
+    registerListeners: ->
+      app = @
+
+      @listenTo(app.dataCollectionView, 'spreadsheet:load', (dataset) ->
+        app.trigger('spreadsheet:load', dataset)
+      )
+
+      @listenTo(app.spreadsheetView, 'data:changed', (origin) ->
+        @trigger('data:changed', origin)
+      )
 
     toggleSpreadsheetVisible: ->
       @spreadsheetView.toggleVisible()

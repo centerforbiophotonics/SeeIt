@@ -15,13 +15,22 @@
 
       @initDatasetViewCollection()
 
+    initDatasetListeners: (datasetView) ->
+      self = @
+
+      @listenTo(datasetView, 'spreadsheet:load', (dataset) ->
+        self.trigger('spreadsheet:load', dataset)
+      )
+
     initDatasetViewCollection: ->
       for i in [0...@data.datasets.length]
         @addDatasetView(@data.datasets[i])
 
     addDatasetView: (data) ->
       @container.find('.dataset-list').append("<div class='SeeIt dataset-container'></div>")
-      @datasetViewCollection.push(new SeeIt.DatasetView(@app, @container.find(".SeeIt.dataset-container").last(), data))
+      datasetView = new SeeIt.DatasetView(@app, @container.find(".SeeIt.dataset-container").last(), data)
+      @initDatasetListeners(datasetView)
+      @datasetViewCollection.push(datasetView)
 
 
     toggleVisible: ->

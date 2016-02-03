@@ -5,8 +5,29 @@
     constructor: (@app, @id, @container, @destroyCallback) ->
       @maximized = false
       @collapsed = false
+      @empty = true
+      @graph = null
+      @dataset = []
       @initHandlers()
       @initLayout()
+
+    addData: (data) ->
+      #DEMO PATCH
+      if @dataset.indexOf(data) == -1
+        @dataset.push(data)
+
+        if @empty
+          @empty = false
+          @initGraph()
+        else
+          @updateGraph()
+
+
+    updateGraph: ->
+      if @graph then @graph.refresh()
+
+    initGraph: ->
+      @graph = new SeeIt.Graphs.BarChart(@container.find('.panel-body'),@dataset)
 
     initHandlers: ->
       graph = @
@@ -35,7 +56,7 @@
             </div>
           </div>
           <div id="collapse_#{@id}" class="panel-collapse collapse in">
-            <div class="SeeIt panel-body"></div>
+            <div class="SeeIt panel-body" style='min-height: 300px'></div>
           </div>
         </div>
       """)
@@ -46,6 +67,7 @@
 
     destroy: ->
       @container.remove()
+
 
     maximize: ->
       if @collapsed

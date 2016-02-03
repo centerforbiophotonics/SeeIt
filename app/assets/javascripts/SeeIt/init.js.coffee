@@ -1,5 +1,6 @@
 @SeeIt = {}
 @SeeIt.Modules = {}
+@SeeIt.Graphs = {}
 appContext = @
 
 @SeeIt.new = (container) ->

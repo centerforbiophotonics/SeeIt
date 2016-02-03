@@ -12,7 +12,7 @@
       @container.find('.row').append("<div class='SeeIt Data col-md-2'></div>")
       @layoutContainers['Data'] = @container.find(".Data")
         
-      @container.find('.row').append("<div class='SeeIt Spreadsheet hidden col-md-10'></div>")
+      @container.find('.row').append("<div class='SeeIt Spreadsheet col-md-10'></div>")
       @layoutContainers['Spreadsheet'] = @container.find(".Spreadsheet")
 
       @container.find('.row').append("<div class='SeeIt Graphs col-md-10'></div>")
