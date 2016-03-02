@@ -28,7 +28,14 @@
 
     addData: (dataColumn) ->
       @container.find(".data-list").append("<li class='SeeIt list-group-item data-container'></li>")
-      @dataColumnViews.push(new SeeIt.DataColumnView(@app, @container.find(".data-container").last(), dataColumn))
+      columnView = new SeeIt.DataColumnView(@app, @container.find(".data-container").last(), dataColumn)
+      @dataColumnViews.push(columnView)
+
+      self = @
+      @listenTo(columnView, 'graph:addData', (graphData) ->
+        self.trigger('graph:addData', graphData)
+      )
+
 
     registerEvents: ->
       self = @

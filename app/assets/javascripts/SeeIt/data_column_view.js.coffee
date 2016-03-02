@@ -23,15 +23,14 @@
         </div>
       """)
 
+      self = @
+
       for graphId, graph of @app.graphCollectionView.graphs
-        console.log graphId
         @container.find('.dropdown-menu').append("<li class='add_to_graph'><a href='#' class='dropdown_child' data-id='#{graphId}'>#{graphId}</a></li>")
 
       reallyBadHandler = (event) ->
-        if self.app.graphCollectionView.graphs[$(@).find('.dropdown_child').attr('data-id')]
-          self.app.graphCollectionView.graphs[$(@).find('.dropdown_child').attr('data-id')].addData(self.data)
+        self.trigger('graph:addData', {graph: $(@).find('.dropdown_child').attr('data-id'), data: self.data})
 
-      self = @
       @container.find('.add_to_graph').off('click', reallyBadHandler).on('click', reallyBadHandler)
 
 

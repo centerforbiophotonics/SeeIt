@@ -32,6 +32,11 @@
       @initDatasetListeners(datasetView)
       @datasetViewCollection.push(datasetView)
 
+      self = @
+      @listenTo(datasetView, 'graph:addData', (graphData) ->
+        self.trigger('graph:addData', graphData)
+      )
+
 
     toggleVisible: ->
       @container.toggle()

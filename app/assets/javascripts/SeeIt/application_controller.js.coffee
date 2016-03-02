@@ -1,7 +1,15 @@
 @SeeIt.ApplicationController = (->
+  ###*
+    # ApplicationController is responsible for initializing views and models,
+    # handling event passing, and communicating with the world.
+  ###
   class ApplicationController
     _.extend(@prototype, Backbone.Events)
 
+    ###*
+      # @class
+      # @param {Object} container - jQuery object referencing container SeeIt will live in
+    ###
     constructor: (@container) ->
       @view = new SeeIt.ApplicationView(@, @container)
       @layoutContainers = @view.initLayout()
@@ -12,10 +20,10 @@
         dataset: [
           ['', 'Kia', 'Nissan', 'Toyota', 'Honda', 'Mazda', 'Ford'],
           ['2012', 10, 11, 12, 13, 15, 16],
-          ['2013', 10, 11, 12, 13, 15, 16],
-          ['2014', 10, 11, 12, 13, 15, 16],
+          ['2013', 12, 11, 12, 13, 15, 16],
+          ['2014', 15, 11, 12, 13, 15, 16],
           ['2015', 10, 11, 12, 13, 15, 16],
-          ['2016', 10, 11, 12, 13, 15, 16]
+          ['2016', 5, 11, 12, 13, 15, 16]
         ],
         isLabeled: true
       },{
@@ -55,9 +63,16 @@
 
       @registerListeners()
 
+    ###*
+      # Sets active dataset in spreadsheet to the given dataset
+      # @param {Object} dataset - DatasetModel instance
+    ###
     showDatasetInSpreadsheet: (dataset) ->
       @spreadsheetView.updateDataset(dataset)
 
+    ###*
+      # Initializes SeeIt.ApplicationController.handlers with DOM event handlers
+    ###
     initHandlers: ->
       app = @
 
@@ -74,6 +89,9 @@
               dataView.init.call(dataView)
       }
 
+    ###*
+      # Initialize Backbone event listeners in which controller listens to members
+    ###
     registerListeners: ->
       app = @
 
@@ -82,17 +100,28 @@
       )
 
       @listenTo(app.spreadsheetView, 'data:changed', (origin) ->
-        @trigger('data:changed', origin)
+        app.trigger('data:changed', origin)
       )
 
+      @listenTo(app.dataCollectionView, 'graph:addData', (graphData) ->
+        app.trigger('graph:addData', graphData)
+      )
+
+    ###*
+      # Toggles visibility of SpreadsheetView
+    ###
     toggleSpreadsheetVisible: ->
       @spreadsheetView.toggleVisible()
       @graphCollectionView.container.toggleClass("spreadsheet-visible")
       @spreadsheetVisible = !@spreadsheetVisible
 
+    ###*
+      # Toggles visibility of DataCollectionView
+    ###
     toggleDataVisible: ->
       @dataCollectionView.toggleVisible()
       @graphCollectionView.toggleFullscreen()
+      @spreadsheetView.toggleFullscreen()
       @dataVisible = !@dataVisible
 
   ApplicationController

@@ -113,3 +113,14 @@
 .SeeIt.maximized {
   height: 100%;
 }
+
+.SeeIt.axis path,
+.SeIt.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.SeeIt.dot {
+  stroke: #000;
+}

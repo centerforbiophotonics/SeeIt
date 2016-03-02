@@ -39,7 +39,7 @@
     initData: ->
       # Assume data is already in array of arrays format and is uniformly padded with 'undefined's
       for i in [1...@rawDataCols()]
-        @data.push(SeeIt.DataColumn.new(@app, @rawData, i))
+        @data.push(SeeIt.DataColumn.new(@app, @rawData, i, @title))
 
     rawDataRows: ->
       @rawData.length

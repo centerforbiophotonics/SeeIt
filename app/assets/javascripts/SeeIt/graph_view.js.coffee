@@ -27,7 +27,7 @@
       if @graph then @graph.refresh()
 
     initGraph: ->
-      @graph = new SeeIt.Graphs.BarChart(@container.find('.panel-body'),@dataset)
+      @graph = new SeeIt.Graphs.DistributionDotPlot(@container.find('.panel-body'),@dataset)
 
     initHandlers: ->
       graph = @

@@ -7,6 +7,8 @@
     constructor: (@app, @container, @dataset) ->
       privateMembers.dataset = @dataset
       @visible = true
+      @fullscreenClass = 'col-md-12'
+      @splitscreenClass = 'col-md-10'
       @hot = null
       @initLayout()
 
@@ -23,6 +25,14 @@
       @resetTable()
       @initHandlers()
       @toggleVisible()
+
+    toggleFullscreen: ->
+      if @isFullscreen 
+        @container.removeClass(@fullscreenClass).addClass(@splitscreenClass)
+      else
+        @container.removeClass(@splitscreenClass).addClass(@fullscreenClass)
+
+      @isFullscreen = !@isFullscreen
 
     updateTitle: ->
       @container.find('.panel-heading').html(@dataset.title)

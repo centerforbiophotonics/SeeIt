@@ -29,6 +29,11 @@
           graph.updateGraph.call(graph)
       )
 
+      graphContainer.listenTo(@app, 'graph:addData', (graphData) ->
+        if graphContainer.graphs[graphData.graph]
+          graphContainer.graphs[graphData.graph].addData(graphData.data)
+      )
+
     addGraph: ->
         @container.find(".graph-list").append("""
         <li class="SeeIt graph list-group-item" id="graph_#{@graphId}">
