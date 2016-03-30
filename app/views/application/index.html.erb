@@ -3,7 +3,7 @@
 
 <%= javascript_tag do %>
   $(function() {
-    app1 = SeeIt.new($("#left-region"));
+    app1 = SeeIt.new({container: $("#left-region")});
   });
 
 <% end %>

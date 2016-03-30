@@ -33,6 +33,5 @@
 
       @container.find('.add_to_graph').off('click', reallyBadHandler).on('click', reallyBadHandler)
 
-
   DataColumnView
 ).call(@)

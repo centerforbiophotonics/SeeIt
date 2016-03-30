@@ -56,6 +56,8 @@
       )
 
     resetTable: ->
+      if !@dataset then return
+
       spreadsheetView = @
       settings = {
         rowHeaders: @dataset.labels,

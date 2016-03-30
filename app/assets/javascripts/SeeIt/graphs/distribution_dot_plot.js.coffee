@@ -121,23 +121,63 @@
 
   SortedSet = (->
 
-    class Stack
-      data = []
+    # class SortedArray
 
-      constructor: (_data) ->
-        data = if _data && _data.length then _data.splice 0 else []
+    #   constructor: (_data) ->
+    #     data = if _data && _data.length then _data.splice 0 else []
+    #     data.sort()
+
+    #     @insert = (d) ->
+
+    #       data.push d
+
+    #     @pop = ->
+    #       if data.length then data.pop() else null
+
+    #     @peek = ->
+    #       if data.length then data[data.length - 1] else null
+
+    #     @size = ->
+    #       data.length
+
+    class IterativeArray
+
+      constructor: (data) ->
+        @it = 0
+        @_data = if data && data.length then data.splice 0 else []
 
       push: (d) ->
-        data.push d
+        @_data.push d
 
-      pop: ->
-        if data.length then data.pop() else null
+      pop: (d) ->
+        @_data.pop d
 
-      peek: ->
-        if data.length then data[data.length - 1] else null
+      set: (d, idx) ->
+        if idx >= 0 && idx <= @_data.length 
+          if idx == @_data.length then @_data.push d else @_data[idx] = d 
+        else 
+          undefined
 
-      size: ->
-        data.length
+      remove: (idx) ->
+        if idx >= 0 && idx < @_data.length then @_data.splice idx else undefined
+
+      at: (idx) ->
+        if idx >= 0 && idx < @_data.length then @_data[idx] else undefined
+
+      first: ->
+        if @_data.length
+          return @_data[0] 
+        else 
+          return undefined
+
+      last: ->
+        if @_data.length then @_data[@_data.length - 1] else undefined
+
+      next: ->
+        if !@_data.length || @it > @_data.length-1 then undefined else @_data[@it]
+
+      iterate: ->
+        @it++
 
     class SortedSet
       data = []
@@ -150,7 +190,7 @@
 
         #Initialize data array
         for i in [0...data.length]
-          data[i] = new Stack()
+          data[i] = new IterativeArray()
 
         console.log data
         dataset = _dataset.splice 0
@@ -167,26 +207,63 @@
 
           #Fill array of stacks
           self.dataArray.forEach (d) ->
-            addToStack.call(self, d)
+            self.placeInArray.call(self, d)
 
-      addToStack = (d) ->
-        #Find what stack element needs to be added to
+        console.log data
+
+      placeInArray: (d) ->
+        #Find what member array the element should be added to
         idx = @valToIdx(d.data.value)
 
-        #Set y value of element
-        setY.call(@, d, idx)
+        left = @findPossibleCollisions(d.data.value, idx-1)
+        right = @findPossibleCollisions(d.data.value, idx+1)        
+        mine = data[idx]
 
-        #Push to stack
-        data[idx].push(d)
+        while(collideLeft = @collision(d, l = left.next()) || collideMiddle = @collision(d, c = mine.next()) || collideRight = @collision(d, r = right.next()))
+          if collideMiddle
+            d.y = Math.max(@solvePythagorean(d,c), d.y)
+            console.log d.y
+            mine.iterate()
 
-      setY = (d, idx) ->
-        console.log idx
-        d.y = if data[idx].size() then @solvePythagorean(d, data[idx].peek()) else R
-        d.y = Math.max(
-          d.y,
-          if idx > 0 && data[idx - 1].size() && @collision(d, data[idx - 1].peek()) then @solvePythagorean(d, data[idx - 1].peek()) else -Infinity,
-          if idx < data.length - 1 && data[idx + 1].size() && @collision(d, data[idx + 1].peek()) then @solvePythagorean(d, data[idx + 1].peek()) else -Infinity
-        )
+          if l != undefined && @collision(d, l = left.next())
+            d.y = Math.max(@solvePythagorean(d,l), d.y)
+            left.iterate()
+
+          if r != undefined && @collision(d, r = right.next())
+            d.y = Math(@solvePythagorean(d,r), d.y)
+            right.iterate()
+
+        mine.set(d, mine.it)
+
+      findPossibleCollisions: (val, idx) ->
+        if idx < 0 || idx >= data.length then return new IterativeArray()
+
+        possibleCollisions = new IterativeArray()
+
+        for d in data[idx]
+          console.log d
+          if Math.abs(d.data.value - val) < 2*R then possibleCollisions.push d
+
+        return possibleCollisions
+
+      # addToStack = (d) ->
+      #   #Find what stack element needs to be added to
+      #   idx = @valToIdx(d.data.value)
+
+      #   #Set y value of element
+      #   setY.call(@, d, idx)
+
+      #   #Push to stack
+      #   data[idx].push(d)
+
+      # setY = (d, idx) ->
+      #   console.log idx
+      #   d.y = if data[idx].size() then @solvePythagorean(d, data[idx].peek()) else R
+      #   d.y = Math.max(
+      #     d.y,
+      #     if idx > 0 && data[idx - 1].size() && @collision(d, data[idx - 1].peek()) then @solvePythagorean(d, data[idx - 1].peek()) else -Infinity,
+      #     if idx < data.length - 1 && data[idx + 1].size() && @collision(d, data[idx + 1].peek()) then @solvePythagorean(d, data[idx + 1].peek()) else -Infinity
+      #   )
 
       solvePythagorean: (p1,p2) ->
         c = -(Math.pow(2*R,2) - Math.pow(@xMap(p1.data.value) - @xMap(p2.data.value),2) - Math.pow(p2.y,2))
@@ -206,6 +283,8 @@
         return max
 
       collision: (p1,p2) ->
+        if !p1 || !p2 then return false
+
         collide = @euclidDist(p1,p2) < 2*R
         console.log collide
         collide
@@ -222,86 +301,6 @@
 
     SortedSet
   ).call(@)
-
-  # SortedSet = (->
-  #   class SortedSet
-  #     _dataset = []
-  #     _data = []
-  #     _x = null
-  #     _y = null
-
-  #     constructor: (dataset, x, y) ->
-  #       _x = x
-  #       _y = y
-  #       _dataset = dataset
-  #       @fillSet(dataset[0])
-
-  #     fillSet: (dataColumn) ->
-  #       _data = createDataWrapper dataColumn.data.slice 0
-  #       _data.data.sort (a,b) -> a.value < b.value
-  #       @setHeights()
-  #       return
-
-  #     setHeights: ->
-  #       _data.data.forEach (d, i) ->
-  #         console.log "solving for index #{i}"
-  #         if i > 0
-  #           for j in [i-1..collisionLowerBoundIndex(i)]
-  #             console.log "j: #{j}"
-  #             if collision(i,j)
-  #               console.log "collision!"
-  #               _data.yValues[i] = solvePythagorean(i,j)
-  #               if i < _data.data.length - 1
-  #                 _data.yValues[i+1] = _data.yValues[i]
-
-  #     addToSet: (dataColumn) ->
-
-  #     get: ->
-  #       _data
-
-  #     clear: ->
-  #       _data = []
-  #       _dataset = []
-
-  #     createDataWrapper = (data) ->
-  #       size = data.length
-  #       wrapper = {data: data, yValues: new Array(size)}
-
-  #       while(size--) 
-  #         wrapper.yValues[size] = R
-
-  #       return wrapper
-
-
-  #     collisionLowerBoundIndex = (i) ->
-  #       j = i - 1
-
-  #       while(j >= 0 && Math.abs(_x(_data.data[i].value) - _x(_data.data[j].value)) < 2*R)
-  #         j--
-
-  #       return Math.max(j,0)
-
-  #     collision = (i,j) ->
-  #       euclidDist(i,j) < 2*R
-
-  #     euclidDist = (i,j) ->
-  #       dist = Math.sqrt(Math.pow(_x(_data.data[i].value) - _x(_data.data[j].value),2) + Math.pow(_y(_data.yValues[i]) - _y(_data.yValues[j]),2))
-  #       console.log dist
-  #       dist
-
-  #     solvePythagorean = (i,j) ->
-  #       c = -(Math.pow(2*R,2) - Math.pow(_x(_data.data[i].value) - _x(_data.data[j].value),2) - Math.pow(_y(_data.yValues[j]),2))
-  #       b = -2*_y(_data.yValues[j])
-  #       #a = 1
-
-  #       sqrt_b2_4ac = Math.sqrt(Math.pow(b,2) - 4*c)
-  #       return Math.max(
-  #         (-b + sqrt_b2_4ac) / 2, 
-  #         (-b - sqrt_b2_4ac) / 2
-  #       )
-
-  #   SortedSet
-  # ).call(@)
 
 
   DistributionDotPlot

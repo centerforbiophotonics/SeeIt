@@ -1,5 +1,5 @@
 @SeeIt.Modules.Validators = {
-  consistentRowType: ->
+  consistentRowType: (data) ->
     isArray = false
     if $.isArray(data)
       for i in [0...data.length]
@@ -16,5 +16,5 @@
 
     return true
 
-  
+
 }

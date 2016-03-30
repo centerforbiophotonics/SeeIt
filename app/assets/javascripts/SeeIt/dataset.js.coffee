@@ -8,7 +8,7 @@
       #Data will be an array of DataColumns
       @labels = []
       @headers = []
-      @rawFormat = "array"
+      @rawFormat = Dataset.getFormat(data)
       @data = []
       @loadData(data)
 
@@ -42,23 +42,26 @@
         @data.push(SeeIt.DataColumn.new(@app, @rawData, i, @title))
 
     rawDataRows: ->
-      @rawData.length
+      if @rawFormat == "array" then @rawData.length else @rawData.columns.length
 
     rawDataCols: ->
-      if @rawData.length then @rawData[0].length else 0
+      if @rawFormat == "array"
+        if @rawData.length then @rawData[0].length else 0
+      else
+        if @rawData.columns.length then @rawData.columns[0].length else 0
 
-    updateColumn: (idx, column) ->
-      for i in [1...@getNumRows()]
-        @data[i][idx] = column[i - 1]
+    # updateColumn: (idx, column) ->
+    #   for i in [1...@getNumRows()]
+    #     @data[i][idx] = column[i - 1]
 
-    updateRow: (idx, row) ->
-      start = (if @isLabeled then 1 else 0)
-      for i in [start...@getNumCols()]
-        @data[idx][i] = row[i - start]
+    # updateRow: (idx, row) ->
+    #   start = (if @isLabeled then 1 else 0)
+    #   for i in [start...@getNumCols()]
+    #     @data[idx][i] = row[i - start]
 
-    updateLabel: (idx, label) ->
+    # updateLabel: (idx, label) ->
 
-    updateHeader: (idx, header) ->
+    # updateHeader: (idx, header) ->
 
     initHeaders: ->
       for i in [1...@rawDataCols()]
@@ -71,6 +74,9 @@
         valid = valid && @Validators[key](@rawData)
 
       return valid
+
+    @getFormat: (data) ->
+      $.type data
 
   #privateMethods: methods for Dataset class
   privateMethods = {
@@ -85,10 +91,10 @@
       @isLabeled = true
 
     addLabels: ->
-      @rawData[0][0].unshift('')
+      @rawData[0].unshift('')
 
       for i in [1...@rawDataRows()]
-        @rawData.unshift(privateMethods.toString.call(@, i + 1))
+        @rawData[i].unshift(privateMethods.toString.call(@, i))
         @labels.push(@rawData[i][0])
 
       @isLabeled = true
