@@ -21,9 +21,8 @@
     draw: ->
       graph = @
       @container.html("<svg class='SeeIt graph-svg' style='width: 100%; min-height: 270px'></svg>")
-      console.log(@container.html())
+
       nv.addGraph ->
-        console.log "drawing"
         chart = nv.models.multiBarChart()
             .x((d) -> d.label )
             .y((d) -> d.value )

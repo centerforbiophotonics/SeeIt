@@ -12,10 +12,11 @@
 
     setLabel: (idx, value) ->
       @data[idx].label = value
-      @trigger('label:changed', @)
+      @trigger('label:changed', idx)
 
     setHeader: (header) ->
       @header = header
+      @trigger('header:changed')
 
     toJson: ->
       {

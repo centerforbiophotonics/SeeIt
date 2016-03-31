@@ -9,6 +9,14 @@
       #DEMO PATCH
       @container.html("<a class='SeeIt data' style='display: inline-block; min-height: 40px'>#{@data.header}</a>")
       @populateBadSelectBox()
+      @registerListeners()
+      
+    registerListeners: ->
+      self = @
+
+      @listenTo(@data, 'header:changed', ->
+        self.container.find('.SeeIt.data').html(@data.header)
+      )
 
     #DEMO PATCH
     populateBadSelectBox: ->

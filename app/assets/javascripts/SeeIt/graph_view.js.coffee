@@ -16,6 +16,16 @@
       if @dataset.indexOf(data) == -1
         @dataset.push(data)
 
+        self = @
+
+        @listenTo(data, 'label:changed', (idx) ->
+          self.updateGraph.call(self)
+        )
+
+        @listenTo(data, 'header:changed', ->
+          self.updateGraph.call(self)
+        )
+
         if @empty
           @empty = false
           @initGraph()
