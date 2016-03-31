@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>SeeIt Full Example</title>
+    <script src="seeit.js" charset="utf-8"></script>
+  </head>
+  <body>
+    <div id="seeit-container"></div>
+
+    <script type="text/javascript">
+      var example_data_1 = [
+        ['', 'Kia', 'Nissan', 'Toyota', 'Honda', 'Mazda', 'Ford'],
+        ['2012', 10, 11, 12, 13, 15, 16],
+        ['2013', 10, 11, 12, 13, 15, 16],
+        ['2014', 10, 11, 12, 13, 15, 16],
+        ['2015', 10, 11, 12, 13, 15, 16],
+        ['2016', 10, 11, 12, 13, 15, 16]
+      ];
+
+      var example_data_2 = {
+        labels: ['2012','2013','2014','2015','2016'],
+        columns: [
+          { 
+            header: "Kia",  
+            type: "Numeric",
+            data: [10,10,10,10,10]
+          },
+          { 
+            header: "Nissan",  
+            type: "Numeric",
+            data: [11,11,11,11,11]
+          },
+          { 
+            header: "Toyota",  
+            type: "Numeric",
+            data: [12,12,12,12,12]
+          },
+          { 
+            header: "Honda",  
+            type: "Numeric",
+            data: [13,13,13,13,13]
+          },
+          { 
+            header: "Mazda",  
+            type: "Numeric",
+            data: [15,15,15,15,15]
+          },
+          { 
+            header: "Ford",  
+            type: "Numeric",
+            data: [16,16,16,16,16]
+          }
+        ] 
+      };
+
+      var seeit = SeeIt.new(
+        {
+          selector: "#seeit-container",
+          data: [
+            {
+              title: "example dataset 1",
+              dataset: example_data_1,
+              is_labeled: true
+            },
+
+            {
+              title: "example dataset 2",
+              dataset: example_data_2,
+              is_labeled: true
+            },
+
+            "https://docs.google.com/spreadsheets/d/1abFaGTVLcLJGjdRIW_OlgMcGobbVZbSEslHL8_V9nLQ"
+
+          ],
+
+          ui:{
+            editing: true,
+            spreadsheet: true,
+            data_selector: true,
+            options_bar: true,
+            graph_add_remove: true,
+            dataset_add_remove: true
+          },
+
+          graphs: [
+            {
+              type: "bar chart",
+              data: [
+                {
+                  set_name: "example dataset 1",
+                  col_name: "Mazda"
+                }
+              ]
+            },
+            {
+              type: "scatter plot",
+              data: [
+                {
+                  set_name: "example dataset 1",
+                  col_name: "Mazda",
+                  role_in_graph: "x-axis"
+                },
+                {
+                  set_name: "example dataset 1",
+                  col_name: "Nissan",
+                  role_in_graph: "y-axis"
+                }
+              ]
+            }
+          ]
+        }
+      );
+    </script>
+  </body>
+</html>
