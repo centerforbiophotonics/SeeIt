@@ -1,0 +1,59 @@
+SeeIt.new({
+  selector: css selector string OR native javascript DOM element OR jquery DOM element  -- default 'body'
+
+  data: [ single element array or  where each element can be:
+    * javascript variable like the following
+      
+        {  
+          title: string,  //unique for each instance of Seeit
+          dataset: 
+            [[],[]] or  
+            
+            
+            {
+              labels: [],
+              columns: [
+                { header: string,  
+                  type: "Numeric or Categorical",
+                  data: [strings or numbers but not mixed]
+                },
+                . . . 
+              ] 
+            },
+            
+          is_labeled: boolean
+        } 
+
+    * json string representing the same as the previous option
+
+    * url string for:
+        - google spreadsheet (will use AJAX with JSONP as current SeeIt version does)
+        - any other URL which returns a json string (if the URL is in the same domain it will make an AJAX call if it’s another domain it will try JSONP)
+
+    * native javascript file object (so you can create a form with a file upload and pass it right to SeeIt
+  ],  -- default is [] or null
+
+  ui: { all booleans default to true
+    editing: boolean,
+    spreadsheet: boolean,
+    data_selector(left side menu): boolean,
+    options_bar: boolean,
+    graph_add_remove: boolean,
+    dataset_add_remove: booean
+  },
+
+  graphs: [
+    {
+      type: string that must match a graph plugin type,
+      data: [
+        {
+          set_name: string that must match a dataset name,
+          col_name: string that must match a column header,
+          role_in_graph: string that must match the graph types allowed data roles  //optional if graph only has one data role (like bar graph)
+        },
+        . . . 
+      ]
+    },
+    . . . 
+  ] -- default is [] or null
+});
