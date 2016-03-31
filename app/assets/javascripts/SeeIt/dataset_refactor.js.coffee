@@ -16,6 +16,7 @@
 			@data = []
 			extend(@, ConverterFactory(@rawFormat))
 			@loadData(data)
+			@registerListeners()
 
 		loadData: (data) ->
 			if Dataset.validateData(data)
@@ -40,6 +41,23 @@
 				obj.dataset.columns.push d.toJson()
 
 			return obj
+
+		registerListeners: ->
+			self = @
+
+			@on 'header:change', (value, idx) ->
+				console.log "header changed"
+				self.headers[idx] = value
+				self.trigger('header:changed', value, idx)
+
+				self.data[idx].setHeader(value)
+				
+			@on 'label:change', (value, idx) ->
+				self.labels[idx] = value
+				self.trigger('label:changed', value, idx)
+
+				self.data.forEach (d) ->
+					d.setLabel(idx, value)
 
 		@validateData: (data) ->
 			valid = true
@@ -133,7 +151,8 @@
 
 				addLabels: ->
 					for i in [0...@rawData.columns.length]
-						@labels.push(i+1)
+						for j in [0...@rawData.columns[i].data.length]
+							@labels.push(j+1)
 
 					@rawData.labels = @labels          
 					@isLabeled = true

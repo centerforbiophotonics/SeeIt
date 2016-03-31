@@ -22,8 +22,8 @@
         </div>
       """)
 
-      @resetTable()
       @initHandlers()
+      @resetTable()
       @toggleVisible()
 
     toggleFullscreen: ->
@@ -46,6 +46,7 @@
     initHandlers: ->
       self = @
 
+
       @listenTo(@app, 'spreadsheet:load', (dataset) ->
         if dataset != self.dataset
           self.updateDataset.call(self, dataset)
@@ -59,11 +60,70 @@
       if !@dataset then return
 
       spreadsheetView = @
+
+      #Creates 'afterGet' callbacks for row and column headers
+      headerCallbackFactory = (dim = "header") ->
+        data = if dim == "label" then spreadsheetView.dataset.labels else spreadsheetView.dataset.headers
+
+        if dim != "label" && dim != "header" then dim = "header"
+
+        (idx, TH) ->
+          #Nothing to do if first row/column
+          if idx == -1 then return
+
+          instance = @
+
+          headerDblclick = (event) ->
+            event.stopPropagation()
+            event.preventDefault()
+
+            $(TH).off('dblclick')
+
+            input = document.createElement('input')
+            input.type = 'text'
+            input.value = TH.firstChild.textContent
+
+            TH.appendChild(input)
+
+            TH.style.position = 'relative'
+            TH.firstChild.style.display = 'none'
+
+            $(input).keyup (event) ->
+              event.stopPropagation()
+              event.preventDefault()
+
+              if event.keyCode == 13
+                value = $(input).val()
+
+                spreadsheetView.dataset.trigger("#{dim}:change", value, idx)
+
+                instance.updateSettings({
+                  "#{if dim == 'header' then 'colHeaders' else 'rowHeaders'}": data
+                })
+
+                $(input).remove()
+                TH.style.position = 'auto'
+                TH.firstChild.style.display = 'table-cell'
+
+                registerDblclick()
+              return false
+
+
+            return false
+
+
+          registerDblclick = ->
+            $(TH).off('dblclick').on('dblclick', headerDblclick)
+
+          $(TH).off('dblclick').on('dblclick', headerDblclick)
+
       settings = {
         rowHeaders: @dataset.labels,
         colHeaders: @dataset.headers,
         data: privateMethods.formatModelData(),
         columns: privateMethods.formatColumns(),
+        afterGetRowHeader: headerCallbackFactory("label"),
+        afterGetColHeader: headerCallbackFactory("header")
         manualColumnResize: true,
         manualRowResize: true,
         copyPaste: true,
