@@ -22,6 +22,7 @@
         self.trigger('spreadsheet:load', dataset)
       )
 
+
     initDatasetViewCollection: ->
       for i in [0...@data.datasets.length]
         @addDatasetView(@data.datasets[i])

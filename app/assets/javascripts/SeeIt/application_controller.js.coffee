@@ -10,80 +10,83 @@
     ###
     constructor: (params = {}) ->
       @container = if params.container then $(params.container) else $("body")
-      
+
       ui = if params.ui then params.ui else {}
 
       @view = new SeeIt.ApplicationView(@, @container)
       @layoutContainers = @view.initLayout()
       @initHandlers()
 
+      #Get data
+      #TODO: Add more validation of data
+      data = if params.data != undefined then params.data else []
 
-      #Initialize options
+      #Initialize UI options
       @ui = {
         editable: if ui.editable != undefined then ui.editable else true,
         spreadsheet: if ui.spreadsheet != undefined then ui.spreadsheet else true,
         dataMenu: if ui.dataMenu != undefined then ui.dataMenu else true,
         toolbar: if ui.toolbar != undefined then ui.toolbar else true,
-        graph_editable: if ui.graph_editable then ui.graph_editable else true
+        graph_editable: if ui.graph_editable != undefined then ui.graph_editable else true
       }
 
-      # testData = [{
-      #   title: "Dataset 1", 
-      #   dataset: [
-      #     ['', 'Kia', 'Nissan', 'Toyota', 'Honda', 'Mazda', 'Ford'],
-      #     ['2012', 10, 11, 12, 13, 15, 16],
-      #     ['2013', 12, 11, 12, 13, 15, 16],
-      #     ['2014', 15, 11, 12, 13, 15, 16],
-      #     ['2015', 10, 11, 12, 13, 15, 16],
-      #     ['2016', 5, 11, 12, 13, 15, 16]
-      #   ],
-      #   isLabeled: true
-      # },{
-      #   title: "Dataset 2",
-      #   dataset: [
-      #     ["", "Ford", "Volvo", "Toyota", "Honda"],
-      #     ["2016", 10, 11, 12, 13],
-      #     ["2017", 20, 11, 14, 13],
-      #     ["2018", 30, 15, 12, 13]
-      #   ],
-      #   isLabeled: true
-      # },{
-      #   title: "Dataset 3",
-      #   dataset: {
-      #     labels: ['A', 'B', 'C'],
-      #     columns: [
-      #       {
-      #         header: 'a',
-      #         type: "numeric",
-      #         data: [2,3,4]
-      #       },
-      #       {
-      #         header: 'b',
-      #         type: "numeric",
-      #         data: [21,34,45]
-      #       }
-      #     ]
-      #   }
-      # }]
+      testData = [{
+        title: "Dataset 1", 
+        dataset: [
+          ['', 'Kia', 'Nissan', 'Toyota', 'Honda', 'Mazda', 'Ford'],
+          ['2012', 10, 11, 12, 13, 15, 16],
+          ['2013', 12, 11, 12, 13, 15, 16],
+          ['2014', 15, 11, 12, 13, 15, 16],
+          ['2015', 10, 11, 12, 13, 15, 16],
+          ['2016', 5, 11, 12, 13, 15, 16]
+        ],
+        isLabeled: true
+      },{
+        title: "Dataset 2",
+        dataset: [
+          ["", "Ford", "Volvo", "Toyota", "Honda"],
+          ["2016", 10, 11, 12, 13],
+          ["2017", 20, 11, 14, 13],
+          ["2018", 30, 15, 12, 13]
+        ],
+        isLabeled: true
+      },{
+        title: "Dataset 3",
+        dataset: {
+          labels: ['A', 'B', 'C'],
+          columns: [
+            {
+              header: 'a',
+              type: "numeric",
+              data: [2,3,4]
+            },
+            {
+              header: 'b',
+              type: "numeric",
+              data: [21,34,45]
+            }
+          ]
+        },
+        isLabeled: true
+      }]
 
-      # newData = {
-      #   title: "Random Data",
-      #   dataset: [[1,2,3,4,5]],
-      #   isLabeled: false
-      # }
+      newData = {
+        title: "Random Data",
+        dataset: [[1,2,3,4,5]],
+        isLabeled: false
+      }
 
-      # for i in [1...10000]
-      #   newData.dataset.push []
-      #   for j in [0...5]
-      #     newData.dataset[i].push Math.random() * 10
+      for i in [1...10000]
+        newData.dataset.push []
+        for j in [0...5]
+          newData.dataset[i].push Math.random() * 10
 
-      # console.log newData
-      # testData.push newData
-
-      testData = []
+      console.log newData
+      testData.push newData
+      data = testData
 
       #Data model
-      @model = new SeeIt.DataCollection(@, testData)
+      @model = new SeeIt.DataCollection(@, data)
 
       @dataVisible = true
       @spreadsheetVisible = false
@@ -148,9 +151,7 @@
         saveCSVData: (event) ->
           event.stopPropagation()
 
-          console.log "saveCSVData"
           app.csvManager.handleUpload(@files[0], (data) ->
-            console.log "callback called"
             app.addDataset.call(app, data)
           )
 
@@ -159,7 +160,6 @@
           if !$("#hidden-csv-upload").length
             app.container.append "<input id='hidden-csv-upload' type='file' style='display: none'>"
 
-          console.log "uploadCSV"
           $("#hidden-csv-upload").off('change', app.handlers.saveCSVData).on('change', app.handlers.saveCSVData)
           $("#hidden-csv-upload").click()
     

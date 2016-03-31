@@ -10,6 +10,14 @@
     getValue: (idx) ->
       return @data[idx].value
 
+    setLabel: (idx, value) ->
+      @data[idx].label = value
+      @trigger('label:changed', idx)
+
+    setHeader: (header) ->
+      @header = header
+      @trigger('header:changed')
+
     toJson: ->
       {
         header: @header,
