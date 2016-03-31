@@ -1,7 +1,7 @@
 SeeIt.new({
   selector: css selector string OR native javascript DOM element OR jquery DOM element  -- default 'body'
 
-  data: [ single element array or  where each element can be:
+  data: [ single element array or where each element can be:
     * javascript variable like the following
       
         {  

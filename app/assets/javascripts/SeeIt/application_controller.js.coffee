@@ -1,13 +1,11 @@
 @SeeIt.ApplicationController = (->
-  ###*
-    # ApplicationController is responsible for initializing views and models,
-    # handling event passing, and communicating with the world.
-  ###
   class ApplicationController
     _.extend(@prototype, Backbone.Events)
 
     ###*
+      # The constructor for ApplicationController
       # @class
+      # @classdesc ApplicationController is responsible for initializing views and models, handling event passing, and communicating with the world.
       # @param {Object} container - jQuery object referencing container SeeIt will live in
     ###
     constructor: (params = {}) ->
