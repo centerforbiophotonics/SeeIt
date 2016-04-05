@@ -206,6 +206,18 @@
         app.trigger('graph:addData', graphData)
       )
 
+      @listenTo(app.dataCollectionView, 'dataset:create', (title) ->
+        app.trigger('dataset:create', title)
+      )
+
+      @listenTo(app.model, 'dataset:created', (dataset) ->
+        app.trigger('dataset:created', dataset)
+
+        if !app.spreadsheetVisible then app.toggleSpreadsheetVisible.call(app)
+
+        app.trigger('spreadsheet:load', dataset)
+      )
+
     ###*
       # Toggles visibility of SpreadsheetView
     ###

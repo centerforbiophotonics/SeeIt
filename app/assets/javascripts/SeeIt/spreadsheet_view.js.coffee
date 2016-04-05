@@ -5,6 +5,8 @@
     _.extend(@prototype, Backbone.Events)
 
     constructor: (@app, @container, @dataset) ->
+      # if !@dataset then @dataset = new SeeIt.Dataset(@app)
+
       privateMembers.dataset = @dataset
       @visible = true
       @fullscreenClass = 'col-md-12'
@@ -15,7 +17,13 @@
     initLayout: ->
       @container.html("""
         <div class="SeeIt spreadsheet-panel panel panel-default">
-          <div class="SeeIt panel-heading">#{if @dataset && @dataset.data.length then @dataset.title else 'New Dataset'}</div>
+          <div class="SeeIt panel-heading">
+            <span class='title'>#{if @dataset && @dataset.data.length then @dataset.title else ""}</span>
+            <div class="SeeIt spreadsheet-button-group btn-group" role="group">
+              <button class="SeeIt add-dataset btn btn-default"><span class="glyphicon glyphicon-plus"></span></button>
+              <button class="SeeIt save-dataset btn btn-default"><span class="glyphicon glyphicon-save"></span></button>
+            </div>
+          </div>
           <div class="SeeIt panel-body spreadsheet">
             <div class="SeeIt Handsontable-Container"></div>
           </div>
@@ -35,7 +43,7 @@
       @isFullscreen = !@isFullscreen
 
     updateTitle: ->
-      @container.find('.panel-heading').html(@dataset.title)
+      @container.find('.panel-heading .title').html(@dataset.title)
 
     updateDataset: (dataset) ->
       @dataset = dataset
@@ -48,6 +56,7 @@
 
 
       @listenTo(@app, 'spreadsheet:load', (dataset) ->
+        console.log 'spreadsheet:load triggered'
         if dataset != self.dataset
           self.updateDataset.call(self, dataset)
       )
@@ -156,8 +165,9 @@
 
     formatModelData: ->
       data = []
+      len = if privateMembers.dataset.data.length then privateMembers.dataset.data[0].data.length else 0
 
-      for i in [0...privateMembers.dataset.data[0].data.length]
+      for i in [0...len]
         data.push(this.hotModel(i))
 
       return data

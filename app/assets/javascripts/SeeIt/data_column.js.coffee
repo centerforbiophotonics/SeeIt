@@ -1,6 +1,7 @@
 @SeeIt.DataColumn = (->
   class DataColumn
     _.extend(@prototype, Backbone.Events)
+    
     constructor: (@app, @header, @data, @datasetTitle) ->
 
     setValue: (idx, value) ->

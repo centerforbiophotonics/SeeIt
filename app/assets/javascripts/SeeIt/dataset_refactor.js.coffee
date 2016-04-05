@@ -8,7 +8,39 @@
 		@Validators = {}
 		_.extend(@Validators, SeeIt.Modules.Validators)
 
-		constructor: (@app, data, @title, @isLabeled) ->
+		constructor: (@app, data, @title = "New Dataset", @isLabeled = false) ->
+			if !data
+				data = {
+					labels: ["1", "2", "3", "4", "5"],
+					columns: [
+						{
+							header: "A",
+							type: "numeric",
+							data: [null,null,null,null,null]
+						},
+						{
+							header: "B",
+							type: "numeric",
+							data: [null,null,null,null,null]
+						},
+						{
+							header: "C",
+							type: "numeric",
+							data: [null,null,null,null,null]
+						},
+						{
+							header: "D",
+							type: "numeric",
+							data: [null,null,null,null,null]
+						},
+						{
+							header: "E",
+							type: "numeric",
+							data: [null,null,null,null,null]
+						},
+					]
+				}
+
 			#Data will be an array of DataColumns
 			@labels = []
 			@headers = []
@@ -51,7 +83,7 @@
 				self.trigger('header:changed', value, idx)
 
 				self.data[idx].setHeader(value)
-				
+
 			@on 'label:change', (value, idx) ->
 				self.labels[idx] = value
 				self.trigger('label:changed', value, idx)

@@ -4,7 +4,14 @@
 
     constructor: (@app, @container, @dataset) ->
       @dataColumnViews = []
+      @initListeners()
       @initLayout()
+
+    initListeners: ->
+      self = @
+
+      @on 'datasetview:open', ->
+        self.container.find('.dataset').trigger('click')
 
     initLayout: ->
       @container.html("""

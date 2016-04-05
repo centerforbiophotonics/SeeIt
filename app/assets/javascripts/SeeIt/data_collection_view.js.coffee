@@ -6,6 +6,7 @@
       @datasetViewCollection = []
       @init()
       @visible = true
+      @
 
     init: ->
       @container.html("""
@@ -13,7 +14,16 @@
         </ul>
       """)
 
+      @initListeners()
       @initDatasetViewCollection()
+
+    initListeners: ->
+      self = @
+
+      @listenTo(@app, 'dataset:created', (dataset) ->
+        datasetView = self.addDatasetView.call(self, dataset)
+        datasetView.trigger('datasetview:open')
+      )
 
     initDatasetListeners: (datasetView) ->
       self = @
@@ -22,14 +32,67 @@
         self.trigger('spreadsheet:load', dataset)
       )
 
+    newDatasetMaker: ->
+      @container.find('.dataset-list').append("""
+        <div class='SeeIt dataset-container new-dataset'>
+          <li class="SeeIt list-group-item new-dataset-li">
+            <a class="SeeIt" style="font-weight: bold">New Dataset</a>
+            <span class='glyphicon glyphicon-plus' style='float: right;'></span>
+          </li>
+        </div>
+        <div class="SeeIt new-dataset-form">
+          <label for="dataset-select">How do you want to create the dataset?</label>
+          <select class="form-control" id="dataset-select">
+            <option value="spreadsheet">Fill out spreadsheet</option>
+            <option value="google">Load from Google Spreadsheet</option>
+          </select>
+          <input type="text" placeholder="Dataset Title" class="form-control SeeIt new-dataset-input dataset-name">
+          <input type="text" placeholder="Spreadsheet URL" class="form-control SeeIt new-dataset-input dataset-spreadsheet-url hidden">
+          <button type="button" class="btn btn-primary" id="create-dataset">Create Dataset</button>
+        </div>
+      """)
+
+      self = @
+      self.container.find("#dataset-select").on "change", (event) ->
+        self.container.find(".new-dataset-input").val("")
+        self.container.find(".new-dataset-input").toggleClass("hidden")
+
+      toggleForm = ->
+        $(@).toggleClass('active')
+        $(@).find('a').toggleClass('selected')
+        $(@).parent().parent().find('.new-dataset-form').slideToggle()
+
+      self.container.find(".new-dataset-li").on('click', toggleForm)
+
+      self.container.find("#create-dataset").on 'click', (event) ->
+        if self.container.find("#dataset-select").val() == "google"
+          return false
+        else
+          title = self.container.find(".dataset-name").val()
+          if title.length && self.validateTitle.call(self, title) 
+            self.container.find(".new-dataset-input").val("")
+            self.container.find(".new-dataset-li").trigger('click')
+            self.trigger("dataset:create", title)
+          else
+            return false
+
+    validateTitle: (title) ->
+      for i in [0...@data.datasets.length]
+        if @data.datasets[i].title == title then return false
+
+      return true
 
     initDatasetViewCollection: ->
+      @newDatasetMaker()
+
       for i in [0...@data.datasets.length]
         @addDatasetView(@data.datasets[i])
 
+
     addDatasetView: (data) ->
-      @container.find('.dataset-list').append("<div class='SeeIt dataset-container'></div>")
-      datasetView = new SeeIt.DatasetView(@app, @container.find(".SeeIt.dataset-container").last(), data)
+      @container.find('.dataset-list .new-dataset').before("<div class='SeeIt dataset-container'></div>")
+      console.log @container.find('.dataset-list').children().last()
+      datasetView = new SeeIt.DatasetView(@app, @container.find(".SeeIt.dataset-container:not(.new-dataset)").last(), data)
       @initDatasetListeners(datasetView)
       @datasetViewCollection.push(datasetView)
 
@@ -37,6 +100,8 @@
       @listenTo(datasetView, 'graph:addData', (graphData) ->
         self.trigger('graph:addData', graphData)
       )
+
+      return datasetView
 
 
     toggleVisible: ->
