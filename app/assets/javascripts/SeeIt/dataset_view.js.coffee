@@ -13,6 +13,9 @@
       @on 'datasetview:open', ->
         self.container.find('.dataset').trigger('click')
 
+      @listenTo @dataset, 'dataColumn:created', (col) ->
+        self.addData.call(self, self.dataset.data[col])
+
     initLayout: ->
       @container.html("""
         <li class="SeeIt dataset list-group-item">
@@ -29,6 +32,10 @@
       @registerEvents()
 
 
+    destroy: ->
+      @container.remove()
+      @trigger('destroy')
+
     initDataColumnViews: ->
       for i in [0...@dataset.data.length]
         @addData(@dataset.data[i])
@@ -39,8 +46,16 @@
       @dataColumnViews.push(columnView)
 
       self = @
+
       @listenTo(columnView, 'graph:addData', (graphData) ->
         self.trigger('graph:addData', graphData)
+      )
+
+      @listenTo(columnView, 'destroy', ->
+        idx = self.dataColumnViews.indexOf(columnView)
+
+        if idx >= 0
+          self.dataColumnViews.splice(idx, 1)
       )
 
 

@@ -18,6 +18,14 @@
         self.container.find('.SeeIt.data').html(@data.header)
       )
 
+      @listenTo(@data, 'destroy', ->
+        self.destroy.call(self)
+      )
+
+    destroy: ->
+      @container.remove()
+      @trigger('destroy')
+
     #DEMO PATCH
     populateBadSelectBox: ->
       @container.find('a').after("""

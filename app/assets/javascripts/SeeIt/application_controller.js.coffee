@@ -195,6 +195,8 @@
       app = @
 
       @listenTo(app.dataCollectionView, 'spreadsheet:load', (dataset) ->
+        if !app.spreadsheetVisible then app.toggleSpreadsheetVisible.call(app)
+        
         app.trigger('spreadsheet:load', dataset)
       )
 

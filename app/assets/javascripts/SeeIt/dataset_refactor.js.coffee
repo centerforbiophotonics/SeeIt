@@ -91,6 +91,60 @@
 				self.data.forEach (d) ->
 					d.setLabel(idx, value)
 
+			@on 'dataColumn:destroy', (col) ->
+				self.destroyColumn.call(self, col)
+
+			@on 'dataColumn:create', (col) ->
+				self.createColumn.call(self, col)
+
+			@on 'row:destroy', (row) ->
+				self.destroyRow.call(self, row)
+
+			@on 'row:create', (row) ->
+				self.createRow.call(self, row)
+
+		generateLabel: (labels) ->
+			i = 1
+
+			while labels.indexOf(i.toString()) >= 0
+				i++
+
+			return i.toString()
+
+		createRow: (row) ->
+			label = @generateLabel(@labels)
+			for i in [0...@data.length]
+				@data[i].insertElement(row, label, null)
+
+			@labels.splice(row, 0, label)
+			@trigger('row:created', row)
+
+		createColumn: (col) ->
+			header = @generateLabel(@headers)
+
+			dataColumn = []
+
+			for i in [0...@labels.length]
+				dataColumn.push({label: @labels[i], value: null})
+
+			@data.splice(col, 0, new SeeIt.DataColumn(@app, header, dataColumn, @title))
+			@headers.splice(col, 0, header)
+			@trigger('dataColumn:created', col)
+
+		destroyRow: (row) ->
+			for i in [0...@data.length]
+				@data[i].removeElement(row)
+
+			@labels.splice(row, 1)
+			@trigger('row:destroyed', row)
+
+		destroyColumn: (col) ->
+			destroyedColumn = @data.splice(col, 1)[0]
+			@headers.splice(col, 1)
+
+			destroyedColumn.trigger('destroy')
+			@trigger('dataColumn:destroyed')
+
 		@validateData: (data) ->
 			valid = true
 

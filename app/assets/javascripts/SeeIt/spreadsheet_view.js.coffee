@@ -19,16 +19,17 @@
         <div class="SeeIt spreadsheet-panel panel panel-default">
           <div class="SeeIt panel-heading">
             <span class='title'>#{if @dataset && @dataset.data.length then @dataset.title else ""}</span>
-            <div class="SeeIt spreadsheet-button-group btn-group" role="group">
-              <button class="SeeIt add-dataset btn btn-default"><span class="glyphicon glyphicon-plus"></span></button>
-              <button class="SeeIt save-dataset btn btn-default"><span class="glyphicon glyphicon-save"></span></button>
-            </div>
           </div>
           <div class="SeeIt panel-body spreadsheet">
             <div class="SeeIt Handsontable-Container"></div>
           </div>
         </div>
       """)
+
+            # <div class="SeeIt spreadsheet-button-group btn-group" role="group">
+            #   <button class="SeeIt add-dataset btn btn-default"><span class="glyphicon glyphicon-plus"></span></button>
+            #   <button class="SeeIt save-dataset btn btn-default"><span class="glyphicon glyphicon-save"></span></button>
+            # </div>
 
       @initHandlers()
       @resetTable()
@@ -46,10 +47,37 @@
       @container.find('.panel-heading .title').html(@dataset.title)
 
     updateDataset: (dataset) ->
+      #Unsubscribe from old dataset
+      @stopListening(@dataset)
+
+      #Update dataset
       @dataset = dataset
       privateMembers.dataset = @dataset
+
+      #Subscribe to new dataset events
+      @subscribeToDataset()
+
       @updateTitle()
       @resetTable()
+
+    subscribeToDataset: ->
+      self = @
+
+      @listenTo(@dataset, 'dataColumn:destroyed', ->
+        self.resetTable.call(self)
+      )
+
+      @listenTo(@dataset, 'dataColumn:created', ->
+        self.resetTable.call(self)
+      )
+
+      @listenTo(@dataset, 'row:destroyed', ->
+        self.resetTable.call(self)
+      )
+
+      @listenTo(@dataset, 'row:created', ->
+        self.resetTable.call(self)
+      )
 
     initHandlers: ->
       self = @
@@ -60,6 +88,8 @@
         if dataset != self.dataset
           self.updateDataset.call(self, dataset)
       )
+
+      @subscribeToDataset()
 
       @listenTo(@app, 'data:changed', (origin) ->
         #Do nothing
@@ -136,7 +166,50 @@
         manualColumnResize: true,
         manualRowResize: true,
         copyPaste: true,
-        contextMenu: ['row_above', 'row_below', 'remove_row', 'col_left', 'col_right', 'remove_row', 'remove_col', 'undo', 'redo'],
+        contextMenu: {
+          items: {
+            "my_row_above": {
+              name: "Insert row above",
+              callback: (key, options) ->
+                spreadsheetView.dataset.trigger('row:create', options.end.row)
+            },
+            "my_row_below": {
+              name: "Insert row below",
+              callback: (key, options) ->
+                spreadsheetView.dataset.trigger('row:create', options.end.row + 1)
+            },
+            "my_remove_row": {
+              name: "Remove row",
+              callback: (key, options) ->
+                if spreadsheetView.hot.countRows.call(spreadsheetView.hot) > 1
+                  spreadsheetView.dataset.trigger('row:destroy', options.end.row)
+                else
+                  setTimeout(->
+                    alert("Dataset must have at least one row")
+                  , 100)                  
+            },
+            "my_remove_col": {
+              name: "Remove column",
+              callback: (key, options) ->
+                if spreadsheetView.hot.countCols.call(spreadsheetView.hot) > 1
+                  spreadsheetView.dataset.trigger('dataColumn:destroy', options.end.col)
+                else
+                  setTimeout(->
+                    alert("Dataset must have at least one column")
+                  , 100)
+            },
+            "my_col_left": {
+              name: "Insert column on the left",
+              callback: (key, options) ->
+                spreadsheetView.dataset.trigger('dataColumn:create', options.end.col)
+            },
+            "my_col_right": {
+              name: "Insert column on the right",
+              callback: (key, options) ->
+                spreadsheetView.dataset.trigger('dataColumn:create', options.end.col + 1)
+            }
+          }
+        },
         afterChange: (changes, source) ->
           spreadsheetView.trigger('data:changed', spreadsheetView)
       }

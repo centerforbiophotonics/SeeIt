@@ -19,6 +19,18 @@
       @header = header
       @trigger('header:changed')
 
+    removeElement: (idx) ->
+      @data.splice(idx, 1)
+      @trigger('data:destroyed', idx)
+
+    insertElement: (idx, label, value) ->
+      @data.splice(idx, 0, {
+        label: label,
+        value: value
+      })
+
+      @trigger('data:created', idx)
+
     toJson: ->
       {
         header: @header,

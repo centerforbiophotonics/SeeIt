@@ -26,6 +26,22 @@
           self.updateGraph.call(self)
         )
 
+        @listenTo(data, 'data:destroyed', ->
+          self.updateGraph.call(self)
+        )
+
+        @listenTo(data, 'data:created', ->
+          self.updateGraph.call(self)
+        )
+
+        @listenTo(data, 'destroy', ->
+          colToDestroy = @dataset.indexOf(data)
+
+          if colToDestroy >= 0
+            @dataset.splice(colToDestroy, 1)
+            self.updateGraph.call(self)
+        )
+
         if @empty
           @empty = false
           @initGraph()
