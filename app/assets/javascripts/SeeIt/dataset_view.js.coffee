@@ -4,6 +4,8 @@
 
     constructor: (@app, @container, @dataset) ->
       @dataColumnViews = []
+      @colors = d3.scale.category20()
+      @viewsCreated = 0
       @initListeners()
       @initLayout()
 
@@ -42,7 +44,7 @@
 
     addData: (dataColumn) ->
       @container.find(".data-list").append("<li class='SeeIt list-group-item data-container'></li>")
-      columnView = new SeeIt.DataColumnView(@app, @container.find(".data-container").last(), dataColumn)
+      columnView = new SeeIt.DataColumnView(@app, @container.find(".data-container").last(), dataColumn, @colors(@viewsCreated++ % 20))
       @dataColumnViews.push(columnView)
 
       self = @

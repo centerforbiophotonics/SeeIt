@@ -43,6 +43,10 @@
   height: calc(100% - 52px);
 }
 
+.SeeIt.data-container {
+  min-height: 60px;
+}
+
 .SeeIt.dataset a.SeeIt.selected, .SeeIt.new-dataset-li a.SeeIt.selected {
   color: white;
 }

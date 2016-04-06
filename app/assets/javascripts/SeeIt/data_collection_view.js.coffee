@@ -75,7 +75,8 @@
             self.trigger("dataset:create", title)
           else
             self.container.find(".dataset-name").val("")
-            tip = new Opentip($(this), "Title must be unique", {style: "alert", target: self.container.find(".dataset-name"), showOn: "creation"})
+            msg = if title.length then "Title must be unique" else "Title cannot be blank"
+            tip = new Opentip($(this), msg, {style: "alert", target: self.container.find(".dataset-name"), showOn: "creation"})
             tip.setTimeout(->
               tip.hide.call(tip)
               return

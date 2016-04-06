@@ -2,12 +2,15 @@
   class DataColumnView
     _.extend(@prototype, Backbone.Events)
 
-    constructor: (@app, @container, @data) ->
+    constructor: (@app, @container, @data, @color) ->
       @init()
 
     init: ->
       #DEMO PATCH
-      @container.html("<a class='SeeIt data' style='display: inline-block; min-height: 40px'>#{@data.header}</a>")
+      @container.html("""
+        <div style="height: 20px; width: 20px; display: inline-block; vertical-align: middle; background-color: #{@color};"></div>
+        <a class='SeeIt data' style='display: inline-block;'>#{@data.header}</a>
+      """)
       @populateBadSelectBox()
       @registerListeners()
       
@@ -30,11 +33,13 @@
     populateBadSelectBox: ->
       @container.find('a').after("""
         <div class="dropdown pull-right" style='padding: 3px; display: inline-block'>
-          <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" id="dropdown_#{@data.header}">
-            Add to graph...
+          <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" id="dropdown_#{@data.header}">
+            <div style='display: inline-block'><span class="glyphicon glyphicon-stats"></span></div>
             <span class="caret"></span>
           </button>
-          <ul class="dropdown-menu" aria-labelledby="dropdown_#{@data.header}">
+          <ul class="dropdown-menu text-center" aria-labelledby="dropdown_#{@data.header}">
+            <span style='text-align: center; display: block; opacity: 0.75'>Add to graph...</span>
+            <li role="separator" class="divider"></li>
           </ul>
         </div>
       """)

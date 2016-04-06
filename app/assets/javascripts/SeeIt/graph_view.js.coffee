@@ -75,6 +75,7 @@
         <div class="SeeIt graph-panel panel panel-default">
           <div class="SeeIt panel-heading">
             <button role="button" class="btn btn-default"><span data-id=#{@id}" class="glyphicon glyphicon-wrench" style="float: left"></span></button>
+            <div style="display: inline; padding-left: 1%" class="SeeIt">#{@id}</div>
             <div class="btn-group" role="group" style="float: right">
               <button class="collapse-btn btn btn-default"><span data-id="#{@id}" class="glyphicon glyphicon-collapse-down"></span></ button>
               <button class="maximize btn btn-default"><span data-id="#{@id}" class="glyphicon glyphicon-resize-full"></span></button>
