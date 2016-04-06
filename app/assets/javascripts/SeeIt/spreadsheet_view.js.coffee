@@ -95,6 +95,13 @@
         #Do nothing
       )
 
+    validateUniqueness: (val, data, ignore) ->
+      for i in [0...data.length]
+        if val == data[i] && (!ignore && !ignore.length || ignore.indexOf(i) == -1)
+          return false
+
+      return true
+
     resetTable: ->
       if !@dataset then return
 
@@ -133,6 +140,14 @@
 
               if event.keyCode == 13
                 value = $(input).val()
+
+                if !spreadsheetView.validateUniqueness(value, data, [idx])
+                  tip = new Opentip($(input).parent(), "#{dim.charAt(0).toUpperCase() + dim.slice(1)} must be unique", {style: "alert", target: $(input).parent(), showOn: "creation"})
+                  tip.setTimeout(->
+                    tip.hide.call(tip)
+                    return
+                  , 5) 
+                  return false
 
                 spreadsheetView.dataset.trigger("#{dim}:change", value, idx)
 
@@ -185,7 +200,12 @@
                   spreadsheetView.dataset.trigger('row:destroy', options.end.row)
                 else
                   setTimeout(->
-                    alert("Dataset must have at least one row")
+                    cell = spreadsheetView.hot.getCell(options.end.row, options.end.col)
+                    tip = new Opentip($(cell), "Dataset must have at least one row", {style: "alert", target: $(cell), showOn: "creation"})
+                    tip.setTimeout(->
+                      tip.hide.call(tip)
+                      return
+                    , 5)
                   , 100)                  
             },
             "my_remove_col": {
@@ -195,8 +215,13 @@
                   spreadsheetView.dataset.trigger('dataColumn:destroy', options.end.col)
                 else
                   setTimeout(->
-                    alert("Dataset must have at least one column")
-                  , 100)
+                    cell = spreadsheetView.hot.getCell(options.end.row, options.end.col)
+                    tip = new Opentip($(cell), "Dataset must have at least one column", {style: "alert", target: $(cell), showOn: "creation"})
+                    tip.setTimeout(->
+                      tip.hide.call(tip)
+                      return
+                    , 5)
+                  , 100)  
             },
             "my_col_left": {
               name: "Insert column on the left",

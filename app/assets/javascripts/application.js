@@ -19,6 +19,7 @@
 //= require backbone-events.js
 //= require d3
 //= require nv.d3
+//= require opentip-jquery-excanvas
 //= require FileSaver.min.js
 //= require SeeIt/init
 //= require SeeIt/validators_module

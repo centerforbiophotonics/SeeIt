@@ -74,6 +74,12 @@
             self.container.find(".new-dataset-li").trigger('click')
             self.trigger("dataset:create", title)
           else
+            self.container.find(".dataset-name").val("")
+            tip = new Opentip($(this), "Title must be unique", {style: "alert", target: self.container.find(".dataset-name"), showOn: "creation"})
+            tip.setTimeout(->
+              tip.hide.call(tip)
+              return
+            , 5)
             return false
 
     validateTitle: (title) ->
