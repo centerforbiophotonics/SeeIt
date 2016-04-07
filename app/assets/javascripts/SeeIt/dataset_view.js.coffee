@@ -18,6 +18,18 @@
       @listenTo @dataset, 'dataColumn:created', (col) ->
         self.addData.call(self, self.dataset.data[col])
 
+      @on 'graph:created', (graphId) ->
+        self.dataColumnViews.forEach (d) ->
+          d.trigger('graph:created', graphId)
+
+      @on 'graph:destroyed', (graphId) ->
+        self.dataColumnViews.forEach (d) ->
+          d.trigger('graph:destroyed', graphId)
+
+      @on 'graph:id:change', (oldId, newId) ->
+        self.dataColumnViews.forEach (d) ->
+          d.trigger('graph:id:change', oldId, newId)
+      
     initLayout: ->
       @container.html("""
         <li class="SeeIt dataset list-group-item">
@@ -58,6 +70,10 @@
 
         if idx >= 0
           self.dataColumnViews.splice(idx, 1)
+      )
+
+      @listenTo(columnView, 'graphs:requestIDs', (cb) ->
+        self.trigger('graphs:requestIDs', cb)
       )
 
 

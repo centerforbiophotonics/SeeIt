@@ -5,6 +5,7 @@
     constructor: (@app, @id, @container, @destroyCallback) ->
       @maximized = false
       @collapsed = false
+      @editing = false
       @empty = true
       @graph = null
       @dataset = []
@@ -68,6 +69,27 @@
 
         collapse: ->
           graph.collapse.call(graph)
+
+        editTitle: ->
+          if !graph.editing
+            graph.container.find(".graph-title-content").html("<input id='graph-title-input' type='text' value='#{graph.id}'>")
+            graph.container.find('#graph-title-input').off('keyup', graph.handlers.graphTitleInputKeyup).on('keyup', graph.handlers.graphTitleInputKeyup)
+            graph.editing = true
+          else
+            oldId = graph.id
+            value = graph.container.find("#graph-title-input").val()
+            graph.id = value
+            newId = graph.id
+            graph.container.find(".graph-title-content").html(value)
+            graph.editing = false
+            graph.trigger('graph:id:change', oldId, newId)
+
+        graphTitleInputKeyup: (event) ->
+          if event.keyCode == 13
+            graph.container.find(".graph-title-edit-icon").trigger('click')
+
+
+            
       }
 
     initLayout: ->
@@ -75,7 +97,10 @@
         <div class="SeeIt graph-panel panel panel-default">
           <div class="SeeIt panel-heading">
             <button role="button" class="btn btn-default"><span data-id=#{@id}" class="glyphicon glyphicon-wrench" style="float: left"></span></button>
-            <div style="display: inline; padding-left: 1%" class="SeeIt">#{@id}</div>
+            <div class="SeeIt graph-title">
+              <div class="SeeIt graph-title-content">#{@id}</div>
+              <span class="SeeIt graph-title-edit-icon glyphicon glyphicon-pencil"></span>
+            </div>
             <div class="btn-group" role="group" style="float: right">
               <button class="collapse-btn btn btn-default"><span data-id="#{@id}" class="glyphicon glyphicon-collapse-down"></span></ button>
               <button class="maximize btn btn-default"><span data-id="#{@id}" class="glyphicon glyphicon-resize-full"></span></button>
@@ -91,6 +116,7 @@
       @container.find(".remove").on('click', @handlers.removeGraph)
       @container.find(".maximize").on('click', @handlers.maximize)
       @container.find(".collapse-btn").on('click', @handlers.collapse)
+      @container.find(".graph-title-edit-icon").on('click', @handlers.editTitle)
 
     destroy: ->
       @container.remove()

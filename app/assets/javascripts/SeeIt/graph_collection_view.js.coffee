@@ -22,6 +22,7 @@
       graphContainer.handlers = {
         removeGraph: (graphId) ->
           delete graphContainer.graphs[graphId]
+          graphContainer.trigger('graph:destroyed', graphId)
       }
 
       graphContainer.listenTo(@app, 'data:changed', (origin) ->
@@ -34,14 +35,44 @@
           graphContainer.graphs[graphData.graph].addData(graphData.data)
       )
 
-    addGraph: ->
-        @container.find(".graph-list").append("""
-        <li class="SeeIt graph list-group-item" id="graph_#{@graphId}">
-        </li>
-        """)
+      @listenTo(@app, 'graph:create', ->
+        graphContainer.addGraph.call(graphContainer)
+      )
 
-        @graphs[@graphId.toString()] = new SeeIt.GraphView(@app, @graphId, @container.find("#graph_#{@graphId}"), @handlers.removeGraph)
-        @graphId++
+      @listenTo(@app, 'graphs:requestIDs', (cb) ->
+        console.log "getting IDs"
+        ids = []
+        for graphId, graph of graphContainer.graphs
+          ids.push graphId
+
+        cb(ids)
+      )
+
+    changeGraphId: (oldId, newId) ->
+      graph = @graphs[oldId]
+      delete @graphs[oldId]
+      @graphs[newId] = graph
+
+      @trigger('graph:id:change', oldId, newId)
+
+    addGraph: ->
+      self = @
+
+      @container.find(".graph-list").append("""
+      <li class="SeeIt graph list-group-item" id="graph_#{@graphId}">
+      </li>
+      """)
+
+      newGraph = new SeeIt.GraphView(@app, @graphId, @container.find("#graph_#{@graphId}"), @handlers.removeGraph)
+      @graphs[@graphId.toString()] = newGraph
+
+      @listenTo newGraph, 'graph:id:change', (oldId, newId) ->
+        self.changeGraphId.call(self, oldId, newId)
+
+      @graphId++
+
+      @trigger('graph:created', @graphId-1)
+
 
     toggleFullscreen: ->
       if @isFullscreen 

@@ -25,11 +25,31 @@
         datasetView.trigger('datasetview:open')
       )
 
+      @listenTo(@app, 'graph:created', (graphId) ->
+        self.datasetViewCollection.forEach (d) ->
+          d.trigger('graph:created', graphId)
+      )
+
+      @listenTo(@app, 'graph:destroyed', (graphId) ->
+        self.datasetViewCollection.forEach (d) ->
+          d.trigger('graph:destroyed', graphId)   
+      )
+
+      @listenTo(@app, 'graph:id:change', (oldId, newId) ->
+        self.datasetViewCollection.forEach (d) ->
+          d.trigger('graph:id:change', oldId, newId)   
+      )
+
+
     initDatasetListeners: (datasetView) ->
       self = @
 
       @listenTo(datasetView, 'spreadsheet:load', (dataset) ->
         self.trigger('spreadsheet:load', dataset)
+      )
+
+      @listenTo(datasetView, 'graphs:requestIDs', (cb) ->
+        self.trigger('graphs:requestIDs', cb)
       )
 
     newDatasetMaker: ->

@@ -123,6 +123,7 @@
       )
 
       @registerListeners()
+      @trigger('ready')
 
     ###*
       # Sets active dataset in spreadsheet to the given dataset
@@ -143,11 +144,13 @@
         toggleSpreadsheetVisible: ->
           app.toggleSpreadsheetVisible.call(app)
         addGraph: ->
-          app.graphCollectionView.addGraph()
-          #DEMO PATCH
-          app.dataCollectionView.datasetViewCollection.forEach (datasetView) ->
-            datasetView.dataColumnViews.forEach (dataView) ->
-              dataView.init.call(dataView)
+          app.trigger('graph:create')
+          # app.graphCollectionView.addGraph()
+          # #DEMO PATCH
+          # app.dataCollectionView.datasetViewCollection.forEach (datasetView) ->
+          #   datasetView.dataColumnViews.forEach (dataView) ->
+          #     dataView.init.call(dataView)
+
         saveCSVData: (event) ->
           event.stopPropagation()
 
@@ -218,6 +221,22 @@
         if !app.spreadsheetVisible then app.toggleSpreadsheetVisible.call(app)
 
         app.trigger('spreadsheet:load', dataset)
+      )
+
+      @listenTo(app.graphCollectionView, 'graph:created', (graphId) ->
+        app.trigger('graph:created', graphId)
+      )
+
+      @listenTo(app.dataCollectionView, 'graphs:requestIDs', (cb) ->
+        app.trigger('graphs:requestIDs', cb)
+      )
+
+      @listenTo(app.graphCollectionView, 'graph:destroyed', (graphId) ->
+        app.trigger('graph:destroyed', graphId)
+      )
+
+      @listenTo(app.graphCollectionView, 'graph:id:change', (oldId, newId) ->
+        app.trigger('graph:id:change', oldId, newId)
       )
 
     ###*
