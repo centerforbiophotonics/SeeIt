@@ -2,62 +2,96 @@
   class GraphView
     _.extend(@prototype, Backbone.Events)
 
-    constructor: (@app, @id, @container, @destroyCallback) ->
+    constructor: (@app, @id, @container, @destroyCallback, @graphType) ->
       @maximized = false
       @collapsed = false
       @editing = false
       @empty = true
       @graph = null
+      @options = null
+      @optionsVisible = false
       @dataset = []
       @initHandlers()
       @initLayout()
+      @graph = new @graphType.class(@container.find('.graph-wrapper'),@dataset)
 
     addData: (data) ->
-      #DEMO PATCH
-      if @dataset.indexOf(data) == -1
-        @dataset.push(data)
+      datasetIdx = -1
 
-        self = @
+      console.log @dataset
 
-        @listenTo(data, 'label:changed', (idx) ->
-          self.updateGraph.call(self)
-        )
+      @dataset.forEach (d, i) ->
+        if d.name == data.name then datasetIdx = i
 
-        @listenTo(data, 'header:changed', ->
-          self.updateGraph.call(self)
-        )
+      if datasetIdx != -1
+        dataIdx = @dataset[datasetIdx].data.indexOf(data.data)
 
-        @listenTo(data, 'data:destroyed', ->
-          self.updateGraph.call(self)
-        )
+        if dataIdx == -1
+          @dataset[datasetIdx].data.push(data.data)
 
-        @listenTo(data, 'data:created', ->
-          self.updateGraph.call(self)
-        )
+          self = @
 
-        @listenTo(data, 'destroy', ->
-          colToDestroy = @dataset.indexOf(data)
-
-          if colToDestroy >= 0
-            @dataset.splice(colToDestroy, 1)
+          @listenTo(data.data, 'label:changed', (idx) ->
             self.updateGraph.call(self)
-        )
+          )
 
-        if @empty
-          @empty = false
-          @initGraph()
-        else
-          @updateGraph()
+          @listenTo(data.data, 'header:changed', ->
+            self.updateGraph.call(self)
+          )
+
+          @listenTo(data.data, 'data:destroyed', ->
+            self.updateGraph.call(self)
+          )
+
+          @listenTo(data.data, 'data:created', ->
+            self.updateGraph.call(self)
+          )
+
+          @listenTo(data.data, 'destroy', ->
+            idx = @dataset.indexOf(data.name)
+
+            if idx >= 0
+              colToDestroy = @dataset[idx].indexOf(data.data)
+
+              if colToDestroy >= 0
+                @dataset[idx].data.splice(colToDestroy, 1)
+                self.updateGraph.call(self)
+          )
+
+          if @empty
+            @empty = false
+            @initGraph()
+          else
+            @updateGraph()
 
 
     updateGraph: ->
       if @graph then @graph.refresh()
 
     initGraph: ->
-      @graph = new SeeIt.Graphs.BarChart(@container.find('.panel-body'),@dataset)
+      self = @
+
+      console.log "initGraph called"
+
+      @graph.draw()
+      @options = new SeeIt.GraphOptions(@container.find('.options-button'), @container.find('.options-wrapper'), @graph.options())
+
+      @listenTo @options, 'options:show', ->
+        self.container.find('.graph-wrapper').addClass('col-md-9')
+        self.container.find('.options-wrapper').removeClass('hidden')
+        self.updateGraph.call(self)
+
+      @listenTo @options, 'options:hide', ->
+        self.container.find('.graph-wrapper').removeClass('col-md-9')
+        self.container.find('.options-wrapper').addClass('hidden')
+        self.updateGraph.call(self)
+
 
     initHandlers: ->
       graph = @
+
+      @on 'request:dataRoles', (cb) ->
+        cb(graph.graph.dataFormat())
 
       graph.handlers = {
         removeGraph: ->
@@ -96,7 +130,7 @@
       @container.html("""
         <div class="SeeIt graph-panel panel panel-default">
           <div class="SeeIt panel-heading">
-            <button role="button" class="btn btn-default"><span data-id=#{@id}" class="glyphicon glyphicon-wrench" style="float: left"></span></button>
+            <button role="button" class="options-button btn btn-default"><span data-id=#{@id}" class="glyphicon glyphicon-wrench" style="float: left"></span></button>
             <div class="SeeIt graph-title">
               <div class="SeeIt graph-title-content">#{@id}</div>
               <span class="SeeIt graph-title-edit-icon glyphicon glyphicon-pencil"></span>
@@ -108,7 +142,10 @@
             </div>
           </div>
           <div id="collapse_#{@id}" class="panel-collapse collapse in">
-            <div class="SeeIt panel-body" style='min-height: 300px'></div>
+            <div class="SeeIt panel-body" style='min-height: 300px'>
+              <div class="SeeIt options-wrapper hidden col-md-3"></div>
+              <div class="SeeIt graph-wrapper"></div>
+            </div>
           </div>
         </div>
       """)

@@ -3,12 +3,23 @@
 
     constructor: ->
       super
-      @draw()
+
+      console.log "BarChart constructor called"
+
+      self = @
+
+      @dataFormat().forEach (d) ->
+        self.dataset.push({
+          name: d.name,
+          type: d.type,
+          multiple: d.multipe,
+          data: []
+        })
 
     formatData: ->
       data = []
 
-      @dataset.forEach (dataColumn) ->
+      @dataset[0].data.forEach (dataColumn) ->
         console.log(dataColumn)
         data.push({values: dataColumn.data, key: dataColumn.header})
 
@@ -38,6 +49,39 @@
         return chart
       
     destroy: ->
+
+
+    dataFormat: ->
+      [
+        {
+          name: "default",
+          type: "numeric",
+          multiple: true
+        }
+      ]
+
+
+    options: ->
+      [
+        {
+          label: "Test",
+          type: "checkbox",
+          callback: null
+        },
+        {
+          label: "Test 2",
+          type: "numeric"
+        },
+        {
+          label: "Test 3",
+          type: "select",
+          values: [1,2,3,4,5]
+        },
+        {
+          label: "Test 4",
+          type: "checkbox"
+        }
+      ]
 
   BarChart
 ).call(@)

@@ -13,6 +13,10 @@
 
       ui = if params.ui then params.ui else {}
 
+      @graphTypes = [
+        {name: "Bar Chart", class: SeeIt.Graphs.BarChart}
+      ]
+
       @view = new SeeIt.ApplicationView(@, @container)
       @layoutContainers = @view.initLayout()
       @initHandlers()
@@ -113,12 +117,12 @@
       #Container for toolbar
       @toolbarView = new SeeIt.ToolbarView(@, @layoutContainers['Globals'], 
         [
-          {class: "toggleData", title: "Show/Hide Data", handler: @handlers.toggleDataVisible},
-          {class: "toggleSpreadsheet", title: "Show/Hide Spreadsheet", handler: @handlers.toggleSpreadsheetVisible},
-          {class: "addGraph", title: "Add graph", handler: @handlers.addGraph, icon: "<span class='glyphicon glyphicon-plus'></span>"}  ,
-          {class: "uploadCSV", title: "Upload CSV", handler: @handlers.uploadCSV},
-          {class: "uploadJSON", title: "Upload JSON", handler: @handlers.uploadJson},
-          {class: "downloadJSON", title: "Download JSON", handler: @handlers.downloadJson}
+          {class: "toggleData", title: "Show/Hide Data", handler: @handlers.toggleDataVisible, type: "button"},
+          {class: "toggleSpreadsheet", title: "Show/Hide Spreadsheet", handler: @handlers.toggleSpreadsheetVisible, type: "button"},
+          {class: "addGraph", title: "Add graph", handler: @handlers.addGraph, icon: "<span class='glyphicon glyphicon-plus'></span>", type: "dropdown", options: @graphTypes}  ,
+          {class: "uploadCSV", title: "Upload CSV", handler: @handlers.uploadCSV, type:"button"},
+          {class: "uploadJSON", title: "Upload JSON", handler: @handlers.uploadJson, type: "button"},
+          {class: "downloadJSON", title: "Download JSON", handler: @handlers.downloadJson, type: "button"}
         ]
       )
 
@@ -144,7 +148,13 @@
         toggleSpreadsheetVisible: ->
           app.toggleSpreadsheetVisible.call(app)
         addGraph: ->
-          app.trigger('graph:create')
+          graphName = $(@).attr('data-id')
+          console.log graphName
+          graphType = app.graphTypes.filter((g) -> g.name == graphName)[0]
+
+          console.log graphType
+
+          app.trigger('graph:create', graphType)
           # app.graphCollectionView.addGraph()
           # #DEMO PATCH
           # app.dataCollectionView.datasetViewCollection.forEach (datasetView) ->
@@ -223,8 +233,8 @@
         app.trigger('spreadsheet:load', dataset)
       )
 
-      @listenTo(app.graphCollectionView, 'graph:created', (graphId) ->
-        app.trigger('graph:created', graphId)
+      @listenTo(app.graphCollectionView, 'graph:created', (graphId, dataRoles) ->
+        app.trigger('graph:created', graphId, dataRoles)
       )
 
       @listenTo(app.dataCollectionView, 'graphs:requestIDs', (cb) ->

@@ -25,8 +25,8 @@
         self.destroy.call(self)
       )
 
-      @on 'graph:created', (graphId) ->
-        self.addGraphOption.call(self, graphId)
+      @on 'graph:created', (graphId, dataRoles) ->
+        self.addGraphOption.call(self, graphId, dataRoles)
 
       @on 'graph:destroyed', (graphId) ->
         self.removeGraphOption.call(self, graphId)
@@ -67,16 +67,54 @@
     removeGraphOption: (graphId) ->
       @container.find("li a[data-id=#{graphId}]").remove()
 
-    addGraphOption: (graphId) ->
+    addGraphOption: (graphId, dataRoles) ->
       self = @
 
-      @container.find('.dropdown-menu').append("<li class='add_to_graph'><a href='#' class='dropdown_child' data-id='#{graphId}'>#{graphId}</a></li>")
 
-      selectGraph = (event) ->
-        self.trigger('graph:addData', {graph: $(@).find('.dropdown_child').attr('data-id'), data: self.data})
+      if dataRoles.length == 1
+        @container.find('.dropdown-menu').append("<li class='add_to_graph'><a href='#' class='dropdown_child' data-id='#{graphId}'>#{graphId}</a></li>")
 
-      @container.find('.add_to_graph').off('click', selectGraph).on('click', selectGraph)
+        selectGraph = (event) ->
+          #data: {name: "default", data: self.data} is a temporary placeholder. I need to pass the data-role info to this view
+          self.trigger('graph:addData', {graph: $(@).find('.dropdown_child').attr('data-id'), data: {name: dataRoles[0].name, data: self.data}})
 
+        @container.find('.add_to_graph').off('click', selectGraph).on('click', selectGraph)
+      else
+        appendRoles = ->
+          htmlStr = ''
+          dataRoles.forEach (d, i) ->
+            htmlStr += "<li class='add_to_data_role' data-graph='#{graphId}' data-id='#{dataRoles[i].name}'><a href='#' class='dropdown_child'>#{dataRoles[i].name}</a></li>"
+
+          return htmlStr
+
+        @container.find('.dropdown-menu').append("""
+          <li class='add_to_graph_submenu dropdown-submenu'>
+            <a href='#' class='dropdown_child dropdown-toggle' data-id='#{graphId}' id='#{graphId}' data-toggle='dropdown' aria-haspopup="true">#{graphId}</a>
+            <ul class="dropdown-menu text-center" aria-labelledby='#{graphId}' style='position: fixed'>
+              <span style='text-align: center; display: block; opacity: 0.75'>Data Roles</span>
+              <li role="separator" class="divider"></li>
+                #{appendRoles()}
+            </ul>
+          </li>
+        """)
+
+        $('.add_to_graph_submenu').click(->
+          dropDownFixPosition($(@),$(@).find('.dropdown-menu'))
+        )
+
+        dropDownFixPosition = (button,dropdown) ->
+          dropDownTop = button.offset().top + button.innerHeight() - 18;
+          dropdown.css('top', dropDownTop + "px");
+          dropdown.css('left', button.offset().left + button.outerWidth() + "px");
+
+
+        selectGraphDataRole = ->
+          self.trigger('graph:addData', {graph: $(@).attr('data-graph'), data: {name: $(@).attr('data-id'), data: self.data}})
+        
+        @container.find('.add_to_data_role').off('click', selectGraphDataRole).on('click', selectGraphDataRole)
+
+      true
+          
     populateGraphSelectBox: ->
       @container.find('a').after(@dropdownTemplate())
       @populateGraphDropdown()

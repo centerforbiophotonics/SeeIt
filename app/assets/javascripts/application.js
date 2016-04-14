@@ -15,6 +15,8 @@
 //= require handsontable.full
 //= require twitter/bootstrap
 //= require bootstrap.js
+//= require bootstrap-switch.min
+//= require dropdowns-enhancement.js
 //= require underscore.js
 //= require backbone-events.js
 //= require d3
@@ -34,6 +36,7 @@
 //= require SeeIt/csv_manager
 //= require SeeIt/json_manager
 //= require SeeIt/graph
+//= require SeeIt/graph_options
 //= require_tree ./SeeIt/graphs
 //= require SeeIt/graph_view
 //= require SeeIt/graph_collection_view

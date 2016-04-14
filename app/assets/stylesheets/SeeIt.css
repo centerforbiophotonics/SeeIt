@@ -13,6 +13,20 @@
   overflow-y: auto;
 }
 
+.SeeIt.nav-el {
+  display: inline-block;
+  padding-top: 15px;
+  padding-bottom: 15px;
+}
+
+.SeeIt.nav-el.left {
+  padding-left: 10px;
+}
+
+.SeeIt.nav-el.right {
+  padding-right: 10px;
+}
+
 .SeeIt.page-container {
   height: 100%;
   width: 100%;
@@ -21,6 +35,25 @@
 .SeeIt.graph-title-content {
   display: inline-block;
 /*  min-width: 5%;*/
+}
+
+.SeeIt.options-wrapper {
+  min-height: 300px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.SeeIt.remove-options {
+  float: right;
+  cursor: pointer;
+}
+
+.SeeIt.options-panel {
+  padding: 0;
+}
+
+.SeeIt.options-wrapper.hidden {
+  display: none;
 }
 
 .SeeIt.graph-title-edit-icon {

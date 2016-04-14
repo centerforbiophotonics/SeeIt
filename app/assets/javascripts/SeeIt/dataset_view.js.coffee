@@ -18,9 +18,9 @@
       @listenTo @dataset, 'dataColumn:created', (col) ->
         self.addData.call(self, self.dataset.data[col])
 
-      @on 'graph:created', (graphId) ->
+      @on 'graph:created', (graphId, dataRoles) ->
         self.dataColumnViews.forEach (d) ->
-          d.trigger('graph:created', graphId)
+          d.trigger('graph:created', graphId, dataRoles)
 
       @on 'graph:destroyed', (graphId) ->
         self.dataColumnViews.forEach (d) ->

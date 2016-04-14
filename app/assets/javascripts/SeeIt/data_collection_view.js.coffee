@@ -25,9 +25,9 @@
         datasetView.trigger('datasetview:open')
       )
 
-      @listenTo(@app, 'graph:created', (graphId) ->
+      @listenTo(@app, 'graph:created', (graphId, dataRoles) ->
         self.datasetViewCollection.forEach (d) ->
-          d.trigger('graph:created', graphId)
+          d.trigger('graph:created', graphId, dataRoles)
       )
 
       @listenTo(@app, 'graph:destroyed', (graphId) ->
