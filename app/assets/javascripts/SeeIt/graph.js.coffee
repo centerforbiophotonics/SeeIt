@@ -57,12 +57,21 @@
     # ***************** Only numeric data is supported at this time ************
     dataFormat: ->
       #Abstract
-      null
+      []
 
-    #options should specify 
+    #options should specify the editable options of a graph
+    # It should return an array of json objects of the form:
+    # {
+    #   type: "checkbox" OR "select" OR "numeric", 
+    #   label: any string,
+    #   values: array of numbers or strings (only used in select),
+    #   default: default value of corresponding form element. Should be
+    #     true or false for checkbox, a number for numeric, or one of the values
+    #     specified in 'values' for select
+    # }
     options: ->
       #Abstract
-      null
+      []
 
 
   Graph

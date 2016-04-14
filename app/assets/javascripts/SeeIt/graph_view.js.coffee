@@ -60,12 +60,20 @@
                 self.updateGraph.call(self)
           )
 
-          if @empty
-            @empty = false
-            @initGraph()
-          else
-            @updateGraph()
+          if @allRolesFilled()
+            if @empty
+              @empty = false
+              @initGraph()
+            else
+              @updateGraph()
 
+    allRolesFilled: ->
+      rolesFilled = true
+      console.log @graph.dataset
+      @graph.dataset.forEach (data) ->
+        if !data.data.length then rolesFilled = false
+
+      return rolesFilled
 
     updateGraph: ->
       if @graph then @graph.refresh(@options.getValues())

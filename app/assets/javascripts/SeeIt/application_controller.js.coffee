@@ -14,7 +14,8 @@
       ui = if params.ui then params.ui else {}
 
       @graphTypes = [
-        {name: "Bar Chart", class: SeeIt.Graphs.BarChart}
+        {name: "Bar Chart", class: SeeIt.Graphs.BarChart},
+        {name: "Scatter Plot", class: SeeIt.Graphs.ScatterPlot}
       ]
 
       @view = new SeeIt.ApplicationView(@, @container)

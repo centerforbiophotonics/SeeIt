@@ -3,8 +3,6 @@
 		_.extend(@prototype, Backbone.Events)
 
 		constructor: (@button, @container, options = []) ->
-			if !options.length then return
-			
 			@options = options
 			@initLayout()
 			@initHandlers()
