@@ -4,18 +4,6 @@
     constructor: ->
       super
 
-      console.log "BarChart constructor called"
-
-      self = @
-
-      @dataFormat().forEach (d) ->
-        self.dataset.push({
-          name: d.name,
-          type: d.type,
-          multiple: d.multipe,
-          data: []
-        })
-
     formatData: ->
       data = []
 
@@ -25,11 +13,13 @@
 
       return data
 
-    refresh: ->
+    refresh: (options) ->
+      console.log options
       d3.select(@container.find('.graph-svg')[0]).datum(@formatData()).transition().duration(500).call(@chartObject);
       nv.utils.windowResize(@chartObject.update);
 
-    draw: ->
+    draw: (options) ->
+      console.log options
       graph = @
       @container.html("<svg class='SeeIt graph-svg' style='width: 100%; min-height: 270px'></svg>")
 
@@ -66,20 +56,23 @@
         {
           label: "Test",
           type: "checkbox",
-          callback: null
+          default: true
         },
         {
           label: "Test 2",
-          type: "numeric"
+          type: "numeric",
+          default: 1
         },
         {
           label: "Test 3",
           type: "select",
-          values: [1,2,3,4,5]
+          values: [1,2,3,4,5],
+          default: 3
         },
         {
           label: "Test 4",
-          type: "checkbox"
+          type: "checkbox",
+          default: false
         }
       ]
 

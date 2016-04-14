@@ -85,7 +85,6 @@
         for j in [0...5]
           newData.dataset[i].push Math.random() * 10
 
-      console.log newData
       testData.push newData
       data = testData
 

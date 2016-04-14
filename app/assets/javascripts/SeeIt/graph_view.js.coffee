@@ -15,6 +15,8 @@
       @initLayout()
       @graph = new @graphType.class(@container.find('.graph-wrapper'),@dataset)
 
+      if !@graph.options().length then @container.find('.options-button').hide()
+
     addData: (data) ->
       datasetIdx = -1
 
@@ -66,15 +68,15 @@
 
 
     updateGraph: ->
-      if @graph then @graph.refresh()
+      if @graph then @graph.refresh(@options.getValues())
 
     initGraph: ->
       self = @
 
       console.log "initGraph called"
 
-      @graph.draw()
       @options = new SeeIt.GraphOptions(@container.find('.options-button'), @container.find('.options-wrapper'), @graph.options())
+      @graph.draw(@options.getValues())
 
       @listenTo @options, 'options:show', ->
         self.container.find('.graph-wrapper').addClass('col-md-9')
@@ -84,6 +86,9 @@
       @listenTo @options, 'options:hide', ->
         self.container.find('.graph-wrapper').removeClass('col-md-9')
         self.container.find('.options-wrapper').addClass('hidden')
+        self.updateGraph.call(self)
+
+      @listenTo @options, 'graph:update', ->
         self.updateGraph.call(self)
 
 
@@ -156,6 +161,7 @@
       @container.find(".graph-title-edit-icon").on('click', @handlers.editTitle)
 
     destroy: ->
+      if @graph then @graph.destroy()
       @container.remove()
 
 

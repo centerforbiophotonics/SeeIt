@@ -3,6 +3,8 @@
 		_.extend(@prototype, Backbone.Events)
 
 		constructor: (@button, @container, options = []) ->
+			if !options.length then return
+			
 			@options = options
 			@initLayout()
 			@initHandlers()
@@ -20,14 +22,44 @@
 			""")
 
 			@populateOptions()
+
 		populateOptions: ->
 			self = @
 			self.container.find('.panel-body').html('')
 			
 			@options.forEach (d) ->
 				self.container.find('.panel-body').append(self.generateOption.call(self, d))
+				self.setDefaultValue.call(self, d)
+
 
 			@container.find('.SeeIt.switch').bootstrapSwitch()
+
+			@container.find('.panel-body').append("<button class='option-save btn btn-primary' role='button' style='width: 100%'>Save</button>")
+
+			@container.find('.option-save').click (event) ->
+				self.trigger('graph:update')
+
+		setDefaultValue: (option, id) ->
+			switch option.type
+				when "checkbox"
+					@container.find("##{option.id}").prop('checked', option.default)
+				when "select"
+					@container.find("##{option.id}").val(option.default)
+				when "numeric"
+					@container.find("##{option.id}").val(option.default)
+
+		getValues: ->
+			values = []
+
+			@options.forEach (option) ->
+				if option.type == "checkbox"
+					values.push {label: option.label, value: $("##{option.id}").prop('checked')}
+				else if option.type == "select"
+					values.push {label: option.label, value: $("##{option.id}").val()}
+				else if option.type == "numeric"
+					values.push {label: option.label, value: parseInt($("##{option.id}").val())}
+
+			return values
 
 		generateOption: (option) ->
 			if !option.label || !option.type then return ""
@@ -43,7 +75,7 @@
 					return checkBoxStr
 				when "select"
 					#Generate select
-					selectStr = "<div class='form-group'><label for='#{id}'>#{option.label}</label><select class='form-control'>"
+					selectStr = "<div class='form-group'><label for='#{id}'>#{option.label}</label><select id='#{id}' class='form-control'>"
 
 					option.values.forEach (val) ->
 						selectStr += "<option value=#{val}>#{val}</option>"
