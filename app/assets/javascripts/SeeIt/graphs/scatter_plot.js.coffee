@@ -2,6 +2,7 @@
 	class ScatterPlot extends SeeIt.Graph
 		constructor: ->
 			super
+			@listenerInitialized = false
 
 		formatData: ->
 			data = []
@@ -31,6 +32,11 @@
 			graph = @
 			@container.html("<svg class='SeeIt graph-svg' style='width: 100%; min-height: 270px'></svg>")
 
+			if !@listenerInitialized
+				@on 'graph:maximize', (maximize) ->
+					graph.chartObject.update()
+					@listenerInitialized = true
+
 			nv.addGraph ->
 				chart = nv.models.scatterChart()
 					# .showDistX(true)
@@ -41,7 +47,11 @@
 					"<h3>#{data.series[0].key}</h3>"
 
 
-				d3.select(graph.container.find('.graph-svg')[0]).datum(graph.formatData.call(graph)).transition().duration(350).call(chart)
+				d3.select(graph.container.find('.graph-svg')[0])
+						.attr('height', '100%')
+						.datum(graph.formatData.call(graph))
+						.transition().duration(350)
+						.call(chart)
 
 				nv.utils.windowResize(chart.update)
 

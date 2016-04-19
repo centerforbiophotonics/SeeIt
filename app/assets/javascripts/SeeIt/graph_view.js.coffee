@@ -154,7 +154,7 @@
               <button class="remove btn btn-default"><span data-id="#{@id}" class="glyphicon glyphicon-remove"></span></button>
             </div>
           </div>
-          <div id="collapse_#{@id}" class="panel-collapse collapse in">
+          <div id="collapse_#{@id}" class="SeeIt graph-panel-content panel-collapse collapse in">
             <div class="SeeIt panel-body" style='min-height: 300px'>
               <div class="SeeIt options-wrapper hidden col-md-3"></div>
               <div class="SeeIt graph-wrapper"></div>
@@ -180,6 +180,9 @@
       @container.toggleClass('maximized')
       @container.find('.maximize .glyphicon').toggleClass('glyphicon-resize-full glyphicon-resize-small')
       @maximized = !@maximized
+
+      @graph.trigger('graph:maximize', @maximize)
+      @options.trigger('graph:maximize', @maximize)
 
     collapse: ->
       if @maximized

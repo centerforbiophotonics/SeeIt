@@ -10,7 +10,7 @@
       privateMembers.dataset = @dataset
       @visible = true
       @fullscreenClass = 'col-md-12'
-      @splitscreenClass = 'col-md-10'
+      @splitscreenClass = 'col-md-9'
       @hot = null
       @initLayout()
 
@@ -21,7 +21,7 @@
             <span class='title'>#{if @dataset && @dataset.data.length then @dataset.title else ""}</span>
           </div>
           <div class="SeeIt panel-body spreadsheet">
-            <div class="SeeIt Handsontable-Container"></div>
+            <div class="SeeIt Handsontable-Container" style="position: relative; overflow: hidden; height: 100%"></div>
           </div>
         </div>
       """)
@@ -94,6 +94,16 @@
       @listenTo(@app, 'data:changed', (origin) ->
         #Do nothing
       )
+
+      $(window).on 'resize', (event) ->
+        if self.hot
+          self.hot.updateSettings({
+            height: self.container.find('.SeeIt.Handsontable-Container').height(),
+            colWidths: ->
+              (self.container.find('.SeeIt.Handsontable-Container').width() - 50) / self.dataset.headers.length
+          })
+
+          self.container.find("td").css('text-align', 'center')
 
     validateUniqueness: (val, data, ignore) ->
       for i in [0...data.length]
@@ -176,6 +186,11 @@
         colHeaders: @dataset.headers,
         data: privateMethods.formatModelData(),
         columns: privateMethods.formatColumns(),
+        className: "htCenter",
+        height: spreadsheetView.container.find('.SeeIt.Handsontable-Container').height(),
+        colWidths: ->
+          (spreadsheetView.container.find('.SeeIt.Handsontable-Container').width() - 50) / spreadsheetView.dataset.headers.length
+        # stretchH: "all",
         afterGetRowHeader: headerCallbackFactory("label"),
         afterGetColHeader: headerCallbackFactory("header")
         manualColumnResize: true,
@@ -247,6 +262,8 @@
         @container.find('.SeeIt.Handsontable-Container')[0],
         settings
       )
+
+      @container.find("td").css('text-align', 'center')
 
     toggleVisible: ->
       @container.toggleClass('hidden')

@@ -95,10 +95,14 @@
 			self = @
 
 			@button.on 'click', ->
+				self.container.css('max-height', self.container.next().height())
 				self.trigger('options:show')
 
 			@container.find('.remove-options').on 'click', ->
 				self.trigger('options:hide')
+
+			@on 'graph:maximize', (maximize) ->
+				self.container.css('max-height', self.container.next().height())
 
 		@randString: (x) ->
 			s = ""

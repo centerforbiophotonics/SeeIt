@@ -8,7 +8,7 @@
       @handlers = {}
       @isFullscreen = false
       @fullscreenClass = 'col-md-12'
-      @splitscreenClass = 'col-md-10'
+      @splitscreenClass = 'col-md-9'
       @initLayout()
       @initHandlers()
 

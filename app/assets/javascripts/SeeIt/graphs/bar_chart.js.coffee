@@ -3,6 +3,7 @@
 
     constructor: ->
       super
+      @listenerInitialized = false
 
     formatData: ->
       data = []
@@ -23,6 +24,11 @@
       graph = @
       @container.html("<svg class='SeeIt graph-svg' style='width: 100%; min-height: 270px'></svg>")
 
+      if !@listenerInitialized
+        @on 'graph:maximize', (maximize) ->
+          graph.chartObject.update()
+          @listenerInitialized = true
+          
       nv.addGraph ->
         chart = nv.models.multiBarChart()
             .x((d) -> d.label )
@@ -31,6 +37,7 @@
         data = graph.formatData.call(graph)
         console.log data
         d3.select(graph.container.find('.graph-svg')[0])
+            .attr('height', '100%')
             .datum(data)
             .call(chart);
 

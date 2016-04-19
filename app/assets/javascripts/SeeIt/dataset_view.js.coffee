@@ -32,9 +32,11 @@
       
     initLayout: ->
       @container.html("""
-        <li class="SeeIt dataset list-group-item">
+        <li class="SeeIt dataset list-group-item" style="min-height: 54px">
           <a class="SeeIt">#{@dataset.title}</a>
-          <span class='show-in-spreadsheet glyphicon glyphicon-expand' style='float: right;'></span>
+          <button class="btn btn-default show-in-spreadsheet pull-right">
+            <span class='glyphicon glyphicon-expand'></span>
+          </button>
         </li>
         <div class="SeeIt data-columns list-group-item" style="padding: 5px; display: none">
           <ul class='SeeIt list-group data-list'>
@@ -79,10 +81,16 @@
 
     registerEvents: ->
       self = @
+
       toggleData = ->
         $(@).toggleClass('active')
         $(@).find('a').toggleClass('selected')
         $(@).parent().find('.data-columns').slideToggle()
+
+        if $(@).hasClass('active')
+          self.dataColumnViews.forEach (d) ->
+            d.trigger('dataColumns:show')
+
       showInSpreadsheet = (event) ->
         event.stopPropagation()
         self.trigger('spreadsheet:load', self.dataset)

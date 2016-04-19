@@ -19,6 +19,16 @@
   padding-bottom: 15px;
 }
 
+.SeeIt.graph-panel-content {
+  height: calc(100% - 54px);
+}
+
+.SeeIt.graph-panel-content .panel-body,
+.SeeIt.graph-panel-content .graph-wrapper
+ {
+  height: 100%;
+}
+
 .SeeIt.nav-el.left {
   padding-left: 10px;
 }
@@ -37,10 +47,25 @@
 /*  min-width: 5%;*/
 }
 
+
 .SeeIt.options-wrapper {
-  min-height: 300px;
-  max-height: 300px;
+  min-height: 270px;
   overflow-y: auto;
+}
+
+
+.SeeIt.Handsontable-Container {
+/*  width: 100%;*/
+/*  width: -webkit-calc(100% - 50px);
+  width: -moz-calc(100% - 50px);
+  width: calc(100% - 50px);
+  padding-right: 50px;*/
+}
+
+.SeeIt.spreadsheet {
+  height: -webkit-calc(100% - 54px);
+  height: -moz-calc(100% - 54px);
+  height: calc(100% - 54px);
 }
 
 .SeeIt.remove-options {
@@ -78,11 +103,16 @@
   border-radius: 4px;
 }
 
+.SeeIt.data-column-button {
+  height: 100%;
+  white-space: normal !important;
+}
+
 .SeeIt.row {
   height: 100%;
 }
 
-.SeeIt.col-md-2, .SeeIt.col-md-10, .SeeIt.col-md-12 {
+.SeeIt.col-md-2, .SeeIt.col-md-3, .SeeIt.col-md-9, .SeeIt.col-md-10, .SeeIt.col-md-12 {
   height: 100%;
 }
 
@@ -92,6 +122,16 @@
 
 .SeeIt.data-container {
   min-height: 60px;
+}
+
+.SeeIt.data-column-panel {
+  border: none;
+  padding: 0;
+  margin-bottom: 0;
+}
+
+.SeeIt.data-column-panel-body {
+  padding: 0;
 }
 
 .SeeIt.dataset a.SeeIt.selected, .SeeIt.new-dataset-li a.SeeIt.selected {

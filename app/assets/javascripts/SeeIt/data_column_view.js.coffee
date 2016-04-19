@@ -8,9 +8,17 @@
     init: ->
       #DEMO PATCH
       @container.html("""
-        <div style="height: 20px; width: 20px; display: inline-block; vertical-align: middle; background-color: #{@color};"></div>
-        <a class='SeeIt data' style='display: inline-block;'>#{@data.header}</a>
-      """)
+        <div class="SeeIt data-column-panel panel panel-default">
+          <div class="SeeIt data-column-panel-body panel-body">
+            <div class="btn-group" role="group" style="width: 100%">
+              <button type="button" class="data-column-button SeeIt btn btn-default" style="background-color: #{@color}; width: 15%"></button>
+              <button type="button" class="data-column-button SeeIt btn btn-default data" style='width: 60%'>#{@data.header}</button>
+              <div role="group" class="data-column-button SeeIt btn-group SeeIt dropdown-container" style='width: 25%'></div>
+            </div>
+          </div>
+        </div>
+      """) 
+
       @populateGraphSelectBox()
       @registerListeners()
       
@@ -19,6 +27,7 @@
 
       @listenTo(@data, 'header:changed', ->
         self.container.find('.SeeIt.data').html(@data.header)
+        self.alignGroupHeight.call(self)
       )
 
       @listenTo(@data, 'destroy', ->
@@ -37,6 +46,17 @@
       @listenTo @app, 'ready', ->
         self.populateGraphDropdown.call(self)
 
+      @on 'dataColumns:show', ->
+        self.alignGroupHeight.call(self)
+
+      $(window).on 'resize', ->
+        self.alignGroupHeight.call(self)
+
+    alignGroupHeight: ->
+      headerHeight = @container.find('.SeeIt.data').height()
+
+      @container.find('.btn:not(.data)').height(headerHeight)
+
     destroy: ->
       @container.remove()
       @trigger('destroy')
@@ -50,16 +70,16 @@
       )
 
     dropdownTemplate: ->
-      """<div class="dropdown pull-right" style='padding: 3px; display: inline-block'>
-        <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" id="dropdown_#{@data.header}">
+      """
+        <button class="btn btn-primary dropdown-toggle SeeIt graph-dropdown" type="button" data-toggle="dropdown" aria-haspopup="true" id="dropdown_#{@data.header}" style="width: 100%">
           <div style='display: inline-block'><span class="glyphicon glyphicon-stats"></span></div>
           <span class="caret"></span>
         </button>
-        <ul class="dropdown-menu text-center" aria-labelledby="dropdown_#{@data.header}">
+        <ul class="dropdown-menu text-center" aria-labelledby="dropdown_#{@data.header}" style="position: fixed">
           <span style='text-align: center; display: block; opacity: 0.75'>Add to graph...</span>
           <li role="separator" class="divider"></li>
         </ul>
-      </div>"""
+      """
 
     updateGraphOption: (oldId, newId) ->
       @container.find("li a[data-id=#{oldId}]").attr('data-id', newId).html(newId)
@@ -72,7 +92,7 @@
 
 
       if dataRoles.length == 1
-        @container.find('.dropdown-menu').append("<li class='add_to_graph'><a href='#' class='dropdown_child' data-id='#{graphId}'>#{graphId}</a></li>")
+        @container.find('.dropdown-menu').append("<li class='add_to_graph' style='box-shadow: none'><a href='#' class='dropdown_child' data-id='#{graphId}'>#{graphId}</a></li>")
 
         selectGraph = (event) ->
           #data: {name: "default", data: self.data} is a temporary placeholder. I need to pass the data-role info to this view
@@ -88,8 +108,8 @@
           return htmlStr
 
         @container.find('.dropdown-menu').append("""
-          <li class='add_to_graph_submenu dropdown-submenu'>
-            <a href='#' class='dropdown_child dropdown-toggle' data-id='#{graphId}' id='#{graphId}' data-toggle='dropdown' aria-haspopup="true">#{graphId}</a>
+          <li class='add_to_graph_submenu dropdown-submenu' style='box-shadow: none'>
+            <a href='#' style='box-shadow: none' class='dropdown_child dropdown-toggle' data-id='#{graphId}' id='#{graphId}' data-toggle='dropdown' aria-haspopup="true">#{graphId}</a>
             <ul class="dropdown-menu text-center" aria-labelledby='#{graphId}' style='position: fixed'>
               <span style='text-align: center; display: block; opacity: 0.75'>Data Roles</span>
               <li role="separator" class="divider"></li>
@@ -98,14 +118,11 @@
           </li>
         """)
 
+
+
         $('.add_to_graph_submenu').click(->
           dropDownFixPosition($(@),$(@).find('.dropdown-menu'))
         )
-
-        dropDownFixPosition = (button,dropdown) ->
-          dropDownTop = button.offset().top + button.innerHeight() - 18;
-          dropdown.css('top', dropDownTop + "px");
-          dropdown.css('left', button.offset().left + button.outerWidth() + "px");
 
 
         selectGraphDataRole = ->
@@ -113,13 +130,21 @@
         
         @container.find('.add_to_data_role').off('click', selectGraphDataRole).on('click', selectGraphDataRole)
 
+
       true
           
     populateGraphSelectBox: ->
-      @container.find('a').after(@dropdownTemplate())
+      @container.find('.SeeIt.dropdown-container').html(@dropdownTemplate())
       @populateGraphDropdown()
 
+      $('.SeeIt.graph-dropdown').click(->
+        dropDownFixPosition($(@),$(@).next())
+      )
 
+  dropDownFixPosition = (button,dropdown) ->
+    dropDownTop = button.offset().top + button.innerHeight() - 18;
+    dropdown.css('top', dropDownTop + "px");
+    dropdown.css('left', button.offset().left + button.outerWidth() + "px")
 
   DataColumnView
 ).call(@)
