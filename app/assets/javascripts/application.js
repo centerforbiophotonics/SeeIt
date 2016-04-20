@@ -18,6 +18,7 @@
 //= require bootstrap-switch.min
 //= require dropdowns-enhancement.js
 //= require underscore.js
+//= require spectrum.js
 //= require backbone-events.js
 //= require d3
 //= require nv.d3

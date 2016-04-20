@@ -20,7 +20,7 @@
     addData: (data) ->
       datasetIdx = -1
 
-      console.log @dataset
+      console.log @dataset, data
 
       @dataset.forEach (d, i) ->
         if d.name == data.name then datasetIdx = i
@@ -29,6 +29,7 @@
         dataIdx = @dataset[datasetIdx].data.indexOf(data.data)
 
         if dataIdx == -1
+          console.log "adding to dataset"
           @dataset[datasetIdx].data.push(data.data)
 
           self = @
@@ -50,13 +51,20 @@
           )
 
           @listenTo(data.data, 'destroy', ->
-            idx = @dataset.indexOf(data.name)
+            console.log 'destroy triggered in graph view'
+            datasetIdx = -1
 
-            if idx >= 0
-              colToDestroy = @dataset[idx].indexOf(data.data)
+            console.log self.dataset
+
+            self.dataset.forEach (d, i) ->
+              if d.name == data.name then datasetIdx = i
+
+            if datasetIdx >= 0
+              colToDestroy = self.dataset[datasetIdx].data.indexOf(data.data)
 
               if colToDestroy >= 0
-                @dataset[idx].data.splice(colToDestroy, 1)
+                console.log "found column to destroy"
+                self.dataset[datasetIdx].data.splice(colToDestroy, 1)
                 self.updateGraph.call(self)
           )
 
@@ -76,7 +84,7 @@
       return rolesFilled
 
     updateGraph: ->
-      if @graph then @graph.refresh(@options.getValues())
+      if @graph && @options then @graph.refresh(@options.getValues())
 
     initGraph: ->
       self = @

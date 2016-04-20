@@ -8,21 +8,32 @@
 			data = []
 			groups = {}
 
-			@dataset.forEach (data) ->
-				dataColumn = data.data[0]
-				dataColumn.data.forEach (d) ->
-					if !groups[d.label]
-						groups[d.label] = {}
+			if @datasetValid()
+				@dataset.forEach (data) ->
+					dataColumn = data.data[0]
+					dataColumn.data.forEach (d) ->
+						if !groups[d.label]
+							groups[d.label] = {}
 
-					if data.name == "x-axis"
-						groups[d.label].x = d.value
-					else
-						groups[d.label].y = d.value
+						if data.name == "x-axis"
+							groups[d.label].x = d.value
+						else
+							groups[d.label].y = d.value
 
-			for key, val of groups
-				data.push {key: key, values: [val]}
+				for key, val of groups
+					data.push {key: key, values: [val]}
 
 			return data
+
+
+		datasetValid: ->
+			valid = true
+
+			@dataset.forEach (data) ->
+				if !data.data.length then valid = false
+
+			return valid
+
 
 		refresh: (options) ->
 	      d3.select(@container.find('.graph-svg')[0]).datum(@formatData()).transition().duration(350).call(@chartObject);

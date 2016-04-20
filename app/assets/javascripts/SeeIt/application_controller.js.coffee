@@ -210,6 +210,8 @@
       @listenTo(app.dataCollectionView, 'spreadsheet:load', (dataset) ->
         if !app.spreadsheetVisible then app.toggleSpreadsheetVisible.call(app)
         
+
+        console.log 'spreadsheet:load trigger in controller'
         app.trigger('spreadsheet:load', dataset)
       )
 

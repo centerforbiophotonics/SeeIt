@@ -46,9 +46,10 @@
     updateTitle: ->
       @container.find('.panel-heading .title').html(@dataset.title)
 
+
     updateDataset: (dataset) ->
       #Unsubscribe from old dataset
-      @stopListening(@dataset)
+      @stopListening('dataColumn:destroyed dataColumn:created row:destroyed row:created')
 
       #Update dataset
       @dataset = dataset
@@ -63,28 +64,28 @@
     subscribeToDataset: ->
       self = @
 
-      @listenTo(@dataset, 'dataColumn:destroyed', ->
+      @listenTo(@dataset, 'dataColumn:destroyed dataColumn:created row:destroyed row:created', ->
         self.resetTable.call(self)
       )
 
-      @listenTo(@dataset, 'dataColumn:created', ->
-        self.resetTable.call(self)
-      )
+      # @listenTo(@dataset, 'dataColumn:created', ->
+      #   self.resetTable.call(self)
+      # )
 
-      @listenTo(@dataset, 'row:destroyed', ->
-        self.resetTable.call(self)
-      )
+      # @listenTo(@dataset, 'row:destroyed', ->
+      #   self.resetTable.call(self)
+      # )
 
-      @listenTo(@dataset, 'row:created', ->
-        self.resetTable.call(self)
-      )
+      # @listenTo(@dataset, 'row:created', ->
+      #   self.resetTable.call(self)
+      # )
 
     initHandlers: ->
       self = @
 
 
       @listenTo(@app, 'spreadsheet:load', (dataset) ->
-        console.log 'spreadsheet:load triggered'
+        console.log 'spreadsheet:load triggered', dataset
         if dataset != self.dataset
           self.updateDataset.call(self, dataset)
       )

@@ -6,12 +6,15 @@
       @init()
 
     init: ->
-      #DEMO PATCH
+      self = @
+
+
       @container.html("""
         <div class="SeeIt data-column-panel panel panel-default">
           <div class="SeeIt data-column-panel-body panel-body">
             <div class="btn-group" role="group" style="width: 100%">
-              <button type="button" class="data-column-button SeeIt btn btn-default" style="background-color: #{@color}; width: 15%"></button>
+              <button type="button" class="color-picker data-column-button SeeIt btn btn-default" style="background-color: #{@color}; width: 15%">
+              </button>
               <button type="button" class="data-column-button SeeIt btn btn-default data" style='width: 60%'>#{@data.header}</button>
               <div role="group" class="data-column-button SeeIt btn-group SeeIt dropdown-container" style='width: 25%'></div>
             </div>
@@ -19,9 +22,28 @@
         </div>
       """) 
 
+      @container.find('.color-picker').first().spectrum({
+        color: @color, 
+        replacerClassName: 'hiddenColorpicker',
+        change: (color) ->
+          console.log 'color change', color.toHexString()
+          self.setColor.call(self, color.toHexString())
+      })
+
+      @container.find('.hiddenColorpicker').hide()
+
+      @container.find('.color-picker').first().click -> 
+        self.container.find('.hiddenColorpicker').trigger('click')
+
       @populateGraphSelectBox()
       @registerListeners()
-      
+    
+
+    setColor: (color) ->
+      @color = color
+
+      @container.find('.color-picker').css('background-color', @color)
+
     registerListeners: ->
       self = @
 
