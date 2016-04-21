@@ -25,6 +25,7 @@
 //= require opentip-jquery-excanvas
 //= require FileSaver.min.js
 //= require SeeIt/init
+//= require SeeIt/utils
 //= require SeeIt/validators_module
 //= require SeeIt/data_column
 //= require SeeIt/dataset_refactor

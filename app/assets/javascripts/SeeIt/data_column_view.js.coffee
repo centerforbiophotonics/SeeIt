@@ -2,7 +2,7 @@
   class DataColumnView
     _.extend(@prototype, Backbone.Events)
 
-    constructor: (@app, @container, @data, @color) ->
+    constructor: (@app, @container, @data) ->
       @init()
 
     init: ->
@@ -13,7 +13,7 @@
         <div class="SeeIt data-column-panel panel panel-default">
           <div class="SeeIt data-column-panel-body panel-body">
             <div class="btn-group" role="group" style="width: 100%">
-              <button type="button" class="color-picker data-column-button SeeIt btn btn-default" style="background-color: #{@color}; width: 15%">
+              <button type="button" class="color-picker data-column-button SeeIt btn btn-default" style="background-color: #{@data.color}; width: 15%">
               </button>
               <button type="button" class="data-column-button SeeIt btn btn-default data" style='width: 60%'>#{@data.header}</button>
               <div role="group" class="data-column-button SeeIt btn-group SeeIt dropdown-container" style='width: 25%'></div>
@@ -23,7 +23,7 @@
       """) 
 
       @container.find('.color-picker').first().spectrum({
-        color: @color, 
+        color: @data.color, 
         replacerClassName: 'hiddenColorpicker',
         change: (color) ->
           console.log 'color change', color.toHexString()
@@ -40,9 +40,9 @@
     
 
     setColor: (color) ->
-      @color = color
+      @data.setColor(color)
 
-      @container.find('.color-picker').css('background-color', @color)
+      @container.find('.color-picker').css('background-color', @data.color)
 
     registerListeners: ->
       self = @

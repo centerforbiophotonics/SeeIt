@@ -48,6 +48,13 @@
         cb(ids)
       )
 
+      @listenTo(@app, 'height:toggle', ->
+        graphContainer.container.toggleClass("spreadsheet-visible")
+
+        for graphId, graph of graphContainer.graphs
+          graph.updateGraph.call(graph)
+      )
+
     findValidId: ->
       @graphId = 1
 

@@ -256,8 +256,9 @@
     ###
     toggleSpreadsheetVisible: ->
       @spreadsheetView.toggleVisible()
-      @graphCollectionView.container.toggleClass("spreadsheet-visible")
       @spreadsheetVisible = !@spreadsheetVisible
+      @trigger('height:toggle')
+      
 
     ###*
       # Toggles visibility of DataCollectionView

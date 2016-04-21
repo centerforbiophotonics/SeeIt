@@ -2,7 +2,10 @@
   class DataColumn
     _.extend(@prototype, Backbone.Events)
     
-    constructor: (@app, @header, @data, @datasetTitle) ->
+    constructor: (@app, @header, @data, @datasetTitle, @color) ->
+      if !@color then @color = SeeIt.Utils.getRandomColor()
+
+      console.log @color
 
     setValue: (idx, value) ->
       @data[idx].value = value
@@ -10,6 +13,10 @@
 
     getValue: (idx) ->
       return @data[idx].value
+
+    setColor: (color) ->
+      @color = color
+      @trigger('color:changed')
 
     setLabel: (idx, value) ->
       @data[idx].label = value

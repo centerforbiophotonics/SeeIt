@@ -8,10 +8,12 @@
     formatData: ->
       data = []
 
+
       @dataset[0].data.forEach (dataColumn) ->
         console.log(dataColumn)
-        data.push({values: dataColumn.data, key: dataColumn.header})
+        data.push({values: dataColumn.data, key: dataColumn.header, color: dataColumn.color})
 
+      console.log @colors
       return data
 
     refresh: (options) ->

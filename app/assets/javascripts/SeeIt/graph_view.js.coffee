@@ -38,6 +38,10 @@
             self.updateGraph.call(self)
           )
 
+          @listenTo(data.data, 'color:changed', ->
+            self.updateGraph.call(self)
+          )
+
           @listenTo(data.data, 'header:changed', ->
             self.updateGraph.call(self)
           )
