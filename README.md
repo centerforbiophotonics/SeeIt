@@ -1,28 +1,21 @@
-== README
+SeeIt
+================
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Build Instructions
+================
 
-Things you may want to cover:
+Docker makes it super easy. On OSX or Windows just install the docker toolbox https://www.docker.com/products/docker-toolbox
 
-* Ruby version
+Then start the Docker Quickstart Terminal and run
 
-* System dependencies
+    docker-compose build
+    docker-compose build
 
-* Configuration
+The server is now running. To get its address open another Docker Quickstart Terminal and run:
 
-* Database creation
+    docker-machine ip
 
-* Database initialization
+The server's address is usually
 
-* How to run the test suite
+    192.168.99.100:3000
 
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
-
-
-Please feel free to use a different markup language if you do not plan to run
-<tt>rake doc:app</tt>.
