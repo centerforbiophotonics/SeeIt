@@ -9,7 +9,7 @@ Docker makes it super easy. On OSX or Windows just install the docker toolbox ht
 Then start the Docker Quickstart Terminal and run
 
     docker-compose build
-    docker-compose build
+    docker-compose up
 
 The server is now running. To get its address open another Docker Quickstart Terminal and run:
 
