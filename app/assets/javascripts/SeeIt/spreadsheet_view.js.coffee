@@ -9,6 +9,7 @@
 
       privateMembers.dataset = @dataset
       @visible = true
+      @editingTitle = false
       @fullscreenClass = 'col-md-12'
       @splitscreenClass = 'col-md-9'
       @hot = null
@@ -19,6 +20,7 @@
         <div class="SeeIt spreadsheet-panel panel panel-default">
           <div class="SeeIt panel-heading">
             <span class='title'>#{if @dataset && @dataset.data.length then @dataset.title else ""}</span>
+            <span class="SeeIt title-edit-icon glyphicon glyphicon-pencil"></span>
           </div>
           <div class="SeeIt panel-body spreadsheet">
             <div class="SeeIt Handsontable-Container" style="position: relative; overflow: hidden; height: 100%"></div>
@@ -90,21 +92,47 @@
           self.updateDataset.call(self, dataset)
       )
 
+      @listenTo(@app, 'width:toggle', ->
+        $(window).triggerHandler('resize')
+      )
+
       @subscribeToDataset()
 
       @listenTo(@app, 'data:changed', (origin) ->
         #Do nothing
       )
 
-      $(window).on 'resize', (event) ->
-        if self.hot
-          self.hot.updateSettings({
-            height: self.container.find('.SeeIt.Handsontable-Container').height(),
-            colWidths: ->
-              (self.container.find('.SeeIt.Handsontable-Container').width() - 50) / self.dataset.headers.length
-          })
+      @handlers = {
+        editTitle: ->
+          if !self.editingTitle
+            self.container.find(".title").html("<input id='title-input' type='text' value='#{self.dataset.title}'>")
+            self.container.find('#title-input').off('keyup', self.handlers.titleInputKeyup).on('keyup', self.handlers.titleInputKeyup)
+            self.editingTitle = true
+          else
+            oldTitle = self.dataset.title
+            value = self.container.find("#title-input").val()
+            self.dataset.setTitle.call(self.dataset, value)
+            self.container.find(".title").html(value)
+            self.editingTitle = false
 
-          self.container.find("td").css('text-align', 'center')
+        titleInputKeyup: (event) ->
+          if event.keyCode == 13
+            self.container.find(".title-edit-icon").trigger('click')
+
+        resize: (event) ->
+          if self.hot
+            self.hot.updateSettings({
+              height: self.container.find('.SeeIt.Handsontable-Container').height(),
+              colWidths: ->
+                (self.container.find('.SeeIt.Handsontable-Container').width() - 50) / self.dataset.headers.length
+            })
+
+            self.container.find("td").css('text-align', 'center')
+      }
+
+      $(window).on 'resize', @handlers.resize
+
+      @container.find('.title-edit-icon').off('click', @handlers.editTitle).on('click', @handlers.editTitle)
 
     validateUniqueness: (val, data, ignore) ->
       for i in [0...data.length]
@@ -112,6 +140,9 @@
           return false
 
       return true
+
+    updateView: ->
+      $(window).triggerHandler('resize')
 
     resetTable: ->
       if !@dataset then return

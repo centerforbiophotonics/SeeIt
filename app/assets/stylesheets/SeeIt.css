@@ -81,7 +81,7 @@
   display: none;
 }
 
-.SeeIt.graph-title-edit-icon {
+.SeeIt.graph-title-edit-icon, .SeeIt.title-edit-icon {
   cursor: pointer;
 }
 

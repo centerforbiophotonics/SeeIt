@@ -1,4 +1,4 @@
-@SeeIt.Graphs.DistributionDotPlot = (->
+@SeeIt.Graphs._DistributionDotPlot = (->
   R = 4
 
   class DistributionDotPlot extends SeeIt.Graph

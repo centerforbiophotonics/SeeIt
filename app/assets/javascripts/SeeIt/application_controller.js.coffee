@@ -15,7 +15,8 @@
 
       @graphTypes = [
         {name: "Bar Chart", class: SeeIt.Graphs.BarChart},
-        {name: "Scatter Plot", class: SeeIt.Graphs.ScatterPlot}
+        {name: "Scatter Plot", class: SeeIt.Graphs.ScatterPlot},
+        {name: "Distribution Dot Plot", class: SeeIt.Graphs.DistributionDotPlot}
       ]
 
       @view = new SeeIt.ApplicationView(@, @container)
@@ -81,7 +82,7 @@
         isLabeled: false
       }
 
-      for i in [1...10000]
+      for i in [1..1000]
         newData.dataset.push []
         for j in [0...5]
           newData.dataset[i].push Math.random() * 10
@@ -257,6 +258,9 @@
     toggleSpreadsheetVisible: ->
       @spreadsheetView.toggleVisible()
       @spreadsheetVisible = !@spreadsheetVisible
+
+      if @spreadsheetVisible then @spreadsheetView.updateView()
+
       @trigger('height:toggle')
       
 
@@ -268,6 +272,7 @@
       @graphCollectionView.toggleFullscreen()
       @spreadsheetView.toggleFullscreen()
       @dataVisible = !@dataVisible
+      @trigger('width:toggle')
 
   ApplicationController
 ).call(@)

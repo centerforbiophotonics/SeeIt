@@ -57,6 +57,7 @@
 				else if option.type == "numeric"
 					values.push {label: option.label, value: parseInt($("##{option.id}").val())}
 
+			console.log values
 			return values
 
 		generateOption: (option) ->

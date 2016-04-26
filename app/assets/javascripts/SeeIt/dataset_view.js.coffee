@@ -28,10 +28,13 @@
         self.dataColumnViews.forEach (d) ->
           d.trigger('graph:id:change', oldId, newId)
       
+      @listenTo @dataset, 'dataset:title:changed', ->
+        self.updateTitle.call(self)
+
     initLayout: ->
       @container.html("""
         <li class="SeeIt dataset list-group-item" style="min-height: 54px">
-          <a class="SeeIt">#{@dataset.title}</a>
+          <a class="SeeIt dataset-title">#{@dataset.title}</a>
           <button class="btn btn-default show-in-spreadsheet pull-right">
             <span class='glyphicon glyphicon-expand'></span>
           </button>
@@ -49,6 +52,9 @@
     destroy: ->
       @container.remove()
       @trigger('destroy')
+
+    updateTitle: ->
+      @container.find('.dataset-title').html(@dataset.title)
 
     initDataColumnViews: ->
       for i in [0...@dataset.data.length]

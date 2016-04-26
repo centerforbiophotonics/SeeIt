@@ -21,12 +21,14 @@
 //= require spectrum.js
 //= require backbone-events.js
 //= require d3
+//= require d3.box
 //= require nv.d3
 //= require opentip-jquery-excanvas
 //= require FileSaver.min.js
 //= require SeeIt/init
 //= require SeeIt/utils
 //= require SeeIt/validators_module
+//= require SeeIt/google_spreadsheet_manager
 //= require SeeIt/data_column
 //= require SeeIt/dataset_refactor
 //= require SeeIt/data_collection

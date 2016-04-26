@@ -55,6 +55,11 @@
           graph.updateGraph.call(graph)
       )
 
+      @listenTo(@app, 'width:toggle', ->
+        for graphId, graph of graphContainer.graphs
+          graph.updateGraph.call(graph)
+      )
+
     findValidId: ->
       @graphId = 1
 

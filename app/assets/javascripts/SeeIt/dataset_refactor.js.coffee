@@ -50,6 +50,14 @@
 			@loadData(data)
 			@registerListeners()
 
+		setTitle: (title) ->
+			@title = title
+
+			@data.forEach (d) ->
+				d.setDatasetTitle.call(d, title)
+
+			@trigger('dataset:title:changed')
+
 		loadData: (data) ->
 			if Dataset.validateData(data)
 				@rawData = data

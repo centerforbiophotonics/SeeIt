@@ -87,6 +87,7 @@
 
       self.container.find("#create-dataset").on 'click', (event) ->
         if self.container.find("#dataset-select").val() == "google"
+          googleSpreadsheet = new SeeIt.GoogleSpreadsheetManager(self.container.find('.dataset-spreadsheet-url').val())
           return false
         else
           title = self.container.find(".dataset-name").val()

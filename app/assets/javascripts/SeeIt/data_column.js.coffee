@@ -7,6 +7,9 @@
 
       console.log @color
 
+    setDatasetTitle: (title) ->
+      @datasetTitle = title
+
     setValue: (idx, value) ->
       @data[idx].value = value
       @trigger('data:changed',@)
