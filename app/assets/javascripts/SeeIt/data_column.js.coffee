@@ -11,11 +11,15 @@
       @datasetTitle = title
 
     setValue: (idx, value) ->
+      console.log @
       @data[idx].value = value
       @trigger('data:changed',@)
 
     getValue: (idx) ->
       return @data[idx].value
+
+    getColor: -> 
+      @color
 
     setColor: (color) ->
       @color = color

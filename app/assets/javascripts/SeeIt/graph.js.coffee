@@ -1,39 +1,101 @@
 @SeeIt.Graph = (->
+  # This is the abstract class that all graph instances should inherit from.
+  # The internal structure of the graph implementation is up to the implementer
+  # other than that the graph must implement destroy, options, and dataFormat
+  # methods (explained below).  The constructor will receive a jquery element 
+  # (the element the graph should be contained in) and a data array that is 
+  # shared with a class higher in the heirarchy. All interactions with the 
+  # class other than calls to destroy, options, and dataFormat will be through
+  # event triggers.  The event keys the scenarios that trigger them are 
+  # explained below.  The proper way to register listeners to events is
+
+  #         @listenTo('event_key', (arg1, arg2, ..., argn) ->
+  #           #Do stuff
+  #         )
+
+  # 'label:changed' - 
+  #   One or more of data points in a DataColumn referenced
+  #   in the graph have had their labels changed
+
+  # 'color:changed' - 
+  #   One or more of the data points in a DataColumn referenced
+  #   in the graph have had their colors changed
+
+  # 'header:changed' - 
+  #   One or more of the DataColumns referenced in the graph
+  #   have had their header changed
+
+  # 'data:created' -
+  #   One or more of the DataColumns referenced in the graph
+  #   have had a data point added
+
+  # 'data:destroyed' - 
+  #   One or more of the DataColumns referenced in the graph
+  #   have had a data point added
+
+  # 'column:destroyed' - 
+  #   One or more of the DataColumns referenced in the graph
+  #   have been removed/destroyed
+
+  # 'size:change' - 
+  #   Size of the container has changed
+
+  # 'options:update' - 
+  #   One or more of the graph's options have been changed  
+
+  # 'data:assigned' - 
+  #   A new DataColumn has been assigned to the graph
+
+  # 'data:changed' -
+  #   One or more data point in a DataColumn referenced in
+  #   the graph has been changed
+
+  # ^EACH HANDLER IS PASSED THE CURRENT GRAPH OPTIONS AS AN ARGUMENT
   class Graph
     _.extend(@prototype, Backbone.Events)
 
-    constructor: (@container, @dataset, @chartObject) ->
+    constructor: (@container, @dataset) ->
       self = @
 
-      @dataFormat().forEach (d) ->
-        self.dataset.push({
-          name: d.name,
-          type: d.type,
-          multiple: d.multipe,
-          data: []
-        })
+      # Data is to be an array of data-role objects.  DataColumns are
+      # assigned to particular data-roles.  Name is the role name,
+      # type defines the data to be numeric or categorical, multiple
+      # specifies whether mutiple DataColumns can be assigned to the
+      # role at a time, and data is an array of DataColumns
+      if !@dataset.length
+        @dataFormat().forEach (d) ->
+          self.dataset.push({
+            name: d.name,
+            type: d.type,
+            multiple: d.multiple,
+            data: []
+          })
 
-    #draw is supposed to render the visualization in the given container
-    #It is called once at least one DataColumn has been assigned to 
-    #each data role
-    # options is an array of objects of the form {label: "string", value: number, string, or boolean}
-    # and specifies the current values of the options in the form created from options()
-    draw: (options) ->
-      #Abstract
-      null
+      @eventCallbacks = {
+        'label:changed': null
+        'color:changed': null,
+        'header:changed': null,
+        'data:created': null,
+        'data:destroyed': null,
+        'column:destroyed': null,
+        'size:change': null,
+        'options:update': null,
+        'data:assigned': null,
+        'data:changed': null
+      }
+
+
+    allRolesFilled: ->
+      rolesFilled = true
+      @dataset.forEach (data) ->
+        rolesFilled = rolesFilled && data.data.length
+
+      return rolesFilled
 
     #destroy is supposed to implement any necessary cleanup that
     #needs to be done before a graph is destroyed (optional)
     destroy: ->
       #Abstract
-      null
-
-    #refresh is supposed to re-render the visualization
-    #It is called when changes are made to the data, labels,
-    #or headers used in the graph
-    # options is an array of objects of the form {label: "string", value: number, string, or boolean}
-    # and specifies the current values of the options in the form created from options()
-    refresh: (options) ->
       null
 
 

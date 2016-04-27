@@ -3,6 +3,8 @@
 		constructor: ->
 			super
 			@listenerInitialized = false
+			@rendered = false
+			@initListeners()
 
 		formatData: ->
 			data = []
@@ -24,6 +26,31 @@
 					data.push {key: key, values: [val]}
 
 			return data
+
+		initListeners: ->
+			self = @
+
+			@eventCallbacks['data:created'] =  (options) ->
+				console.log "in callback"
+				if self.allRolesFilled()
+					if !self.rendered
+						self.rendered = true
+						self.draw.call(self, options)
+					else
+						self.refresh.call(self, options)
+
+			@eventCallbacks['data:assigned'] = @eventCallbacks['data:created']
+			@eventCallbacks['data:destroyed'] = @eventCallbacks['data:created']
+			@eventCallbacks['column:destroyed'] = @eventCallbacks['data:created']
+			@eventCallbacks['size:change'] = @eventCallbacks['data:created']
+			@eventCallbacks['options:update'] = @eventCallbacks['data:created']
+			@eventCallbacks['label:changed'] = @eventCallbacks['data:created']
+			@eventCallbacks['header:changed'] = @eventCallbacks['data:created']
+			@eventCallbacks['color:changed'] = @eventCallbacks['data:created']
+			@eventCallbacks['data:changed'] = @eventCallbacks['data:created']
+			
+			for e, cb of @eventCallbacks
+				@on e, cb
 
 
 		datasetValid: ->

@@ -3,7 +3,35 @@
 
     constructor: ->
       super
+      @chartObject = null
       @listenerInitialized = false
+      @rendered = false
+      @initListeners()
+
+    initListeners: ->
+      self = @
+
+      @eventCallbacks['data:created'] =  (options) ->
+        console.log "in callback"
+        if self.allRolesFilled()
+          if !self.rendered
+            self.rendered = true
+            self.draw.call(self, options)
+          else
+            self.refresh.call(self, options)
+
+      @eventCallbacks['data:assigned'] = @eventCallbacks['data:created']
+      @eventCallbacks['data:destroyed'] = @eventCallbacks['data:created']
+      @eventCallbacks['column:destroyed'] = @eventCallbacks['data:created']
+      @eventCallbacks['size:change'] = @eventCallbacks['data:created']
+      @eventCallbacks['options:update'] = @eventCallbacks['data:created']
+      @eventCallbacks['label:changed'] = @eventCallbacks['data:created']
+      @eventCallbacks['header:changed'] = @eventCallbacks['data:created']
+      @eventCallbacks['color:changed'] = @eventCallbacks['data:created']
+      @eventCallbacks['data:changed'] = @eventCallbacks['data:created']
+      
+      for e, cb of @eventCallbacks
+        @on e, cb
 
     formatData: ->
       data = []
@@ -25,11 +53,6 @@
       console.log options
       graph = @
       @container.html("<svg class='SeeIt graph-svg' style='width: 100%; min-height: 270px'></svg>")
-
-      if !@listenerInitialized
-        @on 'graph:maximize', (maximize) ->
-          graph.chartObject.update()
-          @listenerInitialized = true
           
       nv.addGraph ->
         chart = nv.models.multiBarChart()

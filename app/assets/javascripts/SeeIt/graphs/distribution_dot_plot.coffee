@@ -4,7 +4,54 @@
   class DistributionDotPlot extends SeeIt.Graph
     constructor: ->
       super
-      @listenInitialized = false
+      @rendered = false
+      @initListeners()
+
+    initListeners: ->
+      self = @
+
+      @eventCallbacks['data:created'] =  (options) ->
+        console.log "in callback"
+        if self.allRolesFilled()
+          if !self.rendered
+            self.rendered = true
+            self.draw.call(self, options)
+          else
+            self.refresh.call(self, options)
+
+      @eventCallbacks['data:assigned'] = @eventCallbacks['data:created']
+      @eventCallbacks['data:destroyed'] = @eventCallbacks['data:created']
+      @eventCallbacks['column:destroyed'] = @eventCallbacks['data:created']
+      @eventCallbacks['size:change'] = @eventCallbacks['data:created']
+      @eventCallbacks['options:update'] = @eventCallbacks['data:created']
+      @eventCallbacks['data:changed'] = @eventCallbacks['data:created']
+      
+      @eventCallbacks['label:changed'] = (options) ->
+        self.updateLabels.call(self, options)
+
+      @eventCallbacks['header:changed'] = (options) ->
+        self.updateHeaders.call(self, options)
+
+      @eventCallbacks['color:changed'] = (options) ->
+        self.updateColors.call(self, options)
+
+      for e, cb of @eventCallbacks
+        @on e, cb
+
+
+    updateColors: (options) ->
+      @svg.selectAll('.dot.SeeIt').style('fill', (d) -> d.color())
+      @updateHeaders()
+      # @container.html('')
+      # @drawGraph(options)
+      # @drawLegend(options)
+
+    updateHeaders: (options) ->
+      @container.find('.legend').remove()
+      @drawLegend(options)
+
+    updateLabels: (options) ->
+
 
     minMaxWPadding: (padding) ->
       min = Infinity
@@ -30,7 +77,6 @@
       @style.margin = {top: 20, right: 20, bottom: 30, left: 40}
       @style.width = @container.width() - @style.margin.left - @style.margin.right
       @style.height = Math.max(270, @container.height()) - @style.margin.top - @style.margin.bottom
-      @style.color = d3.scale.category10()
 
       @x = d3.scale.linear().range([0,@style.width])
       @y = d3.scale.linear().range([@style.height,0])
@@ -111,7 +157,7 @@
           return graph.y(d.y)
         )
         .style("fill", (d) ->
-          return d.color
+          return d.color()
         )
 
     draw: (options = []) ->
@@ -119,11 +165,6 @@
 
       @setViewMembers()
       @placeData()
-
-      if !@listenerInitialized
-        @on 'graph:maximize', (maximize) ->
-          @listenerInitialized = true
-          graph.refresh.call(graph)
 
       @drawGraph(options)
       @drawLegend(options)
@@ -198,7 +239,7 @@
 
         @_dataset[0].data.forEach (dataColumn) ->
           dataColumn.data.forEach (d, i) ->
-            point = self.placePoint.call(self, d, dataColumn.header, dataColumn.datasetTitle, dataColumn.color)
+            point = self.placePoint.call(self, d, dataColumn.header, dataColumn.datasetTitle, dataColumn.getColor.bind(dataColumn))
             if point then self.dataArray.push(point)
 
       placePoint: (d, header, datasetTitle, color) ->

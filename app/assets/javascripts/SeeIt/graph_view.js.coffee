@@ -7,12 +7,14 @@
       @collapsed = false
       @editing = false
       @empty = true
+      @initialized = false
       @graph = null
       @options = null
       @optionsVisible = false
       @dataset = []
       @initHandlers()
       @initLayout()
+
       @graph = new @graphType.class(@container.find('.graph-wrapper'),@dataset)
 
       if !@graph.options().length then @container.find('.options-button').hide()
@@ -35,23 +37,27 @@
           self = @
 
           @listenTo(data.data, 'label:changed', (idx) ->
-            self.updateGraph.call(self)
+            self.graph.trigger('label:changed', self.options.getValues())
           )
 
           @listenTo(data.data, 'color:changed', ->
-            self.updateGraph.call(self)
+            self.graph.trigger('color:changed', self.options.getValues())
           )
 
           @listenTo(data.data, 'header:changed', ->
-            self.updateGraph.call(self)
+            self.graph.trigger('header:changed', self.options.getValues())
           )
 
           @listenTo(data.data, 'data:destroyed', ->
-            self.updateGraph.call(self)
+            self.graph.trigger('data:destroyed', self.options.getValues())
           )
 
           @listenTo(data.data, 'data:created', ->
-            self.updateGraph.call(self)
+            self.graph.trigger('data:created', self.options.getValues())
+          )
+
+          @listenTo(data.data, 'data:changed', ->
+            self.graph.trigger('data:changed', self.options.getValues())
           )
 
           @listenTo(data.data, 'destroy', ->
@@ -67,49 +73,34 @@
               colToDestroy = self.dataset[datasetIdx].data.indexOf(data.data)
 
               if colToDestroy >= 0
-                console.log "found column to destroy"
                 self.dataset[datasetIdx].data.splice(colToDestroy, 1)
-                self.updateGraph.call(self)
+                self.graph.trigger('column:destroyed', self.options.getValues())
           )
 
-          if @allRolesFilled()
-            if @empty
-              @empty = false
-              @initGraph()
-            else
-              @updateGraph()
+          if !@initialized
+            @initGraph()
+            @initialized = true
 
-    allRolesFilled: ->
-      rolesFilled = true
-      console.log @graph.dataset
-      @graph.dataset.forEach (data) ->
-        if !data.data.length then rolesFilled = false
-
-      return rolesFilled
-
-    updateGraph: ->
-      if @graph && @options then @graph.refresh(@options.getValues())
+          @graph.trigger('data:assigned', self.options.getValues())
 
     initGraph: ->
       self = @
 
-      console.log "initGraph called"
 
       @options = new SeeIt.GraphOptions(@container.find('.options-button'), @container.find('.options-wrapper'), @graph.options())
-      @graph.draw(@options.getValues())
 
       @listenTo @options, 'options:show', ->
         self.container.find('.graph-wrapper').addClass('col-md-9')
         self.container.find('.options-wrapper').removeClass('hidden')
-        self.updateGraph.call(self)
+        self.graph.trigger('size:change', self.options.getValues())
 
       @listenTo @options, 'options:hide', ->
         self.container.find('.graph-wrapper').removeClass('col-md-9')
         self.container.find('.options-wrapper').addClass('hidden')
-        self.updateGraph.call(self)
+        self.graph.trigger('size:change', self.options.getValues())
 
       @listenTo @options, 'graph:update', ->
-        self.updateGraph.call(self)
+        self.graph.trigger('options:update', self.options.getValues())
 
 
     initHandlers: ->
@@ -117,6 +108,9 @@
 
       @on 'request:dataRoles', (cb) ->
         cb(graph.graph.dataFormat())
+
+      @on 'size:change', ->
+        if graph.graph then graph.graph.trigger('size:change', graph.options.getValues())
 
       graph.handlers = {
         removeGraph: ->
@@ -146,7 +140,6 @@
         graphTitleInputKeyup: (event) ->
           if event.keyCode == 13
             graph.container.find(".graph-title-edit-icon").trigger('click')
-
 
             
       }
@@ -193,7 +186,7 @@
       @container.find('.maximize .glyphicon').toggleClass('glyphicon-resize-full glyphicon-resize-small')
       @maximized = !@maximized
 
-      @graph.trigger('graph:maximize', @maximize)
+      @graph.trigger('size:change', @options.getValues())
       @options.trigger('graph:maximize', @maximize)
 
     collapse: ->

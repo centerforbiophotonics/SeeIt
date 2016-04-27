@@ -25,8 +25,8 @@
       }
 
       graphContainer.listenTo(@app, 'data:changed', (origin) ->
-        for graphId, graph of graphContainer.graphs
-          graph.updateGraph.call(graph)
+        # for graphId, graph of graphContainer.graphs
+        #   graph.updateGraph.call(graph)
       )
 
       graphContainer.listenTo(@app, 'graph:addData', (graphData) ->
@@ -50,14 +50,14 @@
 
       @listenTo(@app, 'height:toggle', ->
         graphContainer.container.toggleClass("spreadsheet-visible")
-
+        
         for graphId, graph of graphContainer.graphs
-          graph.updateGraph.call(graph)
+          graph.trigger('size:change')
       )
 
       @listenTo(@app, 'width:toggle', ->
         for graphId, graph of graphContainer.graphs
-          graph.updateGraph.call(graph)
+          graph.trigger('size:change')
       )
 
     findValidId: ->
