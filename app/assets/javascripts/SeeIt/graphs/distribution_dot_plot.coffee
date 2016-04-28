@@ -9,9 +9,10 @@
 
     initListeners: ->
       self = @
+      prevOptions = []
 
       @eventCallbacks['data:created'] =  (options) ->
-        console.log "in callback"
+        prevOptions = options
         if self.allRolesFilled()
           if !self.rendered
             self.rendered = true
@@ -25,7 +26,7 @@
       @eventCallbacks['size:change'] = @eventCallbacks['data:created']
       @eventCallbacks['options:update'] = @eventCallbacks['data:created']
       @eventCallbacks['data:changed'] = @eventCallbacks['data:created']
-      
+
       @eventCallbacks['label:changed'] = (options) ->
         self.updateLabels.call(self, options)
 
@@ -38,13 +39,14 @@
       for e, cb of @eventCallbacks
         @on e, cb
 
+      $(window).on('resize', (event) ->
+        self.eventCallbacks['data:created'](prevOptions)
+      )
+
 
     updateColors: (options) ->
       @svg.selectAll('.dot.SeeIt').style('fill', (d) -> d.color())
       @updateHeaders()
-      # @container.html('')
-      # @drawGraph(options)
-      # @drawLegend(options)
 
     updateHeaders: (options) ->
       @container.find('.legend').remove()
@@ -135,14 +137,13 @@
 
       @initSvg()
 
-      console.log options
       boxPlotIdx = options.map((option) -> option.label).indexOf('Box Plot')
 
       if boxPlotIdx > -1 && options[boxPlotIdx].value then @drawBoxPlot()
 
       @svg.append("g")
         .attr("class", "x axis SeeIt")
-        .attr("transform", "translate(0," + @style.height + ")")
+        .attr("transform", "translate(0," + (@style.height - 2*R) + ")")
         .call(@xAxis)
 
       @svg.selectAll(".dot.SeeIt")
@@ -154,11 +155,13 @@
           return graph.x(d.data.value)
         )
         .attr("cy", (d) ->
-          return graph.y(d.y)
+          return graph.y(d.y + 2*R)
         )
         .style("fill", (d) ->
           return d.color()
         )
+
+      @drawStats(options)
 
     draw: (options = []) ->
       graph = @
@@ -168,7 +171,107 @@
 
       @drawGraph(options)
       @drawLegend(options)
-      # @drawBoxPlot()
+
+
+    drawStats: (options) ->
+      self = @
+      ops = options.map((option) -> option.label)
+
+      ['Show Mean', 'Show Median', 'Show Mode'].forEach (label) ->
+        if (idx = ops.indexOf(label)) > -1 && options[idx].value
+          self.drawStatistic.call(self, label.split(' ')[1])
+
+    drawStatistic: (stat) ->
+      graph = @
+
+      switch stat
+        when 'Mean'
+          mean = @graphData.dataArray.reduce((sum, d, i) -> 
+            if i > 1 then sum + d.data.value else sum.data.value + d.data.value
+          )
+
+          mean /= @graphData.dataArray.length
+
+          @svg.selectAll(".mean.SeeIt")
+            .data([mean])
+            .enter().append("rect")
+            .attr("class", "mean SeeIt")
+            .attr("width", R*4)
+            .attr("height", R*4)
+            .attr("x", (d) ->
+              return graph.x(mean)
+            )
+            .attr("y", (d) ->
+              return graph.y(-4*R + 2)
+            )
+            .style("fill", 'red')
+            .style("opacity", 0.8)
+
+            msg = "Mean: #{mean}"
+            tip = new Opentip(@container.find('.mean.SeeIt'), msg, {showOn: "click"})
+        when 'Median'
+          cpy = @graphData.dataArray.slice()
+          cpy.sort((a,b) -> a.data.value - b.data.value)
+
+          median = if cpy.length % 2 == 0
+            (cpy[cpy.length / 2 - 1].data.value + cpy[cpy.length / 2 - 1].data.value) / 2
+          else 
+            cpy[Math.floor(cpy.length / 2)].data.value
+
+          @svg.selectAll(".median.SeeIt")
+            .data([median])
+            .enter().append("circle")
+            .attr("class", "median SeeIt")
+            .attr("r", 2*R)
+            .attr("cx", (d) ->
+              graph.x(d)
+            )
+            .attr("cy", graph.y(-6*R + 2))
+            .style("fill", "blue")
+            .style("opacity", 0.8)
+
+          tip = new Opentip(@container.find('.median.SeeIt'), "Median: #{median}", {showOn: "click"})
+        when 'Mode'
+          modes = ((array) ->
+              modes = []
+
+              if array.length == 0 then return []
+
+              modeMap = {}
+              maxEl = array[0].data.value
+              maxCount = 1
+
+              for i in [0...array.length]
+                el = array[i].data.value
+
+                if !modeMap[el]
+                  modeMap[el] = 1
+                else
+                  modeMap[el]++
+
+                if(modeMap[el] > maxCount)
+                  maxEl = el
+                  maxCount = modeMap[el]
+                  modes = [maxEl]
+                else if modeMap[el] == maxCount
+                  modes.push el
+
+              return modes
+          )(@graphData.dataArray)
+
+          @svg.selectAll(".mode.SeeIt")
+            .data(modes)
+            .enter().append("polyline")
+            .attr("class", "mode SeeIt")
+            .attr('points', (d) ->
+              "#{graph.x(d) - 2*R},#{graph.y(-8*R + 2)} #{graph.x(d) + 2*R},#{graph.y(-8*R + 2)} #{graph.x(d)},#{graph.y(-4*R + 2)}"
+            )
+            .style("fill", 'green')
+            .style("opacity", 0.8)
+
+          @svg.selectAll(".mode.SeeIt").each((d) ->
+            tip = new Opentip($(@), "Mode: #{d}", {showOn: "click"})
+          )
 
     drawBoxPlot: ->
       iqr = (k) ->
@@ -218,6 +321,21 @@
     options: ->
       [{
         label: "Box Plot",
+        type: "checkbox",
+        default: false
+      },
+      {
+        label: "Show Median",
+        type: "checkbox",
+        default: false
+      },
+      {
+        label: "Show Mean",
+        type: "checkbox",
+        default: false
+      },
+      {
+        label: "Show Mode",
         type: "checkbox",
         default: false
       }]

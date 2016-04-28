@@ -29,7 +29,7 @@
       @eventCallbacks['header:changed'] = @eventCallbacks['data:created']
       @eventCallbacks['color:changed'] = @eventCallbacks['data:created']
       @eventCallbacks['data:changed'] = @eventCallbacks['data:created']
-      
+
       for e, cb of @eventCallbacks
         @on e, cb
 
@@ -38,10 +38,8 @@
 
 
       @dataset[0].data.forEach (dataColumn) ->
-        console.log(dataColumn)
         data.push({values: dataColumn.data, key: dataColumn.header, color: dataColumn.color})
 
-      console.log @colors
       return data
 
     refresh: (options) ->
@@ -60,7 +58,7 @@
             .y((d) -> d.value )
 
         data = graph.formatData.call(graph)
-        console.log data
+
         d3.select(graph.container.find('.graph-svg')[0])
             .attr('height', '100%')
             .datum(data)
