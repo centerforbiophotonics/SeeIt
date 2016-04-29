@@ -18,6 +18,9 @@
     getValue: (idx) ->
       return @data[idx].value
 
+    compact: ->
+      @data.filter((d) -> d.value != null && d.value != undefined && !isNaN(d.value))
+
     getColor: -> 
       @color
 

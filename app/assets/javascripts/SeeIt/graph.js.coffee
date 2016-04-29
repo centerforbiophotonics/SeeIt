@@ -51,6 +51,8 @@
   #   the graph has been changed
 
   # ^EACH HANDLER IS PASSED THE CURRENT GRAPH OPTIONS AS AN ARGUMENT
+  # The only event that a graph may need to handle on its own is 
+  # window resize
   class Graph
     _.extend(@prototype, Backbone.Events)
 
@@ -71,6 +73,7 @@
             data: []
           })
 
+      #Events that listeners can be registered for
       @eventCallbacks = {
         'label:changed': null
         'color:changed': null,
@@ -85,6 +88,7 @@
       }
 
 
+    # Verifies that all roles in graph have been filled
     allRolesFilled: ->
       rolesFilled = true
       @dataset.forEach (data) ->

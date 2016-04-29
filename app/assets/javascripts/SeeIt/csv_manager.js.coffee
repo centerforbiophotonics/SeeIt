@@ -19,8 +19,14 @@
             csvData = []
 
             csvRows.forEach (r) ->
-              data.push r.split(',')
+              row = r.split(',')
 
+              row.forEach (d, i) ->
+                row[i] = if !isNaN(parseFloat(d)) then parseFloat(d) else d
+
+              data.push row
+
+            console.log data
             callback data
           catch err
             console.log err

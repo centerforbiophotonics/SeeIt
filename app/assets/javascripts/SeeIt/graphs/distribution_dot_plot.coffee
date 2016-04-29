@@ -61,8 +61,8 @@
 
       @dataset[0].data.forEach (dataColumn) ->
         dataColumn.data.forEach (d) ->
-          max = Math.max(max, d.value)
-          min = Math.min(min, d.value)
+          max = if d.value then Math.max(max, d.value) else max
+          min = if d.value then Math.min(min, d.value) else min
 
       adjustment = Math.max(padding*(max - min),0.05)
       return [min - adjustment,max + adjustment]
@@ -356,7 +356,7 @@
           @data.push([])
 
         @_dataset[0].data.forEach (dataColumn) ->
-          dataColumn.data.forEach (d, i) ->
+          dataColumn.compact().forEach (d, i) ->
             point = self.placePoint.call(self, d, dataColumn.header, dataColumn.datasetTitle, dataColumn.getColor.bind(dataColumn))
             if point then self.dataArray.push(point)
 

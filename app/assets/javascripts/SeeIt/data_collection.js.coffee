@@ -35,6 +35,7 @@
 
     addDataset: (data) ->
       dataset = new SeeIt.Dataset(@app, data.dataset, data.title, data.isLabeled)
+      console.log dataset
      	@datasets.push(dataset)
 
       if @initialized then @trigger('dataset:created', dataset)

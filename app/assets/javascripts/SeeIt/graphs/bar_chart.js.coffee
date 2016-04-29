@@ -55,7 +55,7 @@
       nv.addGraph ->
         chart = nv.models.multiBarChart()
             .x((d) -> d.label )
-            .y((d) -> d.value )
+            .y((d) -> d.count )
 
         data = graph.formatData.call(graph)
 
