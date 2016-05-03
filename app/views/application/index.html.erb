@@ -43,18 +43,18 @@
 			isLabeled: true
 		}];
 
-		var newData = {
-			title: "Random Data",
-			dataset: [[1,2,3,4,5]],
-			isLabeled: false
-		};
+	var newData = {
+		title: "Random Data",
+		dataset: [[1,2,3,4,5]],
+		isLabeled: false
+	};
 
-		for(var i = 0; i < 100; i++) {
-			newData.dataset.push([]);
-			for(var j = 0; j < 5; j++) {
-			  newData.dataset[i].push(Math.random() * 10);
-			}
+	for(var i = 1; i <= 100; i++) {
+		newData.dataset.push([]);
+		for(var j = 0; j < 5; j++) {
+		  newData.dataset[i].push(Math.random() * 10);
 		}
+	}
 
       testData.push(newData);
 
