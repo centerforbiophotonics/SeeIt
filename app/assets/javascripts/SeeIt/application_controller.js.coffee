@@ -9,15 +9,12 @@
       # @param {Object} container - jQuery object referencing container SeeIt will live in
     ###
     constructor: (params = {}) ->
+      console.log params
       @container = if params.container then $(params.container) else $("body")
 
       ui = if params.ui then params.ui else {}
 
-      @graphTypes = [
-        {name: "Bar Chart", class: SeeIt.Graphs.BarChart},
-        {name: "Scatter Plot", class: SeeIt.Graphs.ScatterPlot},
-        {name: "Distribution Dot Plot", class: SeeIt.Graphs.DistributionDotPlot}
-      ]
+      @loadGraphs()
 
       @view = new SeeIt.ApplicationView(@, @container)
       @layoutContainers = @view.initLayout()
@@ -35,60 +32,6 @@
         toolbar: if ui.toolbar != undefined then ui.toolbar else true,
         graph_editable: if ui.graph_editable != undefined then ui.graph_editable else true
       }
-
-      testData = [{
-        title: "Dataset 1", 
-        dataset: [
-          ['', 'Kia', 'Nissan', 'Toyota', 'Honda', 'Mazda', 'Ford'],
-          ['2012', 10, 11, 12, 13, 15, 16],
-          ['2013', 12, 11, 12, 13, 15, 16],
-          ['2014', 15, 11, 12, 13, 15, 16],
-          ['2015', 10, 11, 12, 13, 15, 16],
-          ['2016', 5, 11, 12, 13, 15, 16]
-        ],
-        isLabeled: true
-      },{
-        title: "Dataset 2",
-        dataset: [
-          ["", "Ford", "Volvo", "Toyota", "Honda"],
-          ["2016", 10, 11, 12, 13],
-          ["2017", 20, 11, 14, 13],
-          ["2018", 30, 15, 12, 13]
-        ],
-        isLabeled: true
-      },{
-        title: "Dataset 3",
-        dataset: {
-          labels: ['A', 'B', 'C'],
-          columns: [
-            {
-              header: 'a',
-              type: "numeric",
-              data: [2,3,4]
-            },
-            {
-              header: 'b',
-              type: "numeric",
-              data: [21,34,45]
-            }
-          ]
-        },
-        isLabeled: true
-      }]
-
-      newData = {
-        title: "Random Data",
-        dataset: [[1,2,3,4,5]],
-        isLabeled: false
-      }
-
-      for i in [1..100]
-        newData.dataset.push []
-        for j in [0...5]
-          newData.dataset[i].push Math.random() * 10
-
-      testData.push newData
-      data = testData
 
       #Data model
       @model = new SeeIt.DataCollection(@, data)
@@ -129,6 +72,12 @@
 
       @registerListeners()
       @trigger('ready')
+
+    loadGraphs: ->
+      @graphTypes = []
+
+      for name, graph of SeeIt.Graphs
+        @graphTypes.push({name: SeeIt.GraphNames[name], class: graph})
 
     ###*
       # Sets active dataset in spreadsheet to the given dataset

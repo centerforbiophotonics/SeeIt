@@ -312,7 +312,7 @@
 
     formatModelData: ->
       data = []
-      len = if privateMembers.dataset.data.length then privateMembers.dataset.data[0].data.length else 0
+      len = if privateMembers.dataset.data.length then privateMembers.dataset.data[0].data().length else 0
 
       for i in [0...len]
         data.push(this.hotModel(i))

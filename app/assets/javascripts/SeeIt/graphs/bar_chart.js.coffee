@@ -38,7 +38,7 @@
 
 
       @dataset[0].data.forEach (dataColumn) ->
-        data.push({values: dataColumn.data, key: dataColumn.header, color: dataColumn.color})
+        data.push({values: dataColumn.data(), key: dataColumn.header, color: dataColumn.color})
 
       return data
 
@@ -54,8 +54,8 @@
           
       nv.addGraph ->
         chart = nv.models.multiBarChart()
-            .x((d) -> d.label )
-            .y((d) -> d.count )
+            .x((d) -> d.label() )
+            .y((d) -> d.value() )
 
         data = graph.formatData.call(graph)
 
@@ -108,3 +108,5 @@
 
   BarChart
 ).call(@)
+
+@SeeIt.GraphNames["BarChart"] = "Bar Chart"

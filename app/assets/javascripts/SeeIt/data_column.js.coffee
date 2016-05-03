@@ -2,24 +2,77 @@
   class DataColumn
     _.extend(@prototype, Backbone.Events)
     
-    constructor: (@app, @header, @data, @datasetTitle, @color) ->
+    constructor: (@app, @header, data, @datasetTitle, @color, editable = true) ->
       if !@color then @color = SeeIt.Utils.getRandomColor()
 
-      console.log @color
+      dataArray = []
+
+      setDataArray = ->
+        dataArray = []
+        data.forEach (d) ->
+          dataArray.push({
+            label: ->
+              d.label
+            value: ->
+              d.value
+          })
+
+      setDataArray()
+
+      @staleData = false
+
+      @setValue = (idx, value) ->
+        if editable
+          data[idx].value = value
+          @trigger('data:changed',@)
+          @staleData = true
+          return true
+
+        return false
+
+      @data = ->
+        if @staleData then setDataArray()
+
+        console.log dataArray
+        return dataArray
+
+      @getValue = (idx) ->
+        return data[idx].value
+
+      @compact = ->
+        if @staleData then setDataArray()
+
+        dataArray.filter((d) -> d.value() != null && d.value() != undefined && !isNaN(d.value()))
+
+      @setLabel = (idx, value) ->
+        data[idx].label = value
+        @staleData = true
+        @trigger('label:changed', idx)
+
+      @removeElement = (idx) ->
+        @staleData = true
+        data.splice(idx, 1)
+        @trigger('data:destroyed', idx)
+
+      @insertElement = (idx, label, value) ->
+        @staleData = true
+        data.splice(idx, 0, {
+          label: label,
+          value: value
+        })
+
+        @trigger('data:created', idx)
+
+      @toJson = ->
+        {
+          header: @header,
+          type: "numeric",
+          data: @data.map (d) ->
+            d.value
+        }
 
     setDatasetTitle: (title) ->
       @datasetTitle = title
-
-    setValue: (idx, value) ->
-      console.log @
-      @data[idx].value = value
-      @trigger('data:changed',@)
-
-    getValue: (idx) ->
-      return @data[idx].value
-
-    compact: ->
-      @data.filter((d) -> d.value != null && d.value != undefined && !isNaN(d.value))
 
     getColor: -> 
       @color
@@ -28,33 +81,9 @@
       @color = color
       @trigger('color:changed')
 
-    setLabel: (idx, value) ->
-      @data[idx].label = value
-      @trigger('label:changed', idx)
-
     setHeader: (header) ->
       @header = header
       @trigger('header:changed')
-
-    removeElement: (idx) ->
-      @data.splice(idx, 1)
-      @trigger('data:destroyed', idx)
-
-    insertElement: (idx, label, value) ->
-      @data.splice(idx, 0, {
-        label: label,
-        value: value
-      })
-
-      @trigger('data:created', idx)
-
-    toJson: ->
-      {
-        header: @header,
-        type: "numeric",
-        data: @data.map (d) ->
-          d.value
-      }
 
     @new: ->
       # Being created from array of arrays

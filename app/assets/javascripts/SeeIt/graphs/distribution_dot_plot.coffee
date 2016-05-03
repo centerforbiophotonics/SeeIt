@@ -60,9 +60,9 @@
       max = -Infinity
 
       @dataset[0].data.forEach (dataColumn) ->
-        dataColumn.data.forEach (d) ->
-          max = if d.value then Math.max(max, d.value) else max
-          min = if d.value then Math.min(min, d.value) else min
+        dataColumn.data().forEach (d) ->
+          max = if d.value() then Math.max(max, d.value()) else max
+          min = if d.value() then Math.min(min, d.value()) else min
 
       adjustment = Math.max(padding*(max - min),0.05)
       return [min - adjustment,max + adjustment]
@@ -152,7 +152,7 @@
         .attr("class", "dot SeeIt")
         .attr("r", R)
         .attr("cx", (d) ->
-          return graph.x(d.data.value)
+          return graph.x(d.data.value())
         )
         .attr("cy", (d) ->
           return graph.y(d.y + 2*R)
@@ -187,7 +187,7 @@
       switch stat
         when 'Mean'
           mean = @graphData.dataArray.reduce((sum, d, i) -> 
-            if i > 1 then sum + d.data.value else sum.data.value + d.data.value
+            if i > 1 then sum + d.data.value() else sum.data.value() + d.data.value()
           )
 
           mean /= @graphData.dataArray.length
@@ -211,12 +211,12 @@
             tip = new Opentip(@container.find('.mean.SeeIt'), msg, {showOn: "click"})
         when 'Median'
           cpy = @graphData.dataArray.slice()
-          cpy.sort((a,b) -> a.data.value - b.data.value)
+          cpy.sort((a,b) -> a.data.value() - b.data.value())
 
           median = if cpy.length % 2 == 0
-            (cpy[cpy.length / 2 - 1].data.value + cpy[cpy.length / 2 - 1].data.value) / 2
+            (cpy[cpy.length / 2 - 1].data.value() + cpy[cpy.length / 2 - 1].data.value()) / 2
           else 
-            cpy[Math.floor(cpy.length / 2)].data.value
+            cpy[Math.floor(cpy.length / 2)].data.value()
 
           @svg.selectAll(".median.SeeIt")
             .data([median])
@@ -238,11 +238,11 @@
               if array.length == 0 then return []
 
               modeMap = {}
-              maxEl = array[0].data.value
+              maxEl = array[0].data.value()
               maxCount = 1
 
               for i in [0...array.length]
-                el = array[i].data.value
+                el = array[i].data.value()
 
                 if !modeMap[el]
                   modeMap[el] = 1
@@ -292,7 +292,7 @@
 
       chart = d3.box()
         .value((d) -> 
-          d.data.value
+          d.data.value()
         )
         .whiskers(iqr(1.5))
         .width(@style.width)
@@ -340,6 +340,10 @@
         default: false
       }]
 
+    DistributionDotPlot.name = ->
+      "Distribution Dot Plot"
+
+
   DistPlotBuilder = (->
     class DistPlotBuilder
       constructor: (@_dataset, @x, @y, @width, @height) ->
@@ -374,15 +378,15 @@
           while true
             mid = Math.floor((start + end) / 2)
 
-            if Math.abs(self.x(d.value) - self.x(data[idx][mid].data.value)) < 2*R then return -1
+            if Math.abs(self.x(d.value()) - self.x(data[idx][mid].data.value())) < 2*R then return -1
 
             if end == start
-              if d.value < data[idx][mid].data.value
+              if d.value() < data[idx][mid].data.value()
                 return start
               else 
                 return start + 1
 
-            if d.value < data[idx][mid].data.value
+            if d.value() < data[idx][mid].data.value()
               end = mid
             else
               start = mid + 1            
@@ -440,3 +444,5 @@
 
   DistributionDotPlot
 ).call(@)
+
+@SeeIt.GraphNames["DistributionDotPlot"] = "Distribution Dot Plot"

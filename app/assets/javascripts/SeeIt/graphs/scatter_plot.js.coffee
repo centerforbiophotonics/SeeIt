@@ -13,14 +13,14 @@
 			if @datasetValid()
 				@dataset.forEach (data) ->
 					dataColumn = data.data[0]
-					dataColumn.data.forEach (d) ->
-						if !groups[d.label]
-							groups[d.label] = {}
+					dataColumn.data().forEach (d) ->
+						if !groups[d.label()]
+							groups[d.label()] = {}
 
 						if data.name == "x-axis"
-							groups[d.label].x = d.value
+							groups[d.label()].x = d.value()
 						else
-							groups[d.label].y = d.value
+							groups[d.label()].y = d.value()
 
 				for key, val of groups
 					data.push {key: key, values: [val]}
@@ -115,6 +115,10 @@
 				}
 			]
 
+		ScatterPlot.name = ->
+			"Scatter Plot"
 
 	ScatterPlot
 ).call(@)
+
+@SeeIt.GraphNames["ScatterPlot"] = "Scatter Plot"

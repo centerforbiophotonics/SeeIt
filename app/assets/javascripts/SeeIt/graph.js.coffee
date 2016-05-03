@@ -139,7 +139,5 @@
       #Abstract
       []
 
-
   Graph
 ).call(@)
-console.log @SeeIt
