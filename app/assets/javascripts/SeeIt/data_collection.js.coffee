@@ -2,7 +2,7 @@
   class DataCollection
     _.extend(@prototype, Backbone.Events)
 
-    constructor: (@app, data) ->
+    constructor: (@app, data, @editable) ->
       @datasets = []
       @initialized = false
       @initDatasets(data)
@@ -29,13 +29,12 @@
 
     initDatasets: (data) ->
       for i in [0...data.length]
-        @datasets.push(new SeeIt.Dataset(@app, data[i].dataset, data[i].title, data[i].isLabeled))
+        @datasets.push(new SeeIt.Dataset(@app, data[i].dataset, data[i].title, data[i].isLabeled, @editable))
 
       @initialized = true
 
     addDataset: (data) ->
-      dataset = new SeeIt.Dataset(@app, data.dataset, data.title, data.isLabeled)
-      console.log dataset
+      dataset = new SeeIt.Dataset(@app, data.dataset, data.title, data.isLabeled, @editable)
      	@datasets.push(dataset)
 
       if @initialized then @trigger('dataset:created', dataset)

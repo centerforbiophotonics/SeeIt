@@ -68,6 +68,10 @@
       @listenTo @app, 'ready', ->
         self.populateGraphDropdown.call(self)
 
+      @on 'populate:dropdown', ->
+        console.log "populate:dropdown called"
+        self.populateGraphDropdown.call(self)
+
       @on 'dataColumns:show', ->
         self.alignGroupHeight.call(self)
 
@@ -86,9 +90,10 @@
     populateGraphDropdown: ->
       self = @
 
-      @trigger('graphs:requestIDs', (graphIds) ->
-        graphIds.forEach (id) ->
-          self.addGraphOption.call(self, id)
+      @trigger('graphs:requestIDs', (graphData) ->
+        console.log "graph:requestIDs callback"
+        graphData.forEach (graph) ->
+          self.addGraphOption.call(self, graph.id, graph.dataRoles)
       )
 
     dropdownTemplate: ->
@@ -104,10 +109,10 @@
       """
 
     updateGraphOption: (oldId, newId) ->
-      @container.find("li a[data-id=#{oldId}]").attr('data-id', newId).html(newId)
+      @container.find("li a[data-id='#{oldId}']").attr('data-id', newId).html(newId)
 
     removeGraphOption: (graphId) ->
-      @container.find("li a[data-id=#{graphId}]").remove()
+      @container.find("li a[data-id='#{graphId}']").remove()
 
     addGraphOption: (graphId, dataRoles) ->
       self = @

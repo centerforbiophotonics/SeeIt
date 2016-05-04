@@ -28,6 +28,9 @@
         self.dataColumnViews.forEach (d) ->
           d.trigger('graph:id:change', oldId, newId)
       
+      @on 'populate:dropdowns', ->
+        self.populateDropdowns.call(self)
+
       @listenTo @dataset, 'dataset:title:changed', ->
         self.updateTitle.call(self)
 
@@ -60,6 +63,11 @@
       for i in [0...@dataset.data.length]
         @addData(@dataset.data[i])
 
+
+    populateDropdowns: ->
+      @dataColumnViews.forEach (columnView) ->
+        columnView.trigger('populate:dropdown')
+
     addData: (dataColumn) ->
       @container.find(".data-list").append("<li class='SeeIt list-group-item data-container'></li>")
       columnView = new SeeIt.DataColumnView(@app, @container.find(".data-container").last(), dataColumn)
@@ -81,6 +89,7 @@
       @listenTo(columnView, 'graphs:requestIDs', (cb) ->
         self.trigger('graphs:requestIDs', cb)
       )
+
 
 
     registerEvents: ->

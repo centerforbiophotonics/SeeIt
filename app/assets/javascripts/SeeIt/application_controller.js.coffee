@@ -33,8 +33,9 @@
         graph_editable: if ui.graph_editable != undefined then ui.graph_editable else true
       }
 
+      console.log "editable: #{@ui.editable}"
       #Data model
-      @model = new SeeIt.DataCollection(@, data)
+      @model = new SeeIt.DataCollection(@, data, @ui.editable)
 
       @dataVisible = true
       @spreadsheetVisible = false
@@ -154,7 +155,12 @@
       }
 
     addDataset: (dataset) ->
+      app = @
       data = @model.addDataset(dataset)
+
+      # @listenTo(app.dataCollectionView, 'graphs:requestIDs', (cb) ->
+      #   app.trigger('graphs:requestIDs', cb)
+      # )
       # @dataCollectionView.addDatasetView(data)
 
     ###*
@@ -184,6 +190,7 @@
       )
 
       @listenTo(app.model, 'dataset:created', (dataset) ->
+        console.log dataset
         app.trigger('dataset:created', dataset)
 
         if !app.spreadsheetVisible then app.toggleSpreadsheetVisible.call(app)

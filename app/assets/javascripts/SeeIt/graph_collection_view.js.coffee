@@ -4,7 +4,7 @@
 
     constructor: (@app, @container) ->
       @graphs = {}
-      @graphId = 1
+      @graphId = "Graph 1"
       @handlers = {}
       @isFullscreen = false
       @fullscreenClass = 'col-md-12'
@@ -41,11 +41,14 @@
 
       @listenTo(@app, 'graphs:requestIDs', (cb) ->
         console.log "getting IDs"
-        ids = []
-        for graphId, graph of graphContainer.graphs
-          ids.push graphId
+        graphData = []
 
-        cb(ids)
+        for graphId, graph of graphContainer.graphs
+          graph.trigger('request:dataRoles', (dataRoles) ->
+            graphData.push {id: graphId, dataRoles: dataRoles}
+          )
+
+        cb(graphData)
       )
 
       @listenTo(@app, 'height:toggle', ->
@@ -61,12 +64,13 @@
       )
 
     findValidId: ->
-      @graphId = 1
+      @graphId = "Graph 1"
+      idx = 1
 
       keys = Object.keys(@graphs)
 
-      while keys.indexOf(@graphId.toString()) != -1
-        @graphId++
+      while keys.indexOf(@graphId) != -1
+        @graphId = "Graph #{++idx}"
 
     changeGraphId: (oldId, newId) ->
       graph = @graphs[oldId]
@@ -84,20 +88,18 @@
       @findValidId()
 
       @container.find(".graph-list").append("""
-      <li class="SeeIt graph list-group-item" id="graph_#{@graphId}">
+      <li class="SeeIt graph list-group-item" id="graph_#{@graphId.split(' ').join('-')}">
       </li>
       """)
 
-      newGraph = new SeeIt.GraphView(@app, @graphId, @container.find("#graph_#{@graphId}"), @handlers.removeGraph, graphType)
-      @graphs[@graphId.toString()] = newGraph
+      newGraph = new SeeIt.GraphView(@app, @graphId, @container.find("#graph_#{@graphId.split(' ').join('-')}"), @handlers.removeGraph, graphType)
+      @graphs[@graphId] = newGraph
 
       @listenTo newGraph, 'graph:id:change', (oldId, newId) ->
         self.changeGraphId.call(self, oldId, newId)
 
-      @graphId++
-
       newGraph.trigger('request:dataRoles', (dataRoles) ->
-        self.trigger('graph:created', self.graphId-1, dataRoles)
+        self.trigger('graph:created', self.graphId, dataRoles)
       )
 
 

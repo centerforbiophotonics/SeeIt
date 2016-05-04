@@ -120,9 +120,9 @@
 
     addDatasetView: (data) ->
       @container.find('.dataset-list .new-dataset').before("<div class='SeeIt dataset-container'></div>")
-      console.log @container.find('.dataset-list').children().last()
       datasetView = new SeeIt.DatasetView(@app, @container.find(".SeeIt.dataset-container:not(.new-dataset)").last(), data)
       @initDatasetListeners(datasetView)
+      datasetView.trigger('populate:dropdowns')
       @datasetViewCollection.push(datasetView)
 
       self = @

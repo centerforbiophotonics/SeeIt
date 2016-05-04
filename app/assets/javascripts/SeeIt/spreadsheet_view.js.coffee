@@ -1,6 +1,7 @@
 @SeeIt.SpreadsheetView = (->
   privateMembers = {}
   privateMembers.dataset = null
+
   class SpreadsheetView
     _.extend(@prototype, Backbone.Events)
 
@@ -28,10 +29,6 @@
         </div>
       """)
 
-            # <div class="SeeIt spreadsheet-button-group btn-group" role="group">
-            #   <button class="SeeIt add-dataset btn btn-default"><span class="glyphicon glyphicon-plus"></span></button>
-            #   <button class="SeeIt save-dataset btn btn-default"><span class="glyphicon glyphicon-save"></span></button>
-            # </div>
 
       @initHandlers()
       @resetTable()
@@ -69,18 +66,6 @@
       @listenTo(@dataset, 'dataColumn:destroyed dataColumn:created row:destroyed row:created', ->
         self.resetTable.call(self)
       )
-
-      # @listenTo(@dataset, 'dataColumn:created', ->
-      #   self.resetTable.call(self)
-      # )
-
-      # @listenTo(@dataset, 'row:destroyed', ->
-      #   self.resetTable.call(self)
-      # )
-
-      # @listenTo(@dataset, 'row:created', ->
-      #   self.resetTable.call(self)
-      # )
 
     initHandlers: ->
       self = @
@@ -213,6 +198,7 @@
 
           $(TH).off('dblclick').on('dblclick', headerDblclick)
 
+      console.log spreadsheetView.dataset.data.length, spreadsheetView.dataset.data[0].data().length
       settings = {
         rowHeaders: @dataset.labels,
         colHeaders: @dataset.headers,
@@ -228,6 +214,8 @@
         manualColumnResize: true,
         manualRowResize: true,
         copyPaste: true,
+        maxCols: spreadsheetView.dataset.data.length,
+        maxRows: spreadsheetView.dataset.data[0].data().length
         contextMenu: {
           items: {
             "my_row_above": {
