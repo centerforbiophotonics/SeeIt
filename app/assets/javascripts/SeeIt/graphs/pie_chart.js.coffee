@@ -36,8 +36,11 @@
       data = []
       
       @dataset[0].data.forEach (dataColumn) ->
-        data.push({values: dataColumn.data(), key: dataColumn.header, color: dataColumn.color})
+        data = data.concat(dataColumn.data())
+        #data.push({values: dataColumn.data(), key: dataColumn.header, color: dataColumn.color})
 
+      console.log "!!!!"
+      console.log data
       return data
 
     refresh: (options) ->
@@ -50,7 +53,9 @@
 
       nv.addGraph ->
         chart = nv.models.pieChart()
-          .x( (d) -> return d.label())
+          .x( (d) -> 
+            console.log d
+            return d.label())
           .y( (d) -> return d.value());
 
         data = graph.formatData.call(graph)
