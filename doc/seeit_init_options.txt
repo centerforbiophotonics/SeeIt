@@ -39,7 +39,7 @@ SeeIt.new({
     data_selector(left side menu): boolean,
     options_bar: boolean,
     graph_add_remove: boolean,
-    dataset_add_remove: booean
+    dataset_add_remove: boolean
   },
 
   graphs: [
