@@ -12,18 +12,18 @@
 //
 //= require jquery
 //= require turbolinks
-//= require handsontable.full
+//= require handsontable.full.min
 //= require twitter/bootstrap
 //= require bootstrap.js
 //= require bootstrap-switch.min
 //= require dropdowns-enhancement.js
-//= require underscore.js
-//= require spectrum.js
+//= require underscore.min.js
+//= require spectrum.min.js
 //= require backbone-events.js
-//= require d3
+//= require d3.min
 //= require d3.box
-//= require nv.d3
-//= require opentip-jquery-excanvas
+//= require nv.d3.min
+//= require opentip-jquery-excanvas.min
 //= require FileSaver.min.js
 //= require SeeIt/init
 //= require SeeIt/utils

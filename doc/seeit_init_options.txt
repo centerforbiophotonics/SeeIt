@@ -34,7 +34,7 @@ SeeIt.new({
   ],  -- default is [] or null
 
   ui: { all booleans default to true
-    editing: boolean,
+    editable: boolean,
     spreadsheet: boolean,
     data_selector(left side menu): boolean,
     options_bar: boolean,
@@ -57,8 +57,8 @@ SeeIt.new({
       type: string that must match a graph plugin type,
       data: [
         {
-          set_name: string that must match a dataset name,
-          col_name: string that must match a column header,
+          dataset_title: string that must match a dataset name,
+          column_header: string that must match a column header,
           role_in_graph: string that must match the graph types allowed data roles  //optional if graph only has one data role (like bar graph)
         },
         . . . 

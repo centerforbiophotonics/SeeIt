@@ -110,7 +110,7 @@
         cb(graph.graph.dataFormat())
 
       @on 'size:change', ->
-        if graph.graph then graph.graph.trigger('size:change', graph.options.getValues())
+        if graph.initialized then graph.graph.trigger('size:change', graph.options.getValues())
 
       graph.handlers = {
         removeGraph: ->
