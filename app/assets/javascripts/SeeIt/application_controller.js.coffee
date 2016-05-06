@@ -16,7 +16,8 @@
       @graphTypes = [
         {name: "Bar Chart", class: SeeIt.Graphs.BarChart},
         {name: "Scatter Plot", class: SeeIt.Graphs.ScatterPlot},
-        {name: "Distribution Dot Plot", class: SeeIt.Graphs.DistributionDotPlot}
+        {name: "Distribution Dot Plot", class: SeeIt.Graphs.DistributionDotPlot},
+        {name: "Pie Chart", class: SeeIt.Graphs.PieChart}
       ]
 
       @view = new SeeIt.ApplicationView(@, @container)
@@ -82,7 +83,7 @@
         isLabeled: false
       }
 
-      for i in [1..100]
+      for i in [1..1000]
         newData.dataset.push []
         for j in [0...5]
           newData.dataset[i].push Math.random() * 10
@@ -166,16 +167,10 @@
           event.stopPropagation()
 
           app.csvManager.handleUpload(@files[0], (data) ->
-            dataset = {
-              isLabeled: true,
-              dataset: data
-            }
-
-            app.addDataset.call(app, dataset)
+            app.addDataset.call(app, data)
           )
 
           return false
-
         uploadCSV: ->
           if !$("#hidden-csv-upload").length
             app.container.append "<input id='hidden-csv-upload' type='file' style='display: none'>"
@@ -206,7 +201,7 @@
 
     addDataset: (dataset) ->
       data = @model.addDataset(dataset)
-      # @dataCollectionView.addDatasetView(data)
+      @dataCollectionView.addDatasetView(data)
 
     ###*
       # Initialize Backbone event listeners in which controller listens to members
