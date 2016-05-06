@@ -32,7 +32,6 @@
 
       @data = ->
         if @staleData then setDataArray()
-
         return dataArray
 
       @getValue = (idx) ->

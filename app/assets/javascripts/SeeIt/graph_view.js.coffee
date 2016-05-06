@@ -22,8 +22,6 @@
     addData: (data) ->
       datasetIdx = -1
 
-      console.log @dataset, data
-
       @dataset.forEach (d, i) ->
         if d.name == data.name then datasetIdx = i
 
@@ -31,7 +29,6 @@
         dataIdx = @dataset[datasetIdx].data.indexOf(data.data)
 
         if dataIdx == -1
-          console.log "adding to dataset"
           @dataset[datasetIdx].data.push(data.data)
 
           self = @
@@ -61,10 +58,7 @@
           )
 
           @listenTo(data.data, 'destroy', ->
-            console.log 'destroy triggered in graph view'
             datasetIdx = -1
-
-            console.log self.dataset
 
             self.dataset.forEach (d, i) ->
               if d.name == data.name then datasetIdx = i

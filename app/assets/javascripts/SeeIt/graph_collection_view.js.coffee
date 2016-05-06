@@ -30,7 +30,6 @@
       )
 
       graphContainer.listenTo(@app, 'graph:addData', (graphData) ->
-        console.log "In GraphCollectionsView's addData handler:", graphData, graphContainer.graphs
         if graphContainer.graphs[graphData.graph]
           graphContainer.graphs[graphData.graph].addData(graphData.data)
       )
@@ -40,7 +39,6 @@
       )
 
       @listenTo(@app, 'graphs:requestIDs', (cb) ->
-        console.log "getting IDs"
         graphData = []
 
         for graphId, graph of graphContainer.graphs

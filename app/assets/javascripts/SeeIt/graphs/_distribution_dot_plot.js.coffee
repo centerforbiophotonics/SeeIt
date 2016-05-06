@@ -33,7 +33,6 @@ _DistributionDotPlot = (->
           min = Math.min(min, d.value)
 
       adjustment = Math.max(padding*(max - min),0.05)
-      console.log min, max, adjustment
       return [min - adjustment,max + adjustment]
 
     draw: ->
@@ -84,7 +83,6 @@ _DistributionDotPlot = (->
           return graph.x(d.data.value)
         )
         .attr("cy", (d) ->
-          console.log d, graph.y(d.y)
           return graph.y(d.y)
         )
         .style("fill", (d) ->
@@ -186,13 +184,11 @@ _DistributionDotPlot = (->
       constructor: (_dataset, @xMap, @yMap, @width, @height) ->
         @dataArray = []
         data = new Array(Math.ceil(@width / (2*R)))
-        console.log data.length
 
         #Initialize data array
         for i in [0...data.length]
           data[i] = new IterativeArray()
 
-        console.log data
         dataset = _dataset.splice 0
         fillSet.call(@)
 
@@ -209,7 +205,6 @@ _DistributionDotPlot = (->
           self.dataArray.forEach (d) ->
             self.placeInArray.call(self, d)
 
-        console.log data
 
       placeInArray: (d) ->
         #Find what member array the element should be added to
@@ -222,7 +217,6 @@ _DistributionDotPlot = (->
         while(collideLeft = @collision(d, l = left.next()) || collideMiddle = @collision(d, c = mine.next()) || collideRight = @collision(d, r = right.next()))
           if collideMiddle
             d.y = Math.max(@solvePythagorean(d,c), d.y)
-            console.log d.y
             mine.iterate()
 
           if l != undefined && @collision(d, l = left.next())
@@ -241,7 +235,6 @@ _DistributionDotPlot = (->
         possibleCollisions = new IterativeArray()
 
         for d in data[idx]
-          console.log d
           if Math.abs(d.data.value - val) < 2*R then possibleCollisions.push d
 
         return possibleCollisions
@@ -257,7 +250,6 @@ _DistributionDotPlot = (->
       #   data[idx].push(d)
 
       # setY = (d, idx) ->
-      #   console.log idx
       #   d.y = if data[idx].size() then @solvePythagorean(d, data[idx].peek()) else R
       #   d.y = Math.max(
       #     d.y,
@@ -286,7 +278,6 @@ _DistributionDotPlot = (->
         if !p1 || !p2 then return false
 
         collide = @euclidDist(p1,p2) < 2*R
-        console.log collide
         collide
 
       euclidDist: (p1,p2) ->

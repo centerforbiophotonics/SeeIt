@@ -45,7 +45,6 @@
       self = @
 
       @listenTo(datasetView, 'spreadsheet:load', (dataset) ->
-        console.log 'spreadsheet:load triggered in DataCollectionView'
         self.trigger('spreadsheet:load', dataset)
       )
 

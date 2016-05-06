@@ -26,10 +26,8 @@
 
               data.push row
 
-            console.log data
             callback data
           catch err
-            console.log err
           
 
         filereader.readAsText file

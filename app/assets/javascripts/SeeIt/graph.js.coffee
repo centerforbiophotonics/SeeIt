@@ -58,7 +58,6 @@
 
     constructor: (@container, @dataset) ->
       self = @
-
       # Data is to be an array of data-role objects.  DataColumns are
       # assigned to particular data-roles.  Name is the role name,
       # type defines the data to be numeric or categorical, multiple

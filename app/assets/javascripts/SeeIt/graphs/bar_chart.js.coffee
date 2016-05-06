@@ -12,7 +12,6 @@
       self = @
 
       @eventCallbacks['data:created'] =  (options) ->
-        console.log "in callback"
         if self.allRolesFilled()
           if !self.rendered
             self.rendered = true
@@ -43,12 +42,10 @@
       return data
 
     refresh: (options) ->
-      console.log options
       d3.select(@container.find('.graph-svg')[0]).datum(@formatData()).transition().duration(500).call(@chartObject);
       nv.utils.windowResize(@chartObject.update);
 
     draw: (options) ->
-      console.log options
       graph = @
       @container.html("<svg class='SeeIt graph-svg' style='width: 100%; min-height: 270px'></svg>")
           
