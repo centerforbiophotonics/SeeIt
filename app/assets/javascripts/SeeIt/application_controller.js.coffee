@@ -26,12 +26,14 @@
 
       #Initialize UI options
       @ui = {
-        editable: if ui.editable != undefined then ui.editable else true,
-        spreadsheet: if ui.spreadsheet != undefined then ui.spreadsheet else true,
-        dataMenu: if ui.dataMenu != undefined then ui.dataMenu else true,
-        toolbar: if ui.toolbar != undefined then ui.toolbar else true,
+        editable:       if ui.editable != undefined then ui.editable else true,
+        spreadsheet:    if ui.spreadsheet != undefined then ui.spreadsheet else true,
+        dataMenu:       if ui.dataMenu != undefined then ui.dataMenu else true,
+        toolbar:        if ui.toolbar != undefined then ui.toolbar else true,
         graph_editable: if ui.graph_editable != undefined then ui.graph_editable else true
       }
+
+      graph_init_data = if params.graphs then params.graphs else []
 
       console.log "editable: #{@ui.editable}"
       #Data model
@@ -41,14 +43,17 @@
       @spreadsheetVisible = false
 
       # Container for graphs
-      @graphCollectionView = new SeeIt.GraphCollectionView(@, @layoutContainers['Graphs'])
+      @graphCollectionView = new SeeIt.GraphCollectionView(@, @layoutContainers['Graphs'], @ui.graph_editable)
 
-      #Container for list of datasets
-      @dataCollectionView = new SeeIt.DataCollectionView(
-        @,
-        @layoutContainers['Data'],
-        @model
-      )
+      if @ui.dataMenu
+        #Container for list of datasets
+        @dataCollectionView = new SeeIt.DataCollectionView(
+          @,
+          @layoutContainers['Data'],
+          @model
+        )
+      else
+        @layoutContainers['Data'].remove()
 
       #Create CSV manager
       @csvManager = new SeeIt.CSVManager()
@@ -59,20 +64,54 @@
       #Container for spreadsheet
       @spreadsheetView = new SeeIt.SpreadsheetView(@, @layoutContainers['Spreadsheet'])
 
-      #Container for toolbar
-      @toolbarView = new SeeIt.ToolbarView(@, @layoutContainers['Globals'], 
-        [
-          {class: "toggleData", title: "Show/Hide Data", handler: @handlers.toggleDataVisible, type: "button"},
-          {class: "toggleSpreadsheet", title: "Show/Hide Spreadsheet", handler: @handlers.toggleSpreadsheetVisible, type: "button"},
+      if @ui.toolbar
+
+        toolbar_params = [
           {class: "addGraph", title: "Add graph", handler: @handlers.addGraph, icon: "<span class='glyphicon glyphicon-plus'></span>", type: "dropdown", options: @graphTypes}  ,
           {class: "uploadCSV", title: "Upload CSV", handler: @handlers.uploadCSV, type:"button"},
           {class: "uploadJSON", title: "Upload JSON", handler: @handlers.uploadJson, type: "button"},
           {class: "downloadJSON", title: "Download JSON", handler: @handlers.downloadJson, type: "button"}
         ]
-      )
+
+        if @ui.dataMenu then toolbar_params.unshift {class: "toggleData", title: "Show/Hide Data", handler: @handlers.toggleDataVisible, type: "button"}
+
+        if @ui.spreadsheet then toolbar_params.splice 1,0,{class: "toggleSpreadsheet", title: "Show/Hide Spreadsheet", handler: @handlers.toggleSpreadsheetVisible, type: "button"}
+
+        #Container for toolbar
+        @toolbarView = new SeeIt.ToolbarView(@, @layoutContainers['Globals'], toolbar_params)
+
+
+      if !@ui.dataMenu
+        if @ui.spreadsheet then @spreadsheetView.toggleFullscreen()
+        @graphCollectionView.toggleFullscreen()  
+
+      @lastGraphId = null
 
       @registerListeners()
       @trigger('ready')
+
+      self = @
+      graph_init_data.forEach (d) ->
+        graph_types = self.graphTypes.filter((g) -> g.name == d.type)
+        graph_type = if graph_types.length then graph_types[0] else null
+
+        if graph_type then self.trigger('graph:create', graph_type)
+
+        if d.data && d.data.length
+          new_data = []
+          d.data.forEach (data) ->
+            dataset = self.model.getByTitle.call(self.model, data.dataset_title)
+
+            if dataset
+              column = dataset.getByHeader.call(dataset, data.column_header)
+
+              if column && data.role_in_graph
+                new_data.push {name: data.role_in_graph, data: column}
+
+          obj = {graph: self.lastGraphId, data: new_data}
+          console.log obj
+          self.trigger('graph:addData', obj)
+
 
     loadGraphs: ->
       @graphTypes = []
@@ -85,7 +124,7 @@
       # @param {Object} dataset - DatasetModel instance
     ###
     showDatasetInSpreadsheet: (dataset) ->
-      @spreadsheetView.updateDataset(dataset)
+      if @ui.spreadsheet then @spreadsheetView.updateDataset(dataset)
 
     ###*
       # Initializes SeeIt.ApplicationController.handlers with DOM event handlers
@@ -199,6 +238,7 @@
       )
 
       @listenTo(app.graphCollectionView, 'graph:created', (graphId, dataRoles) ->
+        app.lastGraphId = graphId
         app.trigger('graph:created', graphId, dataRoles)
       )
 
@@ -218,12 +258,13 @@
       # Toggles visibility of SpreadsheetView
     ###
     toggleSpreadsheetVisible: ->
-      @spreadsheetView.toggleVisible()
-      @spreadsheetVisible = !@spreadsheetVisible
+      if @ui.spreadsheet
+        @spreadsheetView.toggleVisible()
+        @spreadsheetVisible = !@spreadsheetVisible
 
-      if @spreadsheetVisible then @spreadsheetView.updateView()
+        if @spreadsheetVisible then @spreadsheetView.updateView()
 
-      @trigger('height:toggle')
+        @trigger('height:toggle')
       
 
     ###*
@@ -232,7 +273,9 @@
     toggleDataVisible: ->
       @dataCollectionView.toggleVisible()
       @graphCollectionView.toggleFullscreen()
-      @spreadsheetView.toggleFullscreen()
+
+      if @ui.spreadsheet then @spreadsheetView.toggleFullscreen()
+
       @dataVisible = !@dataVisible
       @trigger('width:toggle')
 

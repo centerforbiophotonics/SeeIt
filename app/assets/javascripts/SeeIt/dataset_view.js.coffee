@@ -90,6 +90,8 @@
         self.trigger('graphs:requestIDs', cb)
       )
 
+      #columnView.populateGraphSelectBox();
+
 
 
     registerEvents: ->

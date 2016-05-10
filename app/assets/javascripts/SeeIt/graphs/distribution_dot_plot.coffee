@@ -1,5 +1,5 @@
 @SeeIt.Graphs.DistributionDotPlot = (->
-  R = 4
+  R = 2
 
   class DistributionDotPlot extends SeeIt.Graph
     constructor: ->

@@ -62,8 +62,49 @@
     	container: $("#left-region"),
     	data: testData,
     	ui: {
-    		editable: true
-    	}
+    		editable: true,
+    		spreadsheet: true,
+    		dataMenu: true,
+    		toolbar: true,
+    		graph_editable: true
+    	},
+    	graphs: [
+    		{
+    			type: "Bar Chart",
+    			data: [
+    				{
+    					dataset_title: "Dataset 1",
+    					column_header: "Kia",
+    					role_in_graph: "default"
+    				},
+    				{
+    					dataset_title: "Dataset 1",
+    					column_header: "Nissan",
+    					role_in_graph: "default"
+    				},
+    				{
+    					dataset_title: "Dataset 1",
+    					column_header: "Toyota",
+    					role_in_graph: "default"
+    				}
+    			]
+    		},
+    		{
+    			type: "Distribution Dot Plot",
+    			data: [
+    				{
+    					dataset_title: "Random Data",
+    					column_header: "1",
+    					role_in_graph: "default"
+    				},
+    				{
+    					dataset_title: "Random Data",
+    					column_header: "2",
+    					role_in_graph: "default"
+    				}
+    			]
+    		}
+    	]
     });
   });
 

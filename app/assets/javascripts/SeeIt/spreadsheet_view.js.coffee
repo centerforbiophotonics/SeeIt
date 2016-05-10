@@ -215,8 +215,8 @@
         manualRowResize: true,
         copyPaste: true,
         maxCols: spreadsheetView.dataset.data.length,
-        maxRows: spreadsheetView.dataset.data[0].data().length
-        contextMenu: {
+        maxRows: spreadsheetView.dataset.data[0].data().length,
+        contextMenu: if !spreadsheetView.dataset.editable then null else {
           items: {
             "my_row_above": {
               name: "Insert row above",
@@ -294,7 +294,9 @@
       columns = []
 
       for i in [0...privateMembers.dataset.data.length]
-        columns.push({data: this.property(i), type: 'numeric'})
+        column = {data: this.property(i), type: 'numeric'}
+        if !privateMembers.dataset.editable then column.editor = false
+        columns.push(column)
 
       return columns
 

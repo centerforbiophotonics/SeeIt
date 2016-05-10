@@ -37,7 +37,7 @@
 
       @populateGraphSelectBox()
       @registerListeners()
-    
+      @alignGroupHeight()
 
     setColor: (color) ->
       @data.setColor(color)
@@ -123,7 +123,7 @@
 
         selectGraph = (event) ->
           #data: {name: "default", data: self.data} is a temporary placeholder. I need to pass the data-role info to this view
-          self.trigger('graph:addData', {graph: $(@).find('.dropdown_child').attr('data-id'), data: {name: dataRoles[0].name, data: self.data}})
+          self.trigger('graph:addData', {graph: $(@).find('.dropdown_child').attr('data-id'), data: [{name: dataRoles[0].name, data: self.data}]})
 
         @container.find('.add_to_graph').off('click', selectGraph).on('click', selectGraph)
       else
@@ -153,7 +153,7 @@
 
 
         selectGraphDataRole = ->
-          self.trigger('graph:addData', {graph: $(@).attr('data-graph'), data: {name: $(@).attr('data-id'), data: self.data}})
+          self.trigger('graph:addData', {graph: $(@).attr('data-graph'), data: [{name: $(@).attr('data-id'), data: self.data}]})
         
         @container.find('.add_to_data_role').off('click', selectGraphDataRole).on('click', selectGraphDataRole)
 

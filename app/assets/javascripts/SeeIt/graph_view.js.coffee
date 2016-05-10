@@ -2,7 +2,7 @@
   class GraphView
     _.extend(@prototype, Backbone.Events)
 
-    constructor: (@app, @id, @container, @destroyCallback, @graphType) ->
+    constructor: (@app, @id, @container, @destroyCallback, @graphType, @graph_editable) ->
       @maximized = false
       @collapsed = false
       @editing = false
@@ -20,68 +20,69 @@
       if !@graph.options().length then @container.find('.options-button').hide()
 
     addData: (data) ->
-      datasetIdx = -1
+      console.log data
+      for j in [0...data.length]
+        this_data = data[j]
 
-      console.log @dataset, data
+        datasetIdx = -1
 
-      @dataset.forEach (d, i) ->
-        if d.name == data.name then datasetIdx = i
+        @dataset.forEach (d, i) ->
+          if d.name == this_data.name then datasetIdx = i
 
-      if datasetIdx != -1
-        dataIdx = @dataset[datasetIdx].data.indexOf(data.data)
+        if datasetIdx != -1
+          dataIdx = @dataset[datasetIdx].data.indexOf(this_data.data)
 
-        if dataIdx == -1
-          console.log "adding to dataset"
-          @dataset[datasetIdx].data.push(data.data)
+          if dataIdx == -1
+            console.log "adding to dataset"
+            @dataset[datasetIdx].data.push(this_data.data)
 
-          self = @
+            self = @
 
-          @listenTo(data.data, 'label:changed', (idx) ->
-            self.graph.trigger('label:changed', self.options.getValues())
-          )
+            @listenTo(this_data.data, 'label:changed', (idx) ->
+              self.graph.trigger('label:changed', self.options.getValues())
+            )
 
-          @listenTo(data.data, 'color:changed', ->
-            self.graph.trigger('color:changed', self.options.getValues())
-          )
+            @listenTo(this_data.data, 'color:changed', ->
+              self.graph.trigger('color:changed', self.options.getValues())
+            )
 
-          @listenTo(data.data, 'header:changed', ->
-            self.graph.trigger('header:changed', self.options.getValues())
-          )
+            @listenTo(this_data.data, 'header:changed', ->
+              self.graph.trigger('header:changed', self.options.getValues())
+            )
 
-          @listenTo(data.data, 'data:destroyed', ->
-            self.graph.trigger('data:destroyed', self.options.getValues())
-          )
+            @listenTo(this_data.data, 'data:destroyed', ->
+              self.graph.trigger('data:destroyed', self.options.getValues())
+            )
 
-          @listenTo(data.data, 'data:created', ->
-            self.graph.trigger('data:created', self.options.getValues())
-          )
+            @listenTo(this_data.data, 'data:created', ->
+              self.graph.trigger('data:created', self.options.getValues())
+            )
 
-          @listenTo(data.data, 'data:changed', ->
-            self.graph.trigger('data:changed', self.options.getValues())
-          )
+            @listenTo(this_data.data, 'data:changed', ->
+              self.graph.trigger('data:changed', self.options.getValues())
+            )
 
-          @listenTo(data.data, 'destroy', ->
-            console.log 'destroy triggered in graph view'
-            datasetIdx = -1
+            @listenTo(this_data.data, 'destroy', ->
+              datasetIdx = -1
 
-            console.log self.dataset
 
-            self.dataset.forEach (d, i) ->
-              if d.name == data.name then datasetIdx = i
+              self.dataset.forEach (d, i) ->
+                if d.name == this_data.name then datasetIdx = i
 
-            if datasetIdx >= 0
-              colToDestroy = self.dataset[datasetIdx].data.indexOf(data.data)
+              if datasetIdx >= 0
+                colToDestroy = self.dataset[datasetIdx].data.indexOf(this_data.data)
 
-              if colToDestroy >= 0
-                self.dataset[datasetIdx].data.splice(colToDestroy, 1)
-                self.graph.trigger('column:destroyed', self.options.getValues())
-          )
+                if colToDestroy >= 0
+                  self.dataset[datasetIdx].data.splice(colToDestroy, 1)
+                  self.graph.trigger('column:destroyed', self.options.getValues())
+            )
 
-          if !@initialized
-            @initGraph()
-            @initialized = true
+            if j == data.length - 1
+              if !@initialized
+                @initGraph()
+                @initialized = true
 
-          @graph.trigger('data:assigned', self.options.getValues())
+              @graph.trigger('data:assigned', self.options.getValues())
 
     initGraph: ->
       self = @
@@ -121,6 +122,7 @@
           graph.maximize.call(graph)
 
         collapse: ->
+          console.log "collapse called"
           graph.collapse.call(graph)
 
         editTitle: ->
@@ -156,10 +158,10 @@
             <div class="btn-group" role="group" style="float: right">
               <button class="collapse-btn btn btn-default"><span data-id="#{@id}" class="glyphicon glyphicon-collapse-down"></span></ button>
               <button class="maximize btn btn-default"><span data-id="#{@id}" class="glyphicon glyphicon-resize-full"></span></button>
-              <button class="remove btn btn-default"><span data-id="#{@id}" class="glyphicon glyphicon-remove"></span></button>
+              #{if @graph_editable then '<button class="remove btn btn-default"><span data-id="#{@id}" class="glyphicon glyphicon-remove"></span></button>' else ''}
             </div>
           </div>
-          <div id="collapse_#{@id}" class="SeeIt graph-panel-content panel-collapse collapse in">
+          <div id="collapse_#{@id.split(' ').join('-')}" class="SeeIt graph-panel-content panel-collapse collapse in">
             <div class="SeeIt panel-body" style='min-height: 300px'>
               <div class="SeeIt options-wrapper hidden col-md-3"></div>
               <div class="SeeIt graph-wrapper"></div>
@@ -168,7 +170,8 @@
         </div>
       """)
 
-      @container.find(".remove").on('click', @handlers.removeGraph)
+      if @graph_editable then @container.find(".remove").on('click', @handlers.removeGraph)
+
       @container.find(".maximize").on('click', @handlers.maximize)
       @container.find(".collapse-btn").on('click', @handlers.collapse)
       @container.find(".graph-title-edit-icon").on('click', @handlers.editTitle)
@@ -193,7 +196,8 @@
       if @maximized
         @container.find(".maximize").trigger('click')
 
-      @container.find("#collapse_#{@id}").toggleClass('in')
+      console.log @container.find("#collapse_#{@id.split(' ').join('-')}"), @container.find('.collapse-btn .glyphicon')
+      @container.find("#collapse_#{@id.split(' ').join('-')}").toggleClass('in')
       @container.find('.collapse-btn .glyphicon').toggleClass('glyphicon-collapse-down glyphicon-collapse-up')
       @collapsed = !@collapsed
 

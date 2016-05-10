@@ -51,6 +51,11 @@
 			@loadData(data)
 			@registerListeners()
 
+		getByHeader: (header) ->
+			idx = @headers.indexOf(header)
+
+			if idx < 0 then return null else return @data[idx]
+
 		setTitle: (title) ->
 			@title = title
 
@@ -136,7 +141,6 @@
 			for i in [0...@labels.length]
 				dataColumn.push({label: @labels[i], value: null})
 
-			console.log "EDITABLE: #{@editable}"
 			@data.splice(col, 0, new SeeIt.DataColumn(@app, header, dataColumn, @title, undefined, @editable))
 			@headers.splice(col, 0, header)
 			@trigger('dataColumn:created', col)
@@ -232,7 +236,7 @@
 
 				initHeaders: ->
 					for i in [1...@rawDataCols()]
-						@headers.push(@rawData[0][i])
+						@headers.push(@toString(@rawData[0][i]))
 			}
 
 
@@ -259,7 +263,7 @@
 
 				initHeaders: ->
 					for i in [0...@rawData.columns.length]
-						@headers.push(@rawData.columns[i].header)
+						@headers.push(@toString(@rawData.columns[i].header))
 
 				initData: ->
 					console.log "EDITABLE: #{@editable}"

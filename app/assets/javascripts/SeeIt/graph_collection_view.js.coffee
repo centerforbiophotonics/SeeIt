@@ -2,7 +2,7 @@
   class GraphCollectionView
     _.extend(@prototype, Backbone.Events)
 
-    constructor: (@app, @container) ->
+    constructor: (@app, @container, @graphs_editable) ->
       @graphs = {}
       @graphId = "Graph 1"
       @handlers = {}
@@ -92,7 +92,7 @@
       </li>
       """)
 
-      newGraph = new SeeIt.GraphView(@app, @graphId, @container.find("#graph_#{@graphId.split(' ').join('-')}"), @handlers.removeGraph, graphType)
+      newGraph = new SeeIt.GraphView(@app, @graphId, @container.find("#graph_#{@graphId.split(' ').join('-')}"), @handlers.removeGraph, graphType, @graphs_editable)
       @graphs[@graphId] = newGraph
 
       @listenTo newGraph, 'graph:id:change', (oldId, newId) ->

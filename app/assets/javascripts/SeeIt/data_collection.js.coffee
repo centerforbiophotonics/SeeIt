@@ -27,6 +27,14 @@
         self.addDataset.call(self, data)
       )
 
+    getByTitle: (dataset_title) ->
+      for i in [0...@datasets.length]
+        if dataset_title == @datasets[i].title
+          return @datasets[i]
+
+      return null
+
+
     initDatasets: (data) ->
       for i in [0...data.length]
         @datasets.push(new SeeIt.Dataset(@app, data[i].dataset, data[i].title, data[i].isLabeled, @editable))
