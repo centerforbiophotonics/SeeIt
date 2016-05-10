@@ -26,7 +26,6 @@
         color: @data.color, 
         replacerClassName: 'hiddenColorpicker',
         change: (color) ->
-          console.log 'color change', color.toHexString()
           self.setColor.call(self, color.toHexString())
       })
 
@@ -69,7 +68,6 @@
         self.populateGraphDropdown.call(self)
 
       @on 'populate:dropdown', ->
-        console.log "populate:dropdown called"
         self.populateGraphDropdown.call(self)
 
       @on 'dataColumns:show', ->
@@ -91,7 +89,6 @@
       self = @
 
       @trigger('graphs:requestIDs', (graphData) ->
-        console.log "graph:requestIDs callback"
         graphData.forEach (graph) ->
           self.addGraphOption.call(self, graph.id, graph.dataRoles)
       )

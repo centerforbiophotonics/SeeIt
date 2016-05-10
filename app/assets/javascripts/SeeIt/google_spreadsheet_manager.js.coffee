@@ -3,7 +3,6 @@
 		_.extend(@prototype, Backbone.Events)
 
 		constructor: (@url) ->
-			console.log "In GoogleSpreadsheetManager constructor"
 			@getData()
 
 		getData: ->

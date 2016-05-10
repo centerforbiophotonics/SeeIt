@@ -9,7 +9,6 @@
       # @param {Object} container - jQuery object referencing container SeeIt will live in
     ###
     constructor: (params = {}) ->
-      console.log params
       @container = if params.container then $(params.container) else $("body")
 
       ui = if params.ui then params.ui else {}
@@ -35,7 +34,6 @@
 
       graph_init_data = if params.graphs then params.graphs else []
 
-      console.log "editable: #{@ui.editable}"
       #Data model
       @model = new SeeIt.DataCollection(@, data, @ui.editable)
 
@@ -139,10 +137,8 @@
           app.toggleSpreadsheetVisible.call(app)
         addGraph: ->
           graphName = $(@).attr('data-id')
-          console.log graphName
           graphType = app.graphTypes.filter((g) -> g.name == graphName)[0]
 
-          console.log graphType
 
           app.trigger('graph:create', graphType)
           # app.graphCollectionView.addGraph()
@@ -210,9 +206,7 @@
 
       @listenTo(app.dataCollectionView, 'spreadsheet:load', (dataset) ->
         if !app.spreadsheetVisible then app.toggleSpreadsheetVisible.call(app)
-        
 
-        console.log 'spreadsheet:load trigger in controller'
         app.trigger('spreadsheet:load', dataset)
       )
 
@@ -229,7 +223,6 @@
       )
 
       @listenTo(app.model, 'dataset:created', (dataset) ->
-        console.log dataset
         app.trigger('dataset:created', dataset)
 
         if !app.spreadsheetVisible then app.toggleSpreadsheetVisible.call(app)

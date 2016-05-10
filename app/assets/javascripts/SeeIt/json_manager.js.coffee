@@ -13,11 +13,9 @@
 
         filereader.onload = ->
         	txtRes = filereader.result
-        	console.log txtRes
 
         	try
         		data = JSON.parse txtRes
-        		console.log data, typeof data
 
         		if !$.isArray(data) then data = [data]
 

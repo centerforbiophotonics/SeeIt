@@ -33,7 +33,6 @@
           dataIdx = @dataset[datasetIdx].data.indexOf(this_data.data)
 
           if dataIdx == -1
-            console.log "adding to dataset"
             @dataset[datasetIdx].data.push(this_data.data)
 
             self = @

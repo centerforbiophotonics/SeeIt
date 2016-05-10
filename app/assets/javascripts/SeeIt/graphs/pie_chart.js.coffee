@@ -1,8 +1,8 @@
-@SeeIt.Graphs.BarChart = (->
-  class BarChart extends SeeIt.Graph
+@SeeIt.Graphs.PieChart = (->
+  class PieChart extends SeeIt.Graph
 
     constructor: ->
-      super
+      super 
       @chartObject = null
       @listenerInitialized = false
       @rendered = false
@@ -11,7 +11,7 @@
     initListeners: ->
       self = @
 
-      @eventCallbacks['data:created'] =  (options) ->
+      @eventCallbacks['data:created'] = (options) ->
         if self.allRolesFilled()
           if !self.rendered
             self.rendered = true
@@ -34,8 +34,7 @@
 
     formatData: ->
       data = []
-
-
+      
       @dataset[0].data.forEach (dataColumn) ->
         data.push({values: dataColumn.data(), key: dataColumn.header, color: dataColumn.color})
 
@@ -48,62 +47,37 @@
     draw: (options) ->
       graph = @
       @container.html("<svg class='SeeIt graph-svg' style='width: 100%; min-height: 270px'></svg>")
-          
+
       nv.addGraph ->
-        chart = nv.models.multiBarChart()
-            .x((d) -> d.label() )
-            .y((d) -> d.value() )
+        chart = nv.models.pieChart()
+          .x( (d) -> return d.label())
+          .y( (d) -> return d.value());
 
         data = graph.formatData.call(graph)
+        #data = graph.exampleData.call(graph)
 
         d3.select(graph.container.find('.graph-svg')[0])
-            .attr('height', '100%')
-            .datum(data)
-            .call(chart);
+          .attr('height', '50%')
+          .datum(data)
+          #.transition().duration(350)
+          .call(chart)
 
-        nv.utils.windowResize(chart.update)
+        nv.utils.windowResize(chart.update);
         graph.chartObject = chart
         return chart
-      
-    destroy: ->
 
+    destroy: ->
 
     dataFormat: ->
       [
         {
-          name: "default",
-          type: "numeric",
+          name: "default"
+          type: "numeric"
           multiple: true
         }
       ]
 
-
-    options: ->
-      [
-        {
-          label: "Test",
-          type: "checkbox",
-          default: true
-        },
-        {
-          label: "Test 2",
-          type: "numeric",
-          default: 1
-        },
-        {
-          label: "Test 3",
-          type: "select",
-          values: [1,2,3,4,5],
-          default: 3
-        },
-        {
-          label: "Test 4",
-          type: "checkbox",
-          default: false
-        }
-      ]
-
-  BarChart
+  PieChart
 ).call(@)
 
-@SeeIt.GraphNames["BarChart"] = "Bar Chart"
+@SeeIt.GraphNames["PieChart"] = "Pie Chart"

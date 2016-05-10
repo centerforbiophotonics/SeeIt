@@ -31,7 +31,6 @@
 			self = @
 
 			@eventCallbacks['data:created'] =  (options) ->
-				console.log "in callback"
 				if self.allRolesFilled()
 					if !self.rendered
 						self.rendered = true
