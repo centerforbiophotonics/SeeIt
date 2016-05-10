@@ -96,6 +96,9 @@
       @listenTo newGraph, 'graph:id:change', (oldId, newId) ->
         self.changeGraphId.call(self, oldId, newId)
 
+      @listenTo newGraph, 'graphSettings:get', (graphName, cb) ->
+        self.trigger('graphSettings:get', graphName, cb)
+
       newGraph.trigger('request:dataRoles', (dataRoles) ->
         self.trigger('graph:created', self.graphId, dataRoles)
       )

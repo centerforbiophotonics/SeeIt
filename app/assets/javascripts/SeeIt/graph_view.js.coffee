@@ -87,20 +87,22 @@
       self = @
 
 
-      @options = new SeeIt.GraphOptions(@container.find('.options-button'), @container.find('.options-wrapper'), @graph.options())
+      @trigger('graphSettings:get', @graphType.name, (settings = {}) ->
+        self.options = new SeeIt.GraphOptions(self.container.find('.options-button'), self.container.find('.options-wrapper'), self.graph.options(), settings.disable, settings.defaults)
 
-      @listenTo @options, 'options:show', ->
-        self.container.find('.graph-wrapper').addClass('col-md-9')
-        self.container.find('.options-wrapper').removeClass('hidden')
-        self.graph.trigger('size:change', self.options.getValues())
+        self.listenTo self.options, 'options:show', ->
+          self.container.find('.graph-wrapper').addClass('col-md-9')
+          self.container.find('.options-wrapper').removeClass('hidden')
+          self.graph.trigger('size:change', self.options.getValues())
 
-      @listenTo @options, 'options:hide', ->
-        self.container.find('.graph-wrapper').removeClass('col-md-9')
-        self.container.find('.options-wrapper').addClass('hidden')
-        self.graph.trigger('size:change', self.options.getValues())
+        self.listenTo self.options, 'options:hide', ->
+          self.container.find('.graph-wrapper').removeClass('col-md-9')
+          self.container.find('.options-wrapper').addClass('hidden')
+          self.graph.trigger('size:change', self.options.getValues())
 
-      @listenTo @options, 'graph:update', ->
-        self.graph.trigger('options:update', self.options.getValues())
+        self.listenTo self.options, 'graph:update', ->
+          self.graph.trigger('options:update', self.options.getValues())
+      )
 
 
     initHandlers: ->

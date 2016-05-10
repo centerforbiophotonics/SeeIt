@@ -34,6 +34,8 @@
 
       graph_init_data = if params.graphs then params.graphs else []
 
+      @graph_settings = if params.graph_settings then params.graph_settings else []
+
       #Data model
       @model = new SeeIt.DataCollection(@, data, @ui.editable)
 
@@ -65,7 +67,7 @@
       if @ui.toolbar
 
         toolbar_params = [
-          {class: "addGraph", title: "Add graph", handler: @handlers.addGraph, icon: "<span class='glyphicon glyphicon-plus'></span>", type: "dropdown", options: @graphTypes}  ,
+          {class: "addGraph", title: "Add graph", handler: @handlers.addGraph, icon: "<span class='glyphicon glyphicon-plus'></span>", type: "dropdown", options: @graphTypes},
           {class: "uploadCSV", title: "Upload CSV", handler: @handlers.uploadCSV, type:"button"},
           {class: "uploadJSON", title: "Upload JSON", handler: @handlers.uploadJson, type: "button"},
           {class: "downloadJSON", title: "Download JSON", handler: @handlers.downloadJson, type: "button"}
@@ -73,7 +75,7 @@
 
         if @ui.dataMenu then toolbar_params.unshift {class: "toggleData", title: "Show/Hide Data", handler: @handlers.toggleDataVisible, type: "button"}
 
-        if @ui.spreadsheet then toolbar_params.splice 1,0,{class: "toggleSpreadsheet", title: "Show/Hide Spreadsheet", handler: @handlers.toggleSpreadsheetVisible, type: "button"}
+        if @ui.spreadsheet then toolbar_params.splice(1,0,{class: "toggleSpreadsheet", title: "Show/Hide Spreadsheet", handler: @handlers.toggleSpreadsheetVisible, type: "button"})
 
         #Container for toolbar
         @toolbarView = new SeeIt.ToolbarView(@, @layoutContainers['Globals'], toolbar_params)
@@ -203,6 +205,13 @@
     ###
     registerListeners: ->
       app = @
+
+      @listenTo(app.graphCollectionView, 'graphSettings:get', (graphName, cb) ->
+        if (idx = app.graph_settings.map((s) -> s.type).indexOf(graphName)) >= 0
+          cb(app.graph_settings[idx])
+        else
+          cb()
+      )
 
       @listenTo(app.dataCollectionView, 'spreadsheet:load', (dataset) ->
         if !app.spreadsheetVisible then app.toggleSpreadsheetVisible.call(app)

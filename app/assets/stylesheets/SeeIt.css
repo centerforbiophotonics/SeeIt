@@ -170,6 +170,11 @@
   overflow-y: auto;
 }
 
+
+.SeeIt.hidden {
+  display: none
+}
+
 .SeeIt.Spreadsheet.hidden {
   display: none;
 }

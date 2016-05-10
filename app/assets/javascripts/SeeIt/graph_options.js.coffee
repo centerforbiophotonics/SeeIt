@@ -2,7 +2,8 @@
 	class GraphOptions
 		_.extend(@prototype, Backbone.Events)
 
-		constructor: (@button, @container, options = []) ->
+		constructor: (@button, @container, options = [], @disabled = [], @defaults = []) ->
+			console.log @disabled, @defaults
 			@options = options
 			@initLayout()
 			@initHandlers()
@@ -38,13 +39,17 @@
 				self.trigger('graph:update')
 
 		setDefaultValue: (option, id) ->
+			idx = @defaults.map((op) -> op.label).indexOf(option.label)
+
+			default_value = if idx >= 0 then @defaults[idx].default else option.default
+
 			switch option.type
 				when "checkbox"
-					@container.find("##{option.id}").prop('checked', option.default)
+					@container.find("##{option.id}").prop('checked', default_value)
 				when "select"
-					@container.find("##{option.id}").val(option.default)
+					@container.find("##{option.id}").val(default_value)
 				when "numeric"
-					@container.find("##{option.id}").val(option.default)
+					@container.find("##{option.id}").val(default_value)
 
 		getValues: ->
 			values = []
@@ -65,15 +70,17 @@
 			#Generate random id
 			id = GraphOptions.randString(20)
 
+			is_disabled = @disabled.indexOf(option.label) >= 0
+
 			switch option.type
 				when "checkbox"
 					#Generate checkbox
-					checkBoxStr = "<div class='form-group'><label for='#{id}'>#{option.label}</label><br><input type='checkbox' class='SeeIt form-control switch' id='#{id}'></div>"
+					checkBoxStr = "<div class='form-group #{if is_disabled then 'hidden' else ''}'><label for='#{id}'>#{option.label}</label><br><input type='checkbox' class='SeeIt form-control switch' id='#{id}'></div>"
 					option.id = id
 					return checkBoxStr
 				when "select"
 					#Generate select
-					selectStr = "<div class='form-group'><label for='#{id}'>#{option.label}</label><select id='#{id}' class='form-control'>"
+					selectStr = "<div class='form-group #{if is_disabled then 'hidden' else ''}'><label for='#{id}'>#{option.label}</label><select id='#{id}' class='form-control'>"
 
 					option.values.forEach (val) ->
 						selectStr += "<option value=#{val}>#{val}</option>"
@@ -85,7 +92,7 @@
 					return selectStr
 				when "numeric"
 					#Generate number input
-					numericInputStr = "<div class='form-group'><label for='#{id}'>#{option.label}</label><input type='number' class='form-control' id='#{id}'></div>"
+					numericInputStr = "<div class='form-group #{if is_disabled then 'hidden' else ''}'><label for='#{id}'>#{option.label}</label><input type='number' class='form-control' id='#{id}'></div>"
 					option.id = id
 
 					return numericInputStr
