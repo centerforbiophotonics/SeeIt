@@ -17,7 +17,7 @@
             self.rendered = true
             self.draw.call(self, options)
           else
-            self.refresh.call(self, options)
+            self.draw.call(self, options)
 
       @eventCallbacks['data:assigned'] = @eventCallbacks['data:created']
       @eventCallbacks['data:destroyed'] = @eventCallbacks['data:created']
@@ -39,8 +39,6 @@
         data = data.concat(dataColumn.data())
         #data.push({values: dataColumn.data(), key: dataColumn.header, color: dataColumn.color})
 
-      console.log "!!!!"
-      console.log data
       return data
 
     refresh: (options) ->
@@ -50,13 +48,14 @@
     draw: (options) ->
       graph = @
       @container.html("<svg class='SeeIt graph-svg' style='width: 100%; min-height: 270px'></svg>")
+      console.log options[0].value
 
       nv.addGraph ->
         chart = nv.models.pieChart()
           .x( (d) -> 
-            console.log d
             return d.label())
-          .y( (d) -> return d.value());
+          .y( (d) -> return d.value())
+          .showLabels(options[0].value);
 
         data = graph.formatData.call(graph)
         #data = graph.exampleData.call(graph)
@@ -76,9 +75,18 @@
     dataFormat: ->
       [
         {
-          name: "default"
-          type: "numeric"
+          name: "default",
+          type: "numeric",
           multiple: true
+        }
+      ]
+
+    options: ->
+      [
+        {
+        	label: "Show/Hide Labels"
+        	type: "checkbox"
+        	default: true
         }
       ]
 
