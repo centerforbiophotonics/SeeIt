@@ -45,6 +45,7 @@
 			#Data will be an array of DataColumns
 			@labels = []
 			@headers = []
+			@types = []
 			@rawFormat = Dataset.getFormat(data)
 			@data = []
 			extend(@, ConverterFactory(@rawFormat))
@@ -68,6 +69,7 @@
 			if Dataset.validateData(data)
 				@rawData = data
 				@formatRawData()
+				@getColTypes()
 				@initData()
 				@trigger("data:loaded")
 			else
@@ -87,6 +89,13 @@
 				obj.dataset.columns.push d.toJson()
 
 			return obj
+
+		getType: (d) ->
+			switch typeof d
+				when "number"
+					return "numeric"
+				else
+					return "categorical"
 
 		registerListeners: ->
 			self = @
@@ -116,6 +125,15 @@
 
 			@on 'row:create', (row) ->
 				self.createRow.call(self, row)
+
+			@on 'dataColumn:type:change', (col, type, callback) ->
+
+				self.data[col].setType(type, (success, msg) ->
+					if success then self.types[col] = type
+
+					callback(success, msg)
+				)
+
 
 		generateLabel: (labels) ->
 			i = 1
@@ -211,6 +229,10 @@
 
 					maxCols
 
+				getColTypes: ->
+					for i in [1...@rawDataCols()]
+						@types.push(@getType(@rawData[1][i]))
+
 				padRows: (maxCols) ->
 					for i in [0...@rawDataRows()]
 						if @rawData[i].length < maxCols
@@ -226,7 +248,7 @@
 					console.log "EDITABLE: #{@editable}"
 					# Assume data is already in array of arrays format and is uniformly padded with 'undefined's
 					for i in [1...@rawDataCols()]
-						@data.push(SeeIt.DataColumn.new(@app, @rawData, i, @title, undefined, @editable))
+						@data.push(SeeIt.DataColumn.new(@app, @rawData, i, @title, @types[i], undefined, @editable))
 
 				rawDataRows: ->
 					@rawData.length
@@ -265,10 +287,14 @@
 					for i in [0...@rawData.columns.length]
 						@headers.push(@toString(@rawData.columns[i].header))
 
+				getColTypes: ->
+					for i in [0...@rawData.columns.length]
+						@types.push(@rawData.columns[i].type)
+
 				initData: ->
 					console.log "EDITABLE: #{@editable}"
 					for i in [0...@rawData.columns.length]
-						@data.push(SeeIt.DataColumn.new(@app, @rawData, i, @title, undefined, @editable))
+						@data.push(SeeIt.DataColumn.new(@app, @rawData, i, @title, @types[i], undefined, @editable))
 
 			}
 

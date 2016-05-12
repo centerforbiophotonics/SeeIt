@@ -19,69 +19,135 @@
 
       if !@graph.options().length then @container.find('.options-button').hide()
 
+      @initDataContainers()
+
     addData: (data) ->
       console.log data
       for j in [0...data.length]
         this_data = data[j]
 
-        datasetIdx = -1
+        ((this_data) ->
+          datasetIdx = -1
 
-        @dataset.forEach (d, i) ->
-          if d.name == this_data.name then datasetIdx = i
+          @dataset.forEach (d, i) ->
+            if d.name == this_data.name then datasetIdx = i
 
-        if datasetIdx != -1
-          dataIdx = @dataset[datasetIdx].data.indexOf(this_data.data)
+          if datasetIdx != -1
+            dataIdx = @dataset[datasetIdx].data.indexOf(this_data.data)
 
-          if dataIdx == -1
-            @dataset[datasetIdx].data.push(this_data.data)
+            if dataIdx == -1
+              @dataset[datasetIdx].data.push(this_data.data)
 
-            self = @
+              self = @
 
-            @listenTo(this_data.data, 'label:changed', (idx) ->
-              self.graph.trigger('label:changed', self.options.getValues())
-            )
+              @listenTo(this_data.data, 'label:changed', (idx) ->
+                self.graph.trigger('label:changed', self.options.getValues())
+              )
 
-            @listenTo(this_data.data, 'color:changed', ->
-              self.graph.trigger('color:changed', self.options.getValues())
-            )
+              @listenTo(this_data.data, 'color:changed', ->
+                self.graph.trigger('color:changed', self.options.getValues())
+              )
 
-            @listenTo(this_data.data, 'header:changed', ->
-              self.graph.trigger('header:changed', self.options.getValues())
-            )
+              @listenTo(this_data.data, 'header:changed', ->
+                self.graph.trigger('header:changed', self.options.getValues())
+              )
 
-            @listenTo(this_data.data, 'data:destroyed', ->
-              self.graph.trigger('data:destroyed', self.options.getValues())
-            )
+              @listenTo(this_data.data, 'data:destroyed', ->
+                self.graph.trigger('data:destroyed', self.options.getValues())
+              )
 
-            @listenTo(this_data.data, 'data:created', ->
-              self.graph.trigger('data:created', self.options.getValues())
-            )
+              @listenTo(this_data.data, 'data:created', ->
+                self.graph.trigger('data:created', self.options.getValues())
+              )
 
-            @listenTo(this_data.data, 'data:changed', ->
-              self.graph.trigger('data:changed', self.options.getValues())
-            )
+              @listenTo(this_data.data, 'data:changed', ->
+                self.graph.trigger('data:changed', self.options.getValues())
+              )
 
-            @listenTo(this_data.data, 'destroy', ->
-              datasetIdx = -1
+              @listenTo(this_data.data, 'destroy', ->
+                console.log this_data, @dataset[0].data[2]
+                datasetIdx = -1
 
 
-              self.dataset.forEach (d, i) ->
-                if d.name == this_data.name then datasetIdx = i
+                self.dataset.forEach (d, i) ->
+                  if d.name == this_data.name then datasetIdx = i
 
-              if datasetIdx >= 0
-                colToDestroy = self.dataset[datasetIdx].data.indexOf(this_data.data)
+                if datasetIdx >= 0
+                  colToDestroy = self.dataset[datasetIdx].data.indexOf(this_data.data)
 
-                if colToDestroy >= 0
-                  self.dataset[datasetIdx].data.splice(colToDestroy, 1)
-                  self.graph.trigger('column:destroyed', self.options.getValues())
-            )
+                  console.log colToDestroy
+                  if colToDestroy >= 0
+                    self.dataset[datasetIdx].data.splice(colToDestroy, 1)
+                    self.graph.trigger('column:destroyed', self.options.getValues())
 
-            if j == data.length - 1
-              if !@initialized
-                @initGraph()
-                @initialized = true
+                self.updateFooterData.call(self)
+              )
 
-              @graph.trigger('data:assigned', self.options.getValues())
+              @addDataToFooter(this_data)
+
+              if j == data.length - 1
+                if !@initialized
+                  @initGraph()
+                  @initialized = true
+
+                @graph.trigger('data:assigned', self.options.getValues())
+        ).call(@, this_data)
+
+    addDataToFooter: (data) ->
+      self = @
+
+      @container.find(".data-drop-zone[data-id='#{data.name}']").append("""
+        <div class="SeeIt data-rep btn-group" role="group" data-id='#{data.data.header}'>
+          <button class="SeeIt data-rep-color btn btn-default" style="background-color: #{data.data.color}"></button>
+          <button class="SeeIt data-rep-text btn btn-default">#{data.data.header}</button>
+          <button class="SeeIt data-rep-remove btn btn-default"><span class="glyphicon glyphicon-remove"></span></button>
+        </div>
+      """)
+
+      @container.find(".data-rep[data-id='#{data.data.header}'] .data-rep-remove").on 'click', ->
+        console.log "removeData called"
+        self.removeData.call(self, data)
+
+      @container.find(".data-rep[data-id='#{data.data.header}'] .data-rep-text").on 'click', ->
+        msg = """
+          <b>Dataset:</b> #{data.data.datasetTitle}
+          <br>
+          <b>Data Type:</b> #{data.data.type}
+        """
+
+        tip = new Opentip($(@), msg, {target: $(@), showOn: "creation"})
+        tip.setTimeout(->
+          tip.hide.call(tip)
+          return
+        , 5)
+      
+
+    updateFooterData: ->
+      self = @
+
+      @container.find(".data-rep").remove()
+
+      @dataset.forEach (role) ->
+        console.log role
+        role.data.forEach (d) ->
+          console.log d
+          self.addDataToFooter.call(self, {name: role.name, data: d})
+
+    removeDataFromFooter: (data) ->
+      @container.find(".data-drop-zone[data-id='#{data.name}'] .data-rep[data-id='#{data.data.header}']").remove()
+
+    removeData: (data) ->
+      console.log @dataset
+      dataset_idx = @dataset.map((d) -> d.name).indexOf(data.name)
+
+      if dataset_idx >= 0
+        console.log @dataset[dataset_idx]
+        idx = @dataset[dataset_idx].data.indexOf(data.data)
+        if idx >= 0
+          console.log "data found"
+          @dataset[dataset_idx].data.splice(idx, 1)
+          @graph.trigger('data:destroyed', @options.getValues())
+          @removeDataFromFooter(data)
 
     initGraph: ->
       self = @
@@ -126,6 +192,9 @@
           console.log "collapse called"
           graph.collapse.call(graph)
 
+        collapseFooter: ->
+          graph.collapseFooter.call(graph)
+
         editTitle: ->
           if !graph.editing
             graph.container.find(".graph-title-content").html("<input id='graph-title-input' type='text' value='#{graph.id}'>")
@@ -157,6 +226,7 @@
               <span class="SeeIt graph-title-edit-icon glyphicon glyphicon-pencil"></span>
             </div>
             <div class="btn-group" role="group" style="float: right">
+              <button class="collapse-footer btn btn-default"><span data-id="#{@id}" class="glyphicon glyphicon-chevron-up"></span></button>
               <button class="collapse-btn btn btn-default"><span data-id="#{@id}" class="glyphicon glyphicon-collapse-down"></span></ button>
               <button class="maximize btn btn-default"><span data-id="#{@id}" class="glyphicon glyphicon-resize-full"></span></button>
               #{if @graph_editable then '<button class="remove btn btn-default"><span data-id="#{@id}" class="glyphicon glyphicon-remove"></span></button>' else ''}
@@ -168,6 +238,10 @@
               <div class="SeeIt graph-wrapper"></div>
             </div>
           </div>
+          <div class="SeeIt panel-footer container-fluid">
+            <div class="SeeIt footer-row row"></div>
+            <div class="SeeIt footer-expanded-row row"></div>
+          </div>
         </div>
       """)
 
@@ -176,6 +250,42 @@
       @container.find(".maximize").on('click', @handlers.maximize)
       @container.find(".collapse-btn").on('click', @handlers.collapse)
       @container.find(".graph-title-edit-icon").on('click', @handlers.editTitle)
+      @container.find(".collapse-footer").on('click', @handlers.collapseFooter)
+
+
+    initDataContainers: ->
+      self = @
+      dataFormat = @graph.dataFormat()
+
+      cols = Math.floor(12 / dataFormat.length)
+
+      dataFormat.forEach (role) ->
+        self.container.find('.footer-row').append("""
+          <div class='SeeIt data-drop-zone-container col-lg-#{cols}'>
+            <h3 class='SeeIt role-name text-center'>#{if dataFormat.length > 1 then role.name else "Data"}</h3>
+            <div class='SeeIt data-drop-zone' data-id="#{role.name}">
+              <button class="SeeIt btn btn-default expand-data" data-id="#{role.name}"><span data-id="#{role.name}" class="glyphicon glyphicon-collapse-down"></span></ button>
+            </div>
+          </div>
+        """)
+
+        self.container.find('.footer-expanded-row').append("""
+          <div class='SeeIt expanded-data-container' data-id="#{role.name}">
+            <div class='SeeIt expanded-data-zone'>
+              <h3 class='text-center SeeIt filters-header'>Filters</h3>
+              <button class="SeeIt add-filter-group btn btn-primary text-center"><div class='SeeIt icon-container'><span class='glyphicon glyphicon-plus'></span></div>Add filter group</button>
+            </div>
+          </div>
+        """)
+
+        self.container.find(".expand-data[data-id='#{role.name}']").on('click', (event) ->
+          self.expandRoleField.call(self, role.name)
+        )
+
+    expandRoleField: (role) ->
+      console.log @container.find(".expanded-data-container[data-id='#{role}']")
+      @container.find(".expanded-data-container[data-id='#{role}']").slideToggle()
+      @container.find(".expand-data span[data-id='#{role}']").toggleClass('glyphicon-collapse-down glyphicon-collapse-up')
 
     destroy: ->
       if @graph then @graph.destroy()
@@ -201,6 +311,10 @@
       @container.find("#collapse_#{@id.split(' ').join('-')}").toggleClass('in')
       @container.find('.collapse-btn .glyphicon').toggleClass('glyphicon-collapse-down glyphicon-collapse-up')
       @collapsed = !@collapsed
+
+    collapseFooter: ->
+      @container.find(".panel-footer").slideToggle()
+      @container.find(".collapse-footer span").toggleClass("glyphicon-chevron-up glyphicon-chevron-down")
 
   GraphView
 ).call(@)

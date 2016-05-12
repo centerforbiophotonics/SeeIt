@@ -2,7 +2,7 @@
   class DataColumn
     _.extend(@prototype, Backbone.Events)
     
-    constructor: (@app, @header, data, @datasetTitle, @color, editable = true) ->
+    constructor: (@app, @header, data, @datasetTitle, @type, @color, editable = true) ->
       if !@color then @color = SeeIt.Utils.getRandomColor()
 
       dataArray = []
@@ -37,6 +37,20 @@
       @getValue = (idx) ->
         return data[idx].value
 
+      @setType = (type, callback) ->
+        if type == "numeric"
+          for i in [0...data.length]
+            if isNaN(parseFloat(data[i].value))
+              callback(false, "Could not change type to numeric because column has non-numeric values")
+              return
+
+        @type = type
+        for i in [0...data.length]
+          data[i].value = if @type == "numeric" then parseFloat(data[i].value) else data[i].value + ''
+
+        callback(true, "Data type changed to #{type}")
+
+
       @compact = ->
         if @staleData then setDataArray()
 
@@ -64,7 +78,7 @@
       @toJson = ->
         {
           header: @header,
-          type: "numeric",
+          type: @type,
           data: @data.map (d) ->
             d.value
         }

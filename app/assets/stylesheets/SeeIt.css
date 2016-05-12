@@ -170,6 +170,91 @@
   overflow-y: auto;
 }
 
+div.SeeIt.footer-row.row, div.SeeIt.footer-expanded-row.row {
+  margin-right: -5px;
+  margin-left: -5px;
+}
+
+div.SeeIt.footer-expanded-row.row {
+
+}
+
+.SeeIt.data-rep {
+  border-radius: 4px;
+  min-height: 44px;
+  margin: 2px;
+}
+
+.SeeIt.expanded-data-container {
+  display: none;
+}
+
+.SeeIt.data-rep-remove, .SeeIt.data-rep-text, .SeeIt.data-rep-color {
+  height: 44px;
+}
+
+.SeeIt.data-rep-remove {
+  min-width: 15px;
+  background-color: #BBBBBB;
+  padding: 10px;
+}
+
+.SeeIt.data-rep-text {
+  padding: 10px 5px;
+  min-width: 40px;
+}
+
+div.SeeIt.data-rep {
+  display: inline-block;
+}
+
+div.SeeIt.data-drop-zone-container, div.SeeIt.expanded-data-container {
+/*  border: 1px inset grey;*/
+  padding-right: 5px;
+  padding-left: 5px;
+
+}
+
+.SeeIt.filters-header {
+  font-size: 20px;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.SeeIt.expand-data {
+  float: right;
+  min-height: 48px;
+  min-width: 48px;
+}
+
+.SeeIt.add-filter-group {
+  width: 100%;
+}
+
+h3.SeeIt.role-name {
+  margin: 0;
+  font-size: 20px;
+}
+
+div.SeeIt.data-drop-zone {
+  background-color: white;
+  border: 1px inset black;
+  min-height: 50px;
+  border-radius: 4px;
+}
+
+div.SeeIt.expanded-data-zone {
+  background-color: white;
+  border: 1px inset black;
+  border-radius: 4px;
+  min-height: 100px;
+}
+
+/*div.SeeIt.footer-row.row {
+  margin-left: -10px;
+  margin-right: -10px;
+}*/
+
 
 .SeeIt.hidden {
   display: none
@@ -195,6 +280,10 @@
 
 .SeeIt.graph-panel {
   height: 100%;
+}
+
+.SeeIt.icon-container {
+  display: inline-block;
 }
 
 .addGraph .iconContainer {

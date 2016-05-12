@@ -267,6 +267,31 @@
               name: "Insert column on the right",
               callback: (key, options) ->
                 spreadsheetView.dataset.trigger('dataColumn:create', options.end.col + 1)
+            },
+            "change_col_type": {
+              key: "change_col_type",
+              name: "Change data type",
+              "submenu": {
+                items: [
+                  {
+                    key: "change_col_type:numeric"
+                    name: "Numeric",
+                    callback: (key, options) ->
+                      console.log key, options
+                      spreadsheetView.dataset.trigger('dataColumn:type:change', options.end.col, "numeric", (success, msg) ->
+                        spreadsheetView.displayTypeChangeMsg(options.end.col, success, msg)
+                      )
+                  },
+                  {
+                    key: "change_col_type:categorical",
+                    name: "Categorical",
+                    callback: (key, options) ->
+                      spreadsheetView.dataset.trigger('dataColumn:type:change', options.end.col, "categorical", (success, msg) ->
+                        spreadsheetView.displayTypeChangeMsg(options.end.col, success, msg)
+                      )
+                  }
+                ]
+              }
             }
           }
         },
@@ -285,6 +310,20 @@
 
       @container.find("td").css('text-align', 'center')
 
+    displayTypeChangeMsg: (col, success, msg) ->
+      $anchor = $(@container.find("th")[col])
+      if success
+        @hot.updateSettings({ columns: privateMethods.formatColumns() })
+
+      setTimeout(->
+          tip = new Opentip($anchor, msg, {style: (if success then "standard" else "alert"), target: $anchor, showOn: "creation"})
+          tip.setTimeout(->
+            tip.hide.call(tip)
+            return
+          , 5)
+        , 100)        
+      
+
     toggleVisible: ->
       @container.toggleClass('hidden')
       @visible = !@visible
@@ -294,7 +333,7 @@
       columns = []
 
       for i in [0...privateMembers.dataset.data.length]
-        column = {data: this.property(i), type: 'numeric'}
+        column = {data: this.property(i), type: if privateMembers.dataset.data[i].type == "numeric" then "numeric" else "text"}
         if !privateMembers.dataset.editable then column.editor = false
         columns.push(column)
 
