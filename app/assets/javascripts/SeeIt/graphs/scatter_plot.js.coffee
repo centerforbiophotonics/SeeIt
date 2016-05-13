@@ -9,6 +9,8 @@
 		formatData: ->
 			data = []
 			groups = {}
+			shapes = ['circle', 'cross', 'triangle-up', 'triangle-down', 'diamond', 'square']
+			random = d3.random.normal()
 
 			if @datasetValid()
 				@dataset.forEach (data) ->
@@ -22,6 +24,12 @@
 						else
 							groups[d.label()].y = d.value()
 
+						getRandomIntInclusive = (min, max) ->
+							Math.floor(Math.random() * (max - min + 1)) + min
+
+						groups[d.label()].size = Math.random()
+						groups[d.label()].shape = if Math.random() > 0.9 then shapes[getRandomIntInclusive(1,5)] else 'circle'
+
 				for key, val of groups
 					data.push {key: key, values: [val]}
 
@@ -29,7 +37,6 @@
 
 		initListeners: ->
 			self = @
-
 			@eventCallbacks['data:created'] =  (options) ->
 				if self.allRolesFilled()
 					if !self.rendered
