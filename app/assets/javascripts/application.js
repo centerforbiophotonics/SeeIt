@@ -42,6 +42,8 @@
 //= require SeeIt/graph
 //= require SeeIt/graph_options
 //= require_tree ./SeeIt/graphs
+//= require SeeIt/filter
+//= require SeeIt/filter_group
 //= require SeeIt/graph_view
 //= require SeeIt/graph_collection_view
 //= require SeeIt/application_view
