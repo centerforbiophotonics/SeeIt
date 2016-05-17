@@ -256,6 +256,15 @@
         app.trigger('graph:id:change', oldId, newId)
       )
 
+      @listenTo app.graphCollectionView, 'request:dataset_names', (cb) ->
+        app.trigger 'request:dataset_names', cb
+
+      @listenTo app.graphCollectionView, 'request:columns', (dataset, cb) ->
+        app.trigger 'request:columns', dataset, cb
+
+      @listenTo app.graphCollectionView, 'request:values:unique', (dataset, colIdx, cb) ->
+        app.trigger 'request:values:unique', dataset, colIdx, cb
+
     ###*
       # Toggles visibility of SpreadsheetView
     ###

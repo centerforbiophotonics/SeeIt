@@ -27,6 +27,24 @@
         self.addDataset.call(self, data)
       )
 
+      @listenTo @app, 'request:dataset_names', (callback) ->
+        datasets = self.datasets.map((d) -> d.title)
+        callback(datasets)
+
+      @listenTo @app, 'request:columns', (dataset, callback) ->
+        found_dataset = self.datasets.filter((d) -> d.title == dataset)
+
+        if found_dataset.length
+          found_dataset = found_dataset[0]
+          found_dataset.trigger 'request:columns', callback
+
+      @listenTo @app, 'request:values:unique', (dataset, colIdx, callback) ->
+        found_dataset = self.datasets.filter((d) -> d.title == dataset)
+
+        if found_dataset.length
+          found_dataset = found_dataset[0]
+          found_dataset.trigger 'request:values:unique', colIdx, callback  
+
     getByTitle: (dataset_title) ->
       for i in [0...@datasets.length]
         if dataset_title == @datasets[i].title

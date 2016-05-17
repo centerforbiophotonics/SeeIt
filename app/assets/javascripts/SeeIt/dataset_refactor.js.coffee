@@ -134,6 +134,12 @@
 					callback(success, msg)
 				)
 
+			@on 'request:columns', (callback) ->
+				callback(self.data, self.types)
+
+			@on 'request:values:unique', (colIdx, callback) ->
+				console.log "calling callback in dataset"
+				callback self.data[colIdx].uniqueData()
 
 		generateLabel: (labels) ->
 			i = 1
@@ -271,20 +277,24 @@
 
 					@initHeaders()
 
+				toString: (val) ->
+					return val + ''
+
 				addLabels: ->
 					for i in [0...@rawData.columns.length]
 						for j in [0...@rawData.columns[i].data.length]
-							@labels.push(j+1)
+							@labels.push(@toString(j+1))
 
 					@rawData.labels = @labels          
 					@isLabeled = true
 
 				stringifyLabels: ->
 					for i in [0...@rawData.labels.length]
-						@labels.push(@rawData.labels[i])
+						@labels.push(@toString(@rawData.labels[i]))
 
 				initHeaders: ->
 					for i in [0...@rawData.columns.length]
+						console.log @rawData.columns[i].header
 						@headers.push(@toString(@rawData.columns[i].header))
 
 				getColTypes: ->

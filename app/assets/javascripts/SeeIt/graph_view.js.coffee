@@ -271,8 +271,8 @@
 
         self.container.find('.footer-expanded-row').append("""
           <div class='SeeIt expanded-data-container' data-id="#{role.name}">
-            <div class='SeeIt expanded-data-zone'>
-              <h3 class='text-center SeeIt filters-header'>Filters</h3>
+            <div class='SeeIt expanded-data-zone text-center'>
+              <h3 class='text-center SeeIt filters-header append-anchor' data-id="#{role.name}">Filters</h3>
               <button class="SeeIt add-filter-group btn btn-primary text-center"><div class='SeeIt icon-container'><span class='glyphicon glyphicon-plus'></span></div>Add filter group</button>
             </div>
           </div>
@@ -282,8 +282,183 @@
           self.expandRoleField.call(self, role.name)
         )
 
+        self.container.find(".expanded-data-container[data-id='#{role.name}'] .add-filter-group").on 'click', (event) ->
+          console.log "add filter group clicked"
+          self.addFilterGroup.call(self, role.name)
+
+    addFilterGroup: (role) ->
+      self = @
+
+      @trigger 'request:dataset_names', (datasets) ->
+
+        self.container.find(".expanded-data-container[data-id='#{role}'] .append-anchor").after("""
+          <div class='SeeIt filter-group' data-id='#{role}'>
+            <div class='SeeIt filter-group-tools'>
+              <div class='SeeIt form-group'>
+                <label for='filter-group-type' class='filter-group-type'>Filter group type:</label>
+                <select name='filter-group-type' class='form-control SeeIt filter-group-type'>
+                  <option val='AND'>All filters must be met</option>
+                  <option val='OR'>At least one filter must be met</option>
+                </select>
+              </div>
+              <button class="SeeIt add-filter btn btn-primary text-center">
+                <div class='SeeIt icon-container'>
+                  <span class='glyphicon glyphicon-plus'></span>
+                </div>
+                Add filter
+              </button>
+              <button class="SeeIt remove-filter-group btn btn-primary text-center">
+                <div class='SeeIt icon-container'>
+                  <span class='glyphicon glyphicon-minus'></span>
+                </div>
+                Remove filter group
+              </button>
+            </div>
+          </div>
+        """)
+
+        this_container = self.container.find(".filter-group[data-id='#{role}']:last")
+
+        self.container.find(".append-anchor").removeClass('append-anchor')
+        self.container.find(".filter-group[data-id='#{role}']:last").addClass('append-anchor')
+
+        self.container.find(".filter-group[data-id='#{role}']:last .add-filter").on 'click', (event) ->
+          self.addFilterContent.call(self, this_container, datasets, role)
+
+        this_container.find('.remove-filter-group').on 'click', (event) ->
+          self.removeFilterGroup.call(self, this_container)
+
+        self.addFilterContent(this_container, datasets, role)
+
+
+    removeFilterGroup: (group) ->
+      parent = group.parent()
+      group.remove()
+      @placeAppendAnchor(parent)
+
+    placeAppendAnchor: (container) ->
+      if !container.find('.append-anchor').length
+        if container.find(".filter-group:last").length
+          container.find(".filter-group:last").addClass('append-anchor')
+        else
+          container.find('.filters-header').addClass('append-anchor')
+
+    addFilterContent: (parent, datasets, role) ->
+      self = @
+
+      parent.find('.filter-group-tools').before("""
+        <div class='filter panel panel-default SeeIt'>
+          <div class='SeeIt panel-body form-group'>
+            <label for='dataset'>Filter by column from dataset:</label>
+            <select class="form-control dataset-select" name='dataset' placeholder='Dataset'>
+            </select>
+            <label class='hidden data-column' for="dataColumn">Select a column to filter by:</label>
+            <select class="data-column data-column-select form-control hidden" name="dataColumn">
+            </select>
+            <label class='SeeIt numeric-filter hidden' for='numeric-filter-comparison'>Only inlclude data points</label>
+            <select class='SeeIt numeric-filter numeric-filter-comparison hidden form-control' name='numeric-filter-comparison'>
+              <option val="lt">Less than</option>
+              <option val="lte">Less than or equal to</option>
+              <option val="eq">Equal to</option>
+              <option val="neq">Not equal to</option>
+              <option val="gte">Greater than or equal to</option>
+              <option val="gt">Greater than</option>
+            </select>
+            <input class="SeeIt numeric-filter filter-value numeric-filter-value hidden form-control" placeholder="Specify number" name="numeric-filter-value" type="number">
+            <label class='SeeIt categorical-filter hidden' for='categorical-filter-comparison'>Only include data points</label>
+            <select class='SeeIt categorical-filter categorical-filter-comparison form-control hidden' name='categorical-filter-comparison'>
+              <option val="eq">Equal to</option>
+              <option val="neq">Not equal to</option>
+            </select>
+            <select class='SeeIt categorical-filter filter-value categorical-filter-value hidden form-control' name='categorical-filter-value'>
+            </select>  
+            <button class="SeeIt remove-filter btn btn-primary text-center">
+              <div class='SeeIt icon-container'>
+                <span class='glyphicon glyphicon-minus'></span>
+              </div>
+              Remove filter
+            </button>
+          </div>
+        </div>   
+      """)
+
+
+      this_container = parent
+      this_filter = this_container.find('.filter:last')
+
+      @populateDatasetSelect(this_filter, this_filter.find('.dataset-select'), datasets)
+
+      this_filter.find('.remove-filter').on 'click', (event) ->
+        self.removeFilter.call(self, this_filter)
+
+
+    populateDatasetSelect: (this_filter, select, datasets, selected_dataset) ->
+      self = @
+
+      options = '<option value="" selected disabled>Please select a dataset</option>'
+
+      datasets.forEach (d) ->
+        options += "<option value='#{d}'>#{d}</option>"
+
+      select.html(options)
+
+      select.on 'change', (event) ->
+        dataset = $(@).val()
+        self.trigger 'request:columns', dataset, (columns, types) ->
+          self.populateColumnSelect.call(self, this_filter, columns, types)
+
+      if selected_dataset then select.val(selected_dataset)
+
+    populateColumnSelect: (filter, columns, types, selected, value) ->
+      self = @
+
+      filter.find(".data-column-select").html("""
+        #{"<option val='' selected disabled>Please select a column</option>" + columns.map((col) -> "<option val='#{col.header}'>#{col.header}</option>" ).join("")}
+      """)
+
+      self.registerDataListeners.call(self, filter, columns)
+
+      filter.find(".data-column").removeClass('hidden')
+
+      filter.find(".data-column-select").on 'change', (event) ->
+        self.initValueField.call(self, filter, columns, types, value)
+
+      if selected then filter.find(".data-column-select").val(selected)
+
+
+    initValueField: (filter, columns, types, value) ->
+      self = @
+      idx = columns.map((col) -> col.header).indexOf($(@).val())
+      type = types[idx]
+
+      if type == "numeric" 
+        filter.find(".categorical-filter").addClass("hidden")
+        filter.find(".numeric-filter").removeClass("hidden")
+      else if type == "categorical"
+        self.trigger 'request:values:unique', dataset, idx, (values) ->
+          filter.find(".numeric-filter").addClass("hidden")
+          filter.find(".categorical-filter-value").html("""
+            #{"<option val='' selected disabled>Please select values to filter by</option>" + values.map((d) -> "<option value='#{d}'>#{d}</option>").join("")}
+          """)
+          filter.find(".categorical-filter").removeClass("hidden")  
+
+      if value != null && value != undefiend then filter.find(".filter-value").val(value) 
+
+
+    registerDataListeners: (filter, columns) ->
+      self = @
+
+      columns.forEach (column) ->
+        column.on 'data:changed', ->
+
+
+    removeFilter: (filter) ->
+      parent = filter.parent()
+      filter.remove()
+
+      if !parent.find('.filter').length then @removeFilterGroup(parent)
+
     expandRoleField: (role) ->
-      console.log @container.find(".expanded-data-container[data-id='#{role}']")
       @container.find(".expanded-data-container[data-id='#{role}']").slideToggle()
       @container.find(".expand-data span[data-id='#{role}']").toggleClass('glyphicon-collapse-down glyphicon-collapse-up')
 

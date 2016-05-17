@@ -99,6 +99,15 @@
       @listenTo newGraph, 'graphSettings:get', (graphName, cb) ->
         self.trigger('graphSettings:get', graphName, cb)
 
+      @listenTo newGraph, 'request:dataset_names', (cb) ->
+        self.trigger 'request:dataset_names', cb
+
+      @listenTo newGraph, 'request:columns', (dataset, cb) ->
+        self.trigger 'request:columns', dataset, cb
+
+      @listenTo newGraph, 'request:values:unique', (dataset, colIdx, callback) ->
+        self.trigger 'request:values:unique', dataset, colIdx, callback
+
       newGraph.trigger('request:dataRoles', (dataRoles) ->
         self.trigger('graph:created', self.graphId, dataRoles)
       )

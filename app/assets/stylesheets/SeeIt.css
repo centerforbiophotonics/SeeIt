@@ -227,7 +227,15 @@ div.SeeIt.data-drop-zone-container, div.SeeIt.expanded-data-container {
   min-width: 48px;
 }
 
-.SeeIt.add-filter-group {
+
+.SeeIt.add-filter, .SeeIt.remove-filter-group {
+  display: inline-block;
+  margin-top: 10px;
+  width: 40%;
+}
+
+.SeeIt.add-filter-group, .SeeIt.remove-filter {
+  margin-top: 10px;
   width: 100%;
 }
 
@@ -238,16 +246,18 @@ h3.SeeIt.role-name {
 
 div.SeeIt.data-drop-zone {
   background-color: white;
-  border: 1px inset black;
+  border: 1px inset transparent;
   min-height: 50px;
   border-radius: 4px;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.05);
 }
 
 div.SeeIt.expanded-data-zone {
   background-color: white;
-  border: 1px inset black;
+  border: 1px inset transparent;
   border-radius: 4px;
   min-height: 100px;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.05);
 }
 
 /*div.SeeIt.footer-row.row {
@@ -280,6 +290,21 @@ div.SeeIt.expanded-data-zone {
 
 .SeeIt.graph-panel {
   height: 100%;
+}
+
+.SeeIt.numeric-filter, .SeeIt.categorical-filter,
+.SeeIt.filter-group-type  {
+  margin-top: 10px;
+  display: inline-block;
+  width: auto;
+}
+
+.SeeIt.filter-group {
+  margin: 10px;
+  padding: 5px;
+  border-radius: 4px;
+  border: 1px solid black;
+
 }
 
 .SeeIt.icon-container {

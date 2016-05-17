@@ -50,6 +50,8 @@
 
         callback(true, "Data type changed to #{type}")
 
+        @trigger('type:changed', type)
+
 
       @compact = ->
         if @staleData then setDataArray()
@@ -82,6 +84,16 @@
           data: @data.map (d) ->
             d.value
         }
+
+      @uniqueData = ->
+        unique_data = []
+
+        for i in [0...data.length]
+          if unique_data.indexOf(data[i].value) == -1
+            unique_data.push(data[i].value)
+
+        console.log unique_data
+        return unique_data
 
     setDatasetTitle: (title) ->
       @datasetTitle = title
