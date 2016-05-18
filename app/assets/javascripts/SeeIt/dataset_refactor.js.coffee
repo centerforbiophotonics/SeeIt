@@ -135,7 +135,7 @@
 				)
 
 			@on 'request:columns', (callback) ->
-				callback(self.data, self.types)
+				callback(self.data.slice(0), self.types.slice(0))
 
 			@on 'request:values:unique', (colIdx, callback) ->
 				console.log "calling callback in dataset"

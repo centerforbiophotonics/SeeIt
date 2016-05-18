@@ -265,6 +265,9 @@
       @listenTo app.graphCollectionView, 'request:values:unique', (dataset, colIdx, cb) ->
         app.trigger 'request:values:unique', dataset, colIdx, cb
 
+      @listenTo app.graphCollectionView, 'request:dataset', (name, callback) ->
+        app.trigger 'request:dataset', name, callback
+
     ###*
       # Toggles visibility of SpreadsheetView
     ###

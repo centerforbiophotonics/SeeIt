@@ -105,6 +105,10 @@
         </div>
       """)
 
+      item = @container.find(".data-drop-zone[data-id='#{data.name}']:last .data-rep-color")
+      @listenTo data.data, 'color:changed', ->
+        item.css('background-color', data.data.color)
+
       @container.find(".data-rep[data-id='#{data.data.header}'] .data-rep-remove").on 'click', ->
         console.log "removeData called"
         self.removeData.call(self, data)
@@ -274,7 +278,13 @@
           <div class='SeeIt expanded-data-container' data-id="#{role.name}">
             <div class='SeeIt expanded-data-zone text-center'>
               <h3 class='text-center SeeIt filters-header append-anchor' data-id="#{role.name}">Filters</h3>
+              <label for='filter-group-requirements' class='filter-group-requirements'>Filter group requirements:</label>
+              <select name='filter-group-requirements' class='form-control SeeIt filter-group-requirements'>
+                <option val='AND'>All filter groups must be fulifilled</option>
+                <option val='OR'>At least one filter group must be fulfilled</option>
+              </select>
               <button class="SeeIt add-filter-group btn btn-primary text-center"><div class='SeeIt icon-container'><span class='glyphicon glyphicon-plus'></span></div>Add filter group</button>
+                <button class="SeeIt save-filters btn btn-success text-center"><div class='SeeIt icon-container'><span class='glyphicon glyphicon-ok'></span></div>Save Filters</button>
             </div>
           </div>
         """)
@@ -311,6 +321,12 @@
 
       @listenTo filter_group, 'request:columns', (dataset, callback) ->
         self.trigger 'request:columns', dataset, callback
+
+      @listenTo filter_group, 'request:values:unique', (dataset, idx, callback) ->
+        self.trigger 'request:values:unique', dataset, idx, callback
+
+      @listenTo filter_group, 'request:dataset', (name, callback) ->
+        self.trigger 'request:dataset', name, callback
 
       filter_group.init()
 

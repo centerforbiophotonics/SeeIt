@@ -234,7 +234,7 @@ div.SeeIt.data-drop-zone-container, div.SeeIt.expanded-data-container {
   width: 40%;
 }
 
-.SeeIt.add-filter-group, .SeeIt.remove-filter {
+.SeeIt.add-filter-group, .SeeIt.remove-filter, .SeeIt.save-filters {
   margin-top: 10px;
   width: 100%;
 }
@@ -293,7 +293,7 @@ div.SeeIt.expanded-data-zone {
 }
 
 .SeeIt.numeric-filter, .SeeIt.categorical-filter,
-.SeeIt.filter-group-type  {
+.SeeIt.filter-group-type, .SeeIt.filter-group-requirements  {
   margin-top: 10px;
   display: inline-block;
   width: auto;
@@ -309,6 +309,7 @@ div.SeeIt.expanded-data-zone {
 
 .SeeIt.icon-container {
   display: inline-block;
+  padding-right: 10px;
 }
 
 .addGraph .iconContainer {

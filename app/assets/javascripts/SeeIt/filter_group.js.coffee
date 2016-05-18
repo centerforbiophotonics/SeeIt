@@ -8,10 +8,10 @@
       @container.html("""
         <div class='SeeIt filter-group-tools'>
           <div class='SeeIt form-group'>
-            <label for='filter-group-type' class='filter-group-type'>Filter group type:</label>
+            <label for='filter-group-type' class='filter-group-type'>Filter requirements:</label>
             <select name='filter-group-type' class='form-control SeeIt filter-group-type'>
-              <option val='AND'>All filters must be met</option>
-              <option val='OR'>At least one filter must be met</option>
+              <option val='AND'>All filters must be fulfilled</option>
+              <option val='OR'>At least one filter must be fulfilled</option>
             </select>
           </div>
           <button class="SeeIt add-filter btn btn-primary text-center">
@@ -61,6 +61,11 @@
 
       @listenTo filter, 'request:values:unique', (dataset, idx, callback) ->
         self.trigger 'request:values:unique', dataset, idx, callback
+
+      @listenTo filter, 'request:dataset', (name, callback) ->
+        self.trigger 'request:dataset', name, callback
+
+      filter.init()
 
       @filters.push filter
 

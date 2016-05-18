@@ -108,6 +108,9 @@
       @listenTo newGraph, 'request:values:unique', (dataset, colIdx, callback) ->
         self.trigger 'request:values:unique', dataset, colIdx, callback
 
+      @listenTo newGraph, 'request:dataset', (name, callback) ->
+        self.trigger 'request:dataset', name, callback
+
       newGraph.trigger('request:dataRoles', (dataRoles) ->
         self.trigger('graph:created', self.graphId, dataRoles)
       )

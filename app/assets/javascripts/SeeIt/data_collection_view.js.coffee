@@ -40,7 +40,6 @@
           d.trigger('graph:id:change', oldId, newId)   
       )
 
-
     initDatasetListeners: (datasetView) ->
       self = @
 
