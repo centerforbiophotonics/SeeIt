@@ -5,13 +5,15 @@
     constructor: (@container, @role) ->
       @filters = []
 
+      @filterOperator = null
+
       @container.html("""
         <div class='SeeIt filter-group-tools'>
           <div class='SeeIt form-group'>
             <label for='filter-group-type' class='filter-group-type'>Filter requirements:</label>
-            <select name='filter-group-type' class='form-control SeeIt filter-group-type'>
-              <option val='AND'>All filters must be fulfilled</option>
-              <option val='OR'>At least one filter must be fulfilled</option>
+            <select name='filter-group-type' class='form-control SeeIt filter-group-type filter-group-type-select'>
+              <option value='AND'>All filters must be fulfilled</option>
+              <option value='OR'>At least one filter must be fulfilled</option>
             </select>
           </div>
           <button class="SeeIt add-filter btn btn-primary text-center">
@@ -40,6 +42,44 @@
 
         self.container.find('.remove-filter-group').on 'click', (event) ->
           self.removeFilterGroup.call(self)
+
+    saveFilters: ->
+      self = @
+      @filterOperator = @container.find(".filter-group-type-select").val()
+
+      @filters.forEach (filter) ->
+        filter.save()
+
+
+    getFilter: ->
+      console.log @filterOperator
+      self = @
+
+      if @filterOperator == "AND"
+        return (dataColumn) ->
+          filteredData = [0...dataColumn.data().length]
+          console.log filteredData
+
+          self.filters.forEach (filter) ->
+            filteredData = _.intersection(filteredData, filter.filter(dataColumn))
+
+          return filteredData
+      else
+        return (dataColumn) ->
+          filteredData = []
+
+          self.filters.forEach (filter) ->
+            filteredData = _.union(filteredData, filter.filter(dataColumn))
+
+          return filteredData
+
+    validate: ->
+      valid = true
+
+      @filters.forEach (filter) ->
+        valid = filter.validate() && valid
+
+      return valid
 
     addFilter: (datasets) ->
       self = @

@@ -18,6 +18,8 @@
             self.draw.call(self, options)
           else
             self.refresh.call(self, options)
+        else
+          self.clearGraph.call(self)
 
       @eventCallbacks['data:assigned'] = @eventCallbacks['data:created']
       @eventCallbacks['data:destroyed'] = @eventCallbacks['data:created']
@@ -31,6 +33,10 @@
 
       for e, cb of @eventCallbacks
         @on e, cb
+
+    clearGraph: ->
+      @container.html("")
+      @rendered = false
 
     formatData: ->
       data = []

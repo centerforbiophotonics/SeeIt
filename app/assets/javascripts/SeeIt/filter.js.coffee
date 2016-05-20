@@ -5,6 +5,11 @@
     constructor: (@container, @datasets) ->
       @columns = []
 
+      @selectedDataset = null
+      @selectedColumn = null
+      @filterType = null
+      @filterData = null
+
       @container.html("""
         <div class='SeeIt panel-body form-group'>
           <label for='dataset'>Filter by column from dataset:</label>
@@ -58,8 +63,11 @@
       select.html(options)
 
       select.on 'change', (event) ->
+        self.selectedColumn = null
         dataset = $(@).val()
         self.container.find('.categorical-filter, .numeric-filter').addClass('hidden')
+
+        self.trigger 'dataset:select'
 
         self.trigger 'request:columns', dataset, (columns, types) ->
           self.populateColumnSelect.call(self, columns, types, dataset)
@@ -88,9 +96,84 @@
 
             old_title = this_dataset.title
 
+          self.on 'dataset:select', ->
+            self.selectedDataset = dataset_object
+
+
+    save: ->
+      @filterData = {
+        dataset: @selectedDataset,
+        column: @selectedColumn,
+        operator: (@container.find(
+            if @filterType == "numeric"
+              ".numeric-filter-comparison" 
+            else 
+              ".categorical-filter-comparison"
+          ).val()
+        )
+        value: (
+          if @filterType == "numeric"
+            parseFloat(@container.find(".numeric-filter-value").val())
+          else
+            @container.find(".categorical-filter-value").val()
+        )
+      }
+
+    filter: (dataColumn) ->
+      self = @
+
+      validData = []
+      columnHash = {}
+
+      console.log @filterType
+      console.log @filterData
+
+      @filterData.column.data().forEach (data) ->
+        columnHash[data.label()] = data.value()
+
+      console.log columnHash
+
+      console.log dataColumn.header
+      dataColumn.data().forEach (data, i) ->
+        value = data.value()
+        label = data.label()
+        console.log label, value, i
+
+        if label of columnHash && self.requirementMet(columnHash[label], self.filterData.value, self.filterData.operator)
+          validData.push i
+
+      console.log validData
+      return validData
+
+    requirementMet: (value, threshold, operator) ->
+      console.log "requirementMet called"
+      switch operator
+        when 'eq'
+          return value == threshold
+        when 'neq'
+          return value != threshold
+        when 'lt'
+          return value < threshold
+        when 'lte'
+          return value <= threshold
+        when 'gt'
+          return value > threshold
+        when 'gte'
+          return value >= threshold
+
+    validate: ->
+      return (
+        @container.find(".dataset-select").val() &&
+        @container.find(".data-column-select").val() &&
+        (
+          @container.find(".numeric-filter-value").val() && @container.find(".numeric-filter-value").is(':visible') ||
+          @container.find(".categorical-filter-value").val() && @container.find(".categorical-filter-value").is(':visible')
+        )
+      )
+
     populateColumnSelect: (columns, types, dataset, selected, value) ->
       self = @
-      console.log dataset
+
       @container.find(".data-column-select").html("""
         #{"<option value='' selected disabled>Please select a column</option>" + columns.map((col) -> "<option value='#{col.header}'>#{col.header}</option>" ).join("")}
       """)
@@ -100,12 +183,11 @@
       @container.find(".data-column").removeClass('hidden')
 
       handler = (event) ->
-        console.log 'handler called'
         self.initValueField.call(self, $(@), columns, types, dataset, value)
 
       @container.find(".data-column-select").off('change')
       @container.find(".data-column-select").on('change', handler)
-      
+
       if selected then @container.find(".data-column-select").val(selected)
 
 
@@ -113,12 +195,15 @@
       self = @
       idx = columns.map((col) -> col.header).indexOf($column_select.val())
       type = types[idx]
-      console.log dataset
+
+      @selectedColumn = columns[idx]
+
       if type == "numeric" 
+        @filterType = "numeric"
         @container.find(".categorical-filter").addClass("hidden")
         @container.find(".numeric-filter").removeClass("hidden")
       else if type == "categorical"
-        console.log dataset
+        @filterType = "categorical"
         @populateCategoricalSelect(dataset, idx, type, value)
 
 
@@ -127,7 +212,6 @@
       self = @
 
       @trigger 'request:values:unique', dataset, idx, (values) ->
-        console.log "in request:values:unique callback"
         self.container.find(".numeric-filter").addClass("hidden")
 
         self.container.find(".categorical-filter-value").html("""
@@ -155,12 +239,11 @@
               
 
         column.on 'type:changed', (type) ->
-          console.log 'in type:changed handler'
           old_type = types[i]
           types[i] = type
 
           if column.header == self.container.find('.data-column-select').val() && old_type != type
-            self.initValueField.call(self, self.container.find('.data-column-select'), columns, types)
+            self.initValueField.call(self, self.container.find('.data-column-select'), columns, types, dataset)
             self.placeOpentip.call(self, "Filter removed because column type changed", self.container.find('.filter-value:visible'))
 
 

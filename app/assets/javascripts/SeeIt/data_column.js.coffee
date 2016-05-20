@@ -21,10 +21,16 @@
 
       @staleData = false
 
+
+      @changeData = (_data) ->
+        data = _data
+        @staleData = true
+        @trigger('data:changed', @)
+
       @setValue = (idx, value) ->
         if editable
           data[idx].value = value
-          @trigger('data:changed',@)
+          @trigger('data:changed',@, idx)
           @staleData = true
           return true
 
@@ -41,14 +47,14 @@
         if type == "numeric"
           for i in [0...data.length]
             if isNaN(parseFloat(data[i].value))
-              callback(false, "Could not change type to numeric because column has non-numeric values")
+              if callback then callback(false, "Could not change type to numeric because column has non-numeric values")
               return
 
         @type = type
         for i in [0...data.length]
           data[i].value = if @type == "numeric" then parseFloat(data[i].value) else data[i].value + ''
 
-        callback(true, "Data type changed to #{type}")
+        if callback then callback(true, "Data type changed to #{type}")
 
         @trigger('type:changed', type)
 
@@ -92,8 +98,10 @@
           if unique_data.indexOf(data[i].value) == -1
             unique_data.push(data[i].value)
 
-        console.log unique_data
         return unique_data
+
+      @isEditable = ->
+        editable
 
     setDatasetTitle: (title) ->
       @datasetTitle = title

@@ -288,6 +288,10 @@ div.SeeIt.expanded-data-zone {
   min-height: 300px;
 */}
 
+.SeeIt-htCenter {
+  text-align: center !important;
+}
+
 .SeeIt.graph-panel {
   height: 100%;
 }

@@ -72,7 +72,6 @@
 
 
       @listenTo(@app, 'spreadsheet:load', (dataset) ->
-        console.log 'spreadsheet:load triggered', dataset
         if dataset != self.dataset
           self.updateDataset.call(self, dataset)
       )
@@ -158,8 +157,7 @@
 
             TH.appendChild(input)
 
-            TH.style.position = 'relative'
-            TH.firstChild.style.display = 'none'
+            $(TH.firstChild).toggle()
 
             $(input).keyup (event) ->
               event.stopPropagation()
@@ -183,8 +181,7 @@
                 })
 
                 $(input).remove()
-                TH.style.position = 'auto'
-                TH.firstChild.style.display = 'table-cell'
+                $(TH.firstChild).toggle()
 
                 registerDblclick()
               return false
@@ -204,7 +201,7 @@
         colHeaders: @dataset.headers,
         data: privateMethods.formatModelData(),
         columns: privateMethods.formatColumns(),
-        className: "htCenter",
+        className: "SeeIt-htCenter",
         height: spreadsheetView.container.find('.SeeIt.Handsontable-Container').height(),
         colWidths: ->
           (spreadsheetView.container.find('.SeeIt.Handsontable-Container').width() - 50) / spreadsheetView.dataset.headers.length

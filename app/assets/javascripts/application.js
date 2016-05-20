@@ -32,6 +32,7 @@
 //= require SeeIt/data_column
 //= require SeeIt/dataset_refactor
 //= require SeeIt/data_collection
+//= require SeeIt/filtered_column_factory
 //= require SeeIt/toolbar_view
 //= require SeeIt/data_column_view
 //= require SeeIt/dataset_view
