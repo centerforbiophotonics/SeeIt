@@ -21,6 +21,8 @@
 
       @staleData = false
 
+      @length = ->
+        data.length
 
       @changeData = (_data) ->
         data = _data
@@ -120,23 +122,23 @@
     @new: ->
       # Being created from array of arrays
       if $.isArray(arguments[1])
-        return ((app, dataset, column, title, color, editable) ->
-          header = dataset[0][column]
+        return ((app, dataset, column, title, type, color, editable) ->
+          header = dataset[0][column] + ''
           data = []
 
           for i in [1...dataset.length]
             data.push({label: dataset[i][0], value: dataset[i][column]})
 
-          return new DataColumn(app, header, data, title, color, editable)
+          return new DataColumn(app, header, data, title, type, color, editable)
         ).apply(@, arguments)
       else
-        return ((app, data, column, title, color, editable) ->
+        return ((app, data, column, title, type, color, editable) ->
           dataColumn = []
 
           for i in [0...data.columns[column].data.length]
             dataColumn.push({label: data.labels[i], value: data.columns[column].data[i]})
 
-          return new DataColumn(app, data.columns[column].header, dataColumn, title, color, editable)
+          return new DataColumn(app, data.columns[column].header, dataColumn, title, type, color, editable)
         ).apply(@,arguments)
 
 

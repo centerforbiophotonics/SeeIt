@@ -52,13 +52,11 @@
 
 
     getFilter: ->
-      console.log @filterOperator
       self = @
 
       if @filterOperator == "AND"
         return (dataColumn) ->
           filteredData = [0...dataColumn.data().length]
-          console.log filteredData
 
           self.filters.forEach (filter) ->
             filteredData = _.intersection(filteredData, filter.filter(dataColumn))

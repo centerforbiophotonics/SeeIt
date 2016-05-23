@@ -91,6 +91,9 @@
 			@listenTo parent, 'destroy', ->
 				child.trigger 'destroy'
 
+			@listenTo parent, 'request:childLength', (callback) ->
+				callback(child.length())
+
 	factory = new FilteredFactory()
 
 	return factory.build()

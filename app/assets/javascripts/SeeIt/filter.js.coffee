@@ -125,28 +125,19 @@
       validData = []
       columnHash = {}
 
-      console.log @filterType
-      console.log @filterData
-
       @filterData.column.data().forEach (data) ->
         columnHash[data.label()] = data.value()
 
-      console.log columnHash
-
-      console.log dataColumn.header
       dataColumn.data().forEach (data, i) ->
         value = data.value()
         label = data.label()
-        console.log label, value, i
 
         if label of columnHash && self.requirementMet(columnHash[label], self.filterData.value, self.filterData.operator)
           validData.push i
 
-      console.log validData
       return validData
 
     requirementMet: (value, threshold, operator) ->
-      console.log "requirementMet called"
       switch operator
         when 'eq'
           return value == threshold
@@ -198,6 +189,7 @@
 
       @selectedColumn = columns[idx]
 
+      console.log typeof $column_select.val(),$column_select.val(), columns, idx, @selectedColumn, 'in initValueField'
       if type == "numeric" 
         @filterType = "numeric"
         @container.find(".categorical-filter").addClass("hidden")

@@ -164,17 +164,23 @@
         self.removeData.call(self, data)
 
       @container.find(".data-rep[data-id='#{data.data.header}'] .data-rep-text").on 'click', ->
-        msg = """
-          <b>Dataset:</b> #{data.data.datasetTitle}
-          <br>
-          <b>Data Type:</b> #{data.data.type}
-        """
+        context = @
+        data.data.trigger 'request:childLength', (childLength) ->
+          console.log "callback triggered"
 
-        tip = new Opentip($(@), msg, {target: $(@), showOn: "creation"})
-        tip.setTimeout(->
-          tip.hide.call(tip)
-          return
-        , 5)
+          msg = """
+            <b>Dataset:</b> #{data.data.datasetTitle}
+            <br>
+            <b>Data Type:</b> #{data.data.type}
+            <br>
+            <b>Filters:</b> #{childLength} out of #{data.data.length()} selected by filter
+          """
+
+          tip = new Opentip($(context), msg, {target: $(context), showOn: "creation"})
+          tip.setTimeout(->
+            tip.hide.call(tip)
+            return
+          , 5)
       
 
     updateFooterData: ->
@@ -291,7 +297,7 @@
               <div class="SeeIt graph-wrapper"></div>
             </div>
           </div>
-          <div class="SeeIt panel-footer container-fluid">
+          <div class="SeeIt panel-footer">
             <div class="SeeIt footer-row row"></div>
             <div class="SeeIt footer-expanded-row row"></div>
           </div>
@@ -437,6 +443,12 @@
 
 
     expandRoleField: (role) ->
+      @container.find(".data-drop-zone").removeClass("bg-primary")
+
+      if @container.find(".expanded-data-container:visible").attr('data-id') != role
+        @container.find(".expanded-data-container:visible").toggle()
+        @container.find(".data-drop-zone[data-id='#{role}']").addClass("bg-primary")
+
       @container.find(".expanded-data-container[data-id='#{role}']").slideToggle()
       @container.find(".expand-data span[data-id='#{role}']").toggleClass('glyphicon-collapse-down glyphicon-collapse-up')
 

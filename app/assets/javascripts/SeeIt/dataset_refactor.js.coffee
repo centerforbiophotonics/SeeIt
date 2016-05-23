@@ -237,6 +237,7 @@
 
 				getColTypes: ->
 					for i in [1...@rawDataCols()]
+						if !@getType(@rawData[1][i]) then  console.log "!!!!", @rawData[1][i], @getType(@rawData[1][i])
 						@types.push(@getType(@rawData[1][i]))
 
 				padRows: (maxCols) ->
@@ -254,7 +255,8 @@
 					console.log "EDITABLE: #{@editable}"
 					# Assume data is already in array of arrays format and is uniformly padded with 'undefined's
 					for i in [1...@rawDataCols()]
-						@data.push(SeeIt.DataColumn.new(@app, @rawData, i, @title, @types[i], undefined, @editable))
+						console.log i, @types[i]
+						@data.push(SeeIt.DataColumn.new(@app, @rawData, i, @title, @types[i-1], undefined, @editable))
 
 				rawDataRows: ->
 					@rawData.length

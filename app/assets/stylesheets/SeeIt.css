@@ -245,11 +245,14 @@ h3.SeeIt.role-name {
 }
 
 div.SeeIt.data-drop-zone {
-  background-color: white;
   border: 1px inset transparent;
   min-height: 50px;
   border-radius: 4px;
   box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+}
+
+div.SeeIt.data-drop-zone:not(.bg-primary) {
+  background-color: white;
 }
 
 div.SeeIt.expanded-data-zone {
