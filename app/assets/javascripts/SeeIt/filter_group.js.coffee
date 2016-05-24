@@ -6,6 +6,7 @@
       @filters = []
 
       @filterOperator = null
+      @filterData = ["AND"]
 
       @container.html("""
         <div class='SeeIt filter-group-tools'>
@@ -43,13 +44,41 @@
         self.container.find('.remove-filter-group').on 'click', (event) ->
           self.removeFilterGroup.call(self)
 
+
+    updateFilters: (filter_data) ->
+      console.log filter_data
+      self = @
+
+      if filter_data.length > 1
+        self.container.find(".filter-group-type-select").val(filter_data[0])
+
+        @trigger 'request:dataset_names', (datasets) ->
+          filter_data.forEach (data, i) ->
+            if i == 0 then return
+
+            if i > 1
+              filter = self.addFilter.call(self, datasets)
+            else
+              filter = self.filters[0]
+              
+            filter.update(data)
+
+
+
     saveFilters: ->
       self = @
       @filterOperator = @container.find(".filter-group-type-select").val()
 
+      @filterData = [@filterOperator]
+
       @filters.forEach (filter) ->
         filter.save()
+        self.filterData.push filter.getFilterData()
 
+      @filterData
+
+    getFilters: ->
+      return @filterData
 
     getFilter: ->
       self = @
@@ -106,6 +135,8 @@
       filter.init()
 
       @filters.push filter
+
+      return filter
 
     removeFilterGroup: ->
       @container.remove()

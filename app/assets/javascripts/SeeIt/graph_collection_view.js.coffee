@@ -34,6 +34,11 @@
           graphContainer.graphs[graphData.graph].addData(graphData.data)
       )
 
+      graphContainer.listenTo(@app, 'graph:filter', (graphData) ->
+        if graphContainer.graphs[graphData.graph]
+          graphContainer.graphs[graphData.graph].updateFilters(graphData.filters)
+      )
+
       @listenTo(@app, 'graph:create', (graphType) ->
         graphContainer.addGraph.call(graphContainer, graphType)
       )
@@ -81,13 +86,37 @@
       @trigger('graph:id:change', oldId, newId)
 
 
-    getGraphState: ->
+    getGraphSettings: ->
+      settings = []
+
+      for id, graph of @graphs
+        settings.push graph.getGraphSettings()
+
+      return settings
+
+    getGraphTypes: ->
+      types = []
+
+      for id, graph of @graphs
+        types.push graph.getGraphType()
+
+      return types
+
+    getGraphStates: ->
       states = []
 
       for id, graph of @graphs
         states.push graph.getGraphState()
 
       return states
+
+    getGraphFilters: ->
+      filters = []
+
+      for id, graph of @graphs
+        states.push graph.getGraphFilters()
+
+      return filters
 
     addGraph: (graphType) ->
       self = @

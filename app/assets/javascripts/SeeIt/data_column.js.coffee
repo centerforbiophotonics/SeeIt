@@ -89,8 +89,8 @@
         {
           header: @header,
           type: @type,
-          data: @data.map (d) ->
-            d.value
+          data: @data().map (d) ->
+            d.value()
         }
 
       @uniqueData = ->

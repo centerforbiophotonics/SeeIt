@@ -71,7 +71,8 @@
           {class: "addGraph", title: "Add graph", handler: @handlers.addGraph, icon: "<span class='glyphicon glyphicon-plus'></span>", type: "dropdown", options: @graphTypes},
           {class: "uploadCSV", title: "Upload CSV", handler: @handlers.uploadCSV, type:"button"},
           {class: "uploadJSON", title: "Upload JSON", handler: @handlers.uploadJson, type: "button"},
-          {class: "downloadJSON", title: "Download JSON", handler: @handlers.downloadJson, type: "button"}
+          {class: "downloadJSON", title: "Download JSON", handler: @handlers.downloadJson, type: "button"},
+          {class: "downloadInitOptions", title: "Save SeeIt", handler: @handlers.saveInitJson, type: "button"}
         ]
 
         if @ui.dataMenu then toolbar_params.unshift {class: "toggleData", title: "Show/Hide Data", handler: @handlers.toggleDataVisible, type: "button"}
@@ -110,8 +111,13 @@
                 new_data.push {name: data.role_in_graph, data: column}
 
           obj = {graph: self.lastGraphId, data: new_data}
-          console.log obj
           self.trigger('graph:addData', obj)
+          if d.filters && d.filters.length
+            ((lastGraphId) ->
+              setTimeout(->
+                self.trigger('graph:filter', {graph: lastGraphId, filters: d.filters})
+              50)
+            )(self.lastGraphId)
 
 
     loadGraphs: ->
@@ -187,6 +193,9 @@
           )
 
           return false
+
+        saveInitJson: (event) ->
+          app.saveInitOptions.call(app)
 
         downloadJson: (event) ->
           app.jsonManager.handleDownload(app.model)
@@ -296,8 +305,17 @@
 
 
     saveInitOptions: ->
+      @params.container = @container.selector
       @params.data = @model.toJson()
-      @params.graphs = @graphCollectionView.getGraphState()
+      @params.graphs = @graphCollectionView.getGraphSettings()
+      
+      blob = new Blob([JSON.stringify(@params)]);
+      filename = prompt("Please enter the name of the file you want to save to (will save with .json extension)");
+
+      if filename == "" || (filename != null && filename.trim() == "")
+        alert('Filename cannot be blank');
+      else if filename && filename != "null" 
+        saveAs(blob, filename+".json");      
 
   ApplicationController
 ).call(@)

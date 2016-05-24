@@ -109,7 +109,7 @@
   white-space: normal !important;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 980px) {
   .SeeIt.row {
     height: 100%;
   }

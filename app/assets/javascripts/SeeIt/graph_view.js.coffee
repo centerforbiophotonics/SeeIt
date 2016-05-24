@@ -11,7 +11,8 @@
         SeeIt.FilteredColumnFactory(dataColumn, [0...dataColumn.data().length], self)
 
       @requirements = []
-      @operator = []
+      @filterState = []
+      @operator = "AND"
       @collapsed = false
       @editing = false
       @empty = true
@@ -42,12 +43,33 @@
       @initDataContainers()
 
 
-    getGraphState: ->
+    getGraphSettings: ->
       return {
-        type: @graphType.name,
-
+        type: @getGraphType(),
+        data: @getGraphState(),
+        filters: @getGraphFilters()
       }
 
+    getGraphType: ->
+      @graphType.name
+
+
+    getGraphFilters: ->
+      return @filterState
+
+
+    getGraphState: ->
+      return _.flatten([
+        @dataset.map((role) ->
+          role.data.map((dataColumn) ->
+            {
+              dataset_title: dataColumn.datasetTitle,
+              column_header: dataColumn.header,
+              role_in_graph: role.name
+            }
+          )
+        )
+      ])
 
     addData: (data) ->
       for j in [0...data.length]
@@ -195,9 +217,7 @@
       @container.find(".data-rep").remove()
 
       @dataset.forEach (role) ->
-        console.log role
         role.data.forEach (d) ->
-          console.log d
           self.addDataToFooter.call(self, {name: role.name, data: d})
 
     removeDataFromFooter: (data) ->
@@ -236,6 +256,20 @@
       )
 
 
+    updateFilters: (filterData) ->
+      @filterGroups.forEach (group) ->
+        group.removeFilterGroup()
+        
+      if filterData.length > 1
+        @container.find(".filter-group-requirements-select").val(filterData[0])
+
+        for filter_group in filterData
+          if $.isArray(filter_group)
+            filter_group_obj = @addFilterGroup()
+            filter_group_obj.updateFilters(filter_group)
+
+        @saveFilters()
+
     initHandlers: ->
       graph = @
 
@@ -243,8 +277,11 @@
         cb(graph.graph.dataFormat())
 
       @on 'size:change', ->
-        graph.setGraphHeight.call(graph)
+        # graph.setGraphHeight.call(graph)
         if graph.initialized then graph.graph.trigger('size:change', graph.options.getValues())
+
+      @on 'filter', (filterData) ->
+        graph.updateFilters.call(graph)
 
       graph.handlers = {
         removeGraph: ->
@@ -255,7 +292,6 @@
           graph.maximize.call(graph)
 
         collapse: ->
-          console.log "collapse called"
           graph.collapse.call(graph)
 
         collapseFooter: ->
@@ -282,8 +318,8 @@
             
       }
 
-      $(window).on 'resize', ->
-        graph.setGraphHeight.call(graph)
+      # $(window).on 'resize', ->
+      #   graph.setGraphHeight.call(graph)
 
     initLayout: ->
       @container.html("""
@@ -379,11 +415,13 @@
       self = @
 
       @operator = @container.find(".filter-group-requirements-select").val()
+      @filterState = [@operator]
       @requirements = []
 
       @filterGroups.forEach (filterGroup) ->
         filterGroup.saveFilters()
         self.requirements.push filterGroup.getFilter()
+        self.filterState.push filterGroup.getFilters()
 
       @filteredDataset.forEach (dataset, datasetIdx) ->
         dataset.data.forEach (dataColumn, i) ->
@@ -440,7 +478,7 @@
 
       filter_group.init()
 
-      @trigger 'size:change'
+      return filter_group
 
     placeAppendAnchor: (container) ->
       if !container.find('.append-anchor').length
@@ -453,9 +491,7 @@
     toggleFilters: (target) ->
       self = @
       visible = !@container.find(".expanded-data-container").is(':visible')
-      @container.find(".expanded-data-container").slideToggle(0, ->
-        self.setGraphHeight.call(self)
-      )
+      @container.find(".expanded-data-container").slideToggle()
 
       if visible
         $(target).html("""
@@ -472,18 +508,18 @@
       if @graph then @graph.destroy()
       @container.remove()
 
-    setGraphHeight: ->
-      @container.find('.graph-wrapper').height(
-        if @maximized
-          (
-            @container.find('.graph-panel').innerHeight() -
-            @container.find('.panel-heading').outerHeight() -
-            @container.find('.panel-footer').outerHeight() -
-            30
-          )
-        else
-          300
-      )
+    # setGraphHeight: ->
+    #   @container.find('.graph-wrapper').height(
+    #     if @maximized
+    #       (
+    #         @container.find('.graph-panel').innerHeight() -
+    #         @container.find('.panel-heading').outerHeight() -
+    #         @container.find('.panel-footer').outerHeight() -
+    #         30
+    #       )
+    #     else
+    #       300
+    #   )
 
     maximize: ->
       if @collapsed
@@ -493,7 +529,7 @@
       @container.find('.maximize .glyphicon').toggleClass('glyphicon-resize-full glyphicon-resize-small')
       @maximized = !@maximized
 
-      @setGraphHeight()
+      # @setGraphHeight()
 
       @graph.trigger('size:change', @options.getValues())
       @options.trigger('graph:maximize', @maximize)

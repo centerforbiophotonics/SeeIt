@@ -9,6 +9,8 @@
       @selectedColumn = null
       @filterType = null
       @filterData = null
+      @operator = null
+      @value = null
 
       @container.html("""
         <div class='SeeIt panel-body form-group'>
@@ -33,8 +35,7 @@
             <option value="eq">Equal to</option>
             <option value="neq">Not equal to</option>
           </select>
-          <select class='SeeIt categorical-filter filter-value categorical-filter-value hidden form-control' name='categorical-filter-value'>
-          </select>  
+          <input type='text' class='SeeIt categorical-filter filter-value categorical-filter-value hidden form-control' name='categorical-filter-value'>  
           <button class="SeeIt remove-filter btn btn-primary text-center">
             <div class='SeeIt icon-container'>
               <span class='glyphicon glyphicon-minus'></span>
@@ -57,6 +58,7 @@
 
       options = '<option value="" selected disabled>Please select a dataset</option>'
 
+      console.log @
       @datasets.forEach (dataset) ->
         options += "<option value='#{dataset}'>#{dataset}</option>"
 
@@ -67,7 +69,7 @@
         dataset = $(@).val()
         self.container.find('.categorical-filter, .numeric-filter').addClass('hidden')
 
-        self.trigger 'dataset:select'
+        self.trigger "dataset:select:#{dataset}"
 
         self.trigger 'request:columns', dataset, (columns, types) ->
           self.populateColumnSelect.call(self, columns, types, dataset)
@@ -96,9 +98,35 @@
 
             old_title = this_dataset.title
 
-          self.on 'dataset:select', ->
+            self.off "dataset:select:#{old_title}"
+            self.on "dataset:select:#{this_dataset.title}", ->
+              self.selectedDataset = dataset_object
+
+          self.on "dataset:select:#{dataset}", ->
             self.selectedDataset = dataset_object
 
+
+    update: (filter_data) ->
+      @container.find('.dataset-select').val(filter_data.dataset_title)
+      @container.find('.dataset-select').trigger('change')
+
+      @container.find('.data-column-select').val(filter_data.column_header)
+      @container.find('.data-column-select').trigger('change')
+
+      if @filterType == "numeric"
+        @container.find(".numeric-filter-comparison").val(filter_data.comparison)
+        @container.find(".numeric-filter-value").val(filter_data.value)
+      else
+        @container.find(".categorical-filter-comparison").val(filter_data.comparison)
+        @container.find(".categorical-filter-value").val(filter_data.value)
+
+    getFilterData: ->
+      {
+        dataset_title: @filterData.dataset.title,
+        column_header: @filterData.column.header,
+        comparison: @filterData.operator,
+        value: @filterData.value
+      }
 
     save: ->
       @filterData = {
@@ -203,16 +231,10 @@
     populateCategoricalSelect: (dataset, idx, type, value) ->
       self = @
 
-      @trigger 'request:values:unique', dataset, idx, (values) ->
-        self.container.find(".numeric-filter").addClass("hidden")
+      @container.find(".numeric-filter").addClass("hidden")
+      @container.find(".categorical-filter").removeClass("hidden")  
 
-        self.container.find(".categorical-filter-value").html("""
-          #{"<option val='' selected disabled>Please select values to filter by</option>" + values.map((d) -> "<option value='#{d}'>#{d}</option>").join("")}
-        """)
-
-        self.container.find(".categorical-filter").removeClass("hidden")  
-
-        if value != null && value != undefined then self.container.find(".filter-value").val(value) 
+      if value != null && value != undefined then @container.find(".filter-value").val(value) 
 
 
     registerDataListeners: (columns, types, dataset) ->

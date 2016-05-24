@@ -61,6 +61,17 @@ SeeIt.new({
           column_header: string that must match a column header,
           role_in_graph: string that must match the graph types allowed data roles  //optional if graph only has one data role (like bar graph)
         },
+      filters: [
+        "AND" or "OR",
+        [
+          "AND" or "OR",
+          {
+            dataset_title: string that must match a dataset name,
+            column_header: string that must match a column header,
+            comparison: if type is numeric ("lt" | "lte" | "eq" | "neq" | "gte" | "gt") else ("eq" | "neq")
+          }
+        ]
+      ]
         . . . 
       ]
     },
