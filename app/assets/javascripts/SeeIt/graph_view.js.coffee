@@ -10,8 +10,8 @@
       @filter = (dataColumn) ->
         SeeIt.FilteredColumnFactory(dataColumn, [0...dataColumn.data().length], self)
 
-      @requirements = {}
-      @operator = {}
+      @requirements = []
+      @operator = []
       @collapsed = false
       @editing = false
       @empty = true
@@ -19,7 +19,6 @@
       @graph = null
       @options = null
       @optionsVisible = false
-      @filterMap = {}
       @dataset = []
       @filteredDataset = []
       @initHandlers()
@@ -41,6 +40,14 @@
       if !@graph.options().length then @container.find('.options-button').hide()
 
       @initDataContainers()
+
+
+    getGraphState: ->
+      return {
+        type: @graphType.name,
+
+      }
+
 
     addData: (data) ->
       for j in [0...data.length]
@@ -166,7 +173,6 @@
       @container.find(".data-rep[data-id='#{data.data.header}'] .data-rep-text").on 'click', ->
         context = @
         data.data.trigger 'request:childLength', (childLength) ->
-          console.log "callback triggered"
 
           msg = """
             <b>Dataset:</b> #{data.data.datasetTitle}
@@ -237,6 +243,7 @@
         cb(graph.graph.dataFormat())
 
       @on 'size:change', ->
+        graph.setGraphHeight.call(graph)
         if graph.initialized then graph.graph.trigger('size:change', graph.options.getValues())
 
       graph.handlers = {
@@ -274,6 +281,9 @@
 
             
       }
+
+      $(window).on 'resize', ->
+        graph.setGraphHeight.call(graph)
 
     initLayout: ->
       @container.html("""
@@ -323,38 +333,41 @@
           <div class='SeeIt data-drop-zone-container col-lg-#{cols}'>
             <h3 class='SeeIt role-name text-center'>#{if dataFormat.length > 1 then role.name else "Data"}</h3>
             <div class='SeeIt data-drop-zone' data-id="#{role.name}">
-              <button class="SeeIt btn btn-default expand-data" data-id="#{role.name}"><span data-id="#{role.name}" class="glyphicon glyphicon-collapse-down"></span></ button>
             </div>
           </div>
         """)
 
-        self.container.find('.footer-expanded-row').append("""
-          <div class='SeeIt expanded-data-container' data-id="#{role.name}">
-            <div class='SeeIt expanded-data-zone text-center'>
-              <h3 class='text-center SeeIt filters-header append-anchor' data-id="#{role.name}">Filters</h3>
-              <label for='filter-group-requirements' class='filter-group-requirements'>Filter group requirements:</label>
-              <select name='filter-group-requirements' class='form-control SeeIt filter-group-requirements filter-group-requirements-select'>
-                <option value='AND'>All filter groups must be fulifilled</option>
-                <option value='OR'>At least one filter group must be fulfilled</option>
-              </select>
-              <button class="SeeIt add-filter-group btn btn-primary text-center"><div class='SeeIt icon-container'><span class='glyphicon glyphicon-plus'></span></div>Add filter group</button>
-              <button class="SeeIt save-filters btn btn-success text-center"><div class='SeeIt icon-container'><span class='glyphicon glyphicon-ok'></span></div>Save Filters</button>
-            </div>
+      @container.find('.footer-expanded-row').append("""
+        <button class='btn btn-primary SeeIt toggle-filters'>
+          <span class='caret'></span>
+          Show Filters
+        </button>
+        <div class='SeeIt expanded-data-container'>
+          <div class='SeeIt expanded-data-zone text-center'>
+            <h3 class='text-center SeeIt filters-header append-anchor'>Filters</h3>
+            <label for='filter-group-requirements' class='filter-group-requirements'>Filter group requirements:</label>
+            <select name='filter-group-requirements' class='form-control SeeIt filter-group-requirements filter-group-requirements-select'>
+              <option value='AND'>All filter groups must be fulifilled</option>
+              <option value='OR'>At least one filter group must be fulfilled</option>
+            </select>
+            <button class="SeeIt add-filter-group btn btn-primary text-center"><div class='SeeIt icon-container'><span class='glyphicon glyphicon-plus'></span></div>Add filter group</button>
+            <button class="SeeIt save-filters btn btn-success text-center"><div class='SeeIt icon-container'><span class='glyphicon glyphicon-ok'></span></div>Save Filters</button>
           </div>
-        """)
+        </div>
+      """)
 
-        self.container.find(".expand-data[data-id='#{role.name}']").on('click', (event) ->
-          self.expandRoleField.call(self, role.name)
-        )
 
-        self.container.find(".expanded-data-container[data-id='#{role.name}'] .add-filter-group").on 'click', (event) ->
-          self.addFilterGroup.call(self, role.name)
+      @container.find(".toggle-filters").on 'click', (event) ->
+        self.toggleFilters.call(self, @)
 
-        self.container.find(".expanded-data-container[data-id='#{role.name}'] .save-filters").on 'click', (event) ->
-          if self.validateFilters.call(self, role)
-            self.saveFilters.call(self, role)
+      @container.find(".expanded-data-container .add-filter-group").on 'click', (event) ->
+        self.addFilterGroup.call(self)
 
-    validateFilters: (role) ->
+      @container.find(".expanded-data-container .save-filters").on 'click', (event) ->
+        if self.validateFilters.call(self)
+          self.saveFilters.call(self)
+
+    validateFilters: ->
       valid = true
       
       @filterGroups.forEach (filterGroup) ->
@@ -362,59 +375,52 @@
 
       return valid
 
-    saveFilters: (role) ->
+    saveFilters: ->
       self = @
 
-      @operator[role.name] = @container.find(".filter-group-requirements-select").val()
-      @requirements[role.name] = []
-      datasetIdx = -1
+      @operator = @container.find(".filter-group-requirements-select").val()
+      @requirements = []
 
-      self.filteredDataset.forEach (d, i) ->
-        if d.name == role.name then datasetIdx = i
+      @filterGroups.forEach (filterGroup) ->
+        filterGroup.saveFilters()
+        self.requirements.push filterGroup.getFilter()
 
-      if datasetIdx != -1
-        console.log @filterGroups
-        @filterGroups.forEach (filterGroup) ->
-          filterGroup.saveFilters()
-          self.requirements[role.name].push filterGroup.getFilter()
-
-
-        self.filteredDataset[datasetIdx].data.forEach (dataColumn, i) ->
+      @filteredDataset.forEach (dataset, datasetIdx) ->
+        dataset.data.forEach (dataColumn, i) ->
           parentColumn = self.dataset[datasetIdx].data[i]
-          self.filterColumn.call(self, dataColumn, parentColumn, role.name)
+          self.filterColumn.call(self, dataColumn, parentColumn)
 
 
-    filterColumn: (dataColumn, parentColumn, roleName) ->
+    filterColumn: (dataColumn, parentColumn) ->
       self = @
 
       filteredData = [0...parentColumn.data().length]
 
-      if self.requirements[roleName].length > 0 && self.operator[roleName] == "OR" then filteredData = []
+      if self.requirements.length > 0 && self.operator == "OR" then filteredData = []
 
-      self.requirements[roleName].forEach (requirement) ->
-        if self.operator[roleName] == "AND"
+      self.requirements.forEach (requirement) ->
+        if self.operator == "AND"
           filteredData = _.intersection(filteredData, requirement(parentColumn))
         else
           filteredData = _.union(filteredData, requirement(parentColumn))
 
-      console.log filteredData
       dataColumn.trigger 'filter:changed', filteredData
 
-    addFilterGroup: (role) ->
+    addFilterGroup: ->
       self = @
 
-      self.container.find(".expanded-data-container[data-id='#{role}'] .append-anchor").after("""
-        <div class='SeeIt filter-group' data-id='#{role}'>
+      self.container.find(".expanded-data-container .append-anchor").after("""
+        <div class='SeeIt filter-group'>
         </div>
       """)
 
-      this_container = @container.find(".expanded-data-container[data-id='#{role}'] .filter-group:last")
+      this_container = @container.find(".expanded-data-container .filter-group:last")
       parent = this_container.parent()
-      filter_group = new SeeIt.FilterGroup(this_container, role)
+      filter_group = new SeeIt.FilterGroup(this_container)
       @filterGroups.push filter_group
 
       self.container.find(".append-anchor").removeClass('append-anchor')
-      self.container.find(".filter-group[data-id='#{role}']:last").addClass('append-anchor')
+      self.container.find(".filter-group:last").addClass('append-anchor')
 
       @listenTo filter_group, 'request:dataset_names', (callback) ->
         self.trigger 'request:dataset_names', callback
@@ -434,6 +440,8 @@
 
       filter_group.init()
 
+      @trigger 'size:change'
+
     placeAppendAnchor: (container) ->
       if !container.find('.append-anchor').length
         if container.find(".filter-group:last").length
@@ -442,20 +450,40 @@
           container.find('.filters-header').addClass('append-anchor')
 
 
-    expandRoleField: (role) ->
-      @container.find(".data-drop-zone").removeClass("bg-primary")
+    toggleFilters: (target) ->
+      self = @
+      visible = !@container.find(".expanded-data-container").is(':visible')
+      @container.find(".expanded-data-container").slideToggle(0, ->
+        self.setGraphHeight.call(self)
+      )
 
-      if @container.find(".expanded-data-container:visible").attr('data-id') != role
-        @container.find(".expanded-data-container:visible").toggle()
-        @container.find(".data-drop-zone[data-id='#{role}']").addClass("bg-primary")
-
-      @container.find(".expanded-data-container[data-id='#{role}']").slideToggle()
-      @container.find(".expand-data span[data-id='#{role}']").toggleClass('glyphicon-collapse-down glyphicon-collapse-up')
+      if visible
+        $(target).html("""
+          <span class='dropup'><span class="caret"></span></span>
+          Hide Filters
+        """)
+      else
+        $(target).html("""
+          <span class="caret"></span>
+          Show Filters
+        """)
 
     destroy: ->
       if @graph then @graph.destroy()
       @container.remove()
 
+    setGraphHeight: ->
+      @container.find('.graph-wrapper').height(
+        if @maximized
+          (
+            @container.find('.graph-panel').innerHeight() -
+            @container.find('.panel-heading').outerHeight() -
+            @container.find('.panel-footer').outerHeight() -
+            30
+          )
+        else
+          300
+      )
 
     maximize: ->
       if @collapsed
@@ -465,6 +493,8 @@
       @container.find('.maximize .glyphicon').toggleClass('glyphicon-resize-full glyphicon-resize-small')
       @maximized = !@maximized
 
+      @setGraphHeight()
+
       @graph.trigger('size:change', @options.getValues())
       @options.trigger('graph:maximize', @maximize)
 
@@ -472,7 +502,6 @@
       if @maximized
         @container.find(".maximize").trigger('click')
 
-      console.log @container.find("#collapse_#{@id.split(' ').join('-')}"), @container.find('.collapse-btn .glyphicon')
       @container.find("#collapse_#{@id.split(' ').join('-')}").toggleClass('in')
       @container.find('.collapse-btn .glyphicon').toggleClass('glyphicon-collapse-down glyphicon-collapse-up')
       @collapsed = !@collapsed

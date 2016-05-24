@@ -20,7 +20,8 @@
 }
 
 .SeeIt.graph-panel-content {
-  height: calc(100% - 54px);
+  min-height: 300px;
+/*  height: calc(100% - 54px);*/
 }
 
 .SeeIt.graph-panel-content .panel-body,
@@ -108,8 +109,10 @@
   white-space: normal !important;
 }
 
-.SeeIt.row {
-  height: 100%;
+@media (min-width: 768px) {
+  .SeeIt.row {
+    height: 100%;
+  }
 }
 
 .SeeIt.col-md-2, .SeeIt.col-md-3, .SeeIt.col-md-9, .SeeIt.col-md-10, .SeeIt.col-md-12 {
@@ -234,7 +237,7 @@ div.SeeIt.data-drop-zone-container, div.SeeIt.expanded-data-container {
   width: 40%;
 }
 
-.SeeIt.add-filter-group, .SeeIt.remove-filter, .SeeIt.save-filters {
+.SeeIt.add-filter-group, .SeeIt.remove-filter, .SeeIt.save-filters, .SeeIt.toggle-filters {
   margin-top: 10px;
   width: 100%;
 }
@@ -346,7 +349,12 @@ div.SeeIt.expanded-data-zone {
 }
 
 .SeeIt.maximized {
-  height: 100%;
+/*  min-height: 100vh*/
+/*  min-height: 300px;*/
+}
+
+.SeeIt.maximized .SeeIt.graph-wrapper {
+  min-height: calc(100vh - 150px);
 }
 
 .SeeIt.axis path,

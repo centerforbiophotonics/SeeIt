@@ -75,13 +75,13 @@
 
       return dataset
 
-    toJsonString: ->
+    toJson: ->
       obj = []
 
       @datasets.forEach (d) ->
         obj.push d.toJson()
 
-      return JSON.stringify obj
+      return obj
 
   DataCollection
 ).call(@)

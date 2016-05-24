@@ -2,7 +2,7 @@
   class FilterGroup
     _.extend(@prototype, Backbone.Events)
 
-    constructor: (@container, @role) ->
+    constructor: (@container) ->
       @filters = []
 
       @filterOperator = null

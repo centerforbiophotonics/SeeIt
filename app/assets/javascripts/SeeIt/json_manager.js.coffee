@@ -29,7 +29,7 @@
         	
 
     handleDownload: (dataCollection) ->
-      blob = new Blob([dataCollection.toJsonString()]);
+      blob = new Blob([JSON.stringify(dataCollection.toJsonString())]);
       filename = prompt("Please enter the name of the file you want to save to (will save with .json extension)");
 
       if filename == "" || (filename != null && filename.trim() == "")

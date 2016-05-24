@@ -80,6 +80,15 @@
 
       @trigger('graph:id:change', oldId, newId)
 
+
+    getGraphState: ->
+      states = []
+
+      for id, graph of @graphs
+        states.push graph.getGraphState()
+
+      return states
+
     addGraph: (graphType) ->
       self = @
 

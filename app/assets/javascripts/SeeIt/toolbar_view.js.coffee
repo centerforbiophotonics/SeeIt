@@ -10,7 +10,7 @@
         """<nav class='SeeIt navbar navbar-default'>
           <div class='SeeIt container-fluid'>
             <div class='SeeIt navbar-header'>
-              <a class='SeeIt navbar-brand' href='#'>Tools</a>
+              <a class='SeeIt navbar-brand' href='#'>SeeIt</a>
             </div>
             #{@buildNav()}
           </div>

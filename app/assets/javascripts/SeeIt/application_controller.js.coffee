@@ -9,6 +9,7 @@
       # @param {Object} container - jQuery object referencing container SeeIt will live in
     ###
     constructor: (params = {}) ->
+      @params = params
       @container = if params.container then $(params.container) else $("body")
 
       ui = if params.ui then params.ui else {}
@@ -292,6 +293,11 @@
 
       @dataVisible = !@dataVisible
       @trigger('width:toggle')
+
+
+    saveInitOptions: ->
+      @params.data = @model.toJson()
+      @params.graphs = @graphCollectionView.getGraphState()
 
   ApplicationController
 ).call(@)
