@@ -344,6 +344,53 @@ div.SeeIt.expanded-data-zone {
   padding-right: 10px;
 }
 
+.SeeIt.new-dataset-msg {
+  display: none;
+  width: 100%;
+  text-align: center;
+}
+
+.SeeIt.new-dataset-msg.error {
+  color: red;
+  display: inline;
+}
+
+.SeeIt.spin{
+  -webkit-transform-origin: 50% 58%;
+  transform-origin:50% 58%;
+  -ms-transform-origin:50% 58%; /* IE 9 */
+  -webkit-animation: spin .6s infinite linear;
+  -moz-animation: spin .6s infinite linear;
+  -o-animation: spin .6s infinite linear;
+  animation: spin .6s infinite linear;
+}
+
+@-moz-keyframes spin {
+  from {
+    -moz-transform: rotate(0deg);
+  }
+  to {
+    -moz-transform: rotate(360deg);
+  }
+}
+
+@-webkit-keyframes spin {
+  from {
+    -webkit-transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(360deg);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
 .SeeIt.graph-panel .panel-collapse {
   min-height: 300px;
 }
@@ -355,6 +402,7 @@ div.SeeIt.expanded-data-zone {
 
 .SeeIt.maximized .SeeIt.graph-wrapper {
   min-height: calc(100vh - 150px);
+  height: calc(100vh - 150px);
 }
 
 .SeeIt.axis path,

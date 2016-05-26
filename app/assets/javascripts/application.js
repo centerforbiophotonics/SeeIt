@@ -25,6 +25,7 @@
 //= require nv.d3.min
 //= require opentip-jquery-excanvas.min
 //= require FileSaver.min.js
+//= require tabletop.js
 //= require SeeIt/init
 //= require SeeIt/utils
 //= require SeeIt/validators_module

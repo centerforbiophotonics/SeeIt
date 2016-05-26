@@ -22,7 +22,7 @@
 
       @listenTo(@app, 'dataset:created', (dataset) ->
         datasetView = self.addDatasetView.call(self, dataset)
-        datasetView.trigger('datasetview:open')
+        # datasetView.trigger('datasetview:open')
       )
 
       @listenTo(@app, 'graph:created', (graphId, dataRoles) ->
@@ -67,7 +67,11 @@
           </select>
           <input type="text" placeholder="Dataset Title" class="form-control SeeIt new-dataset-input dataset-name">
           <input type="text" placeholder="Spreadsheet URL" class="form-control SeeIt new-dataset-input dataset-spreadsheet-url hidden">
-          <button type="button" class="btn btn-primary" id="create-dataset">Create Dataset</button>
+          <span class="SeeIt new-dataset-msg"></span>
+          <button type="button" class="btn btn-primary" id="create-dataset" style='width: 100%' 
+                  data-loading-text="<span class='SeeIt glyphicon glyphicon-refresh spin'></span>">
+            Create Dataset
+          </button>
         </div>
       """)
 
@@ -85,7 +89,52 @@
 
       self.container.find("#create-dataset").on 'click', (event) ->
         if self.container.find("#dataset-select").val() == "google"
-          googleSpreadsheet = new SeeIt.GoogleSpreadsheetManager(self.container.find('.dataset-spreadsheet-url').val())
+          url = self.container.find('.dataset-spreadsheet-url').val()
+
+          if url.length
+            button = @
+            $(button).button('loading')
+
+            # window.onerror = ->
+            #   console.log "old onerror callback!"
+
+            oldOnError = window.onerror
+            window.onerror = (message, source, lineno, colno, error) ->
+              self.container.find(".new-dataset-msg").addClass("error").html("Error loading from spreadsheet")
+              $(button).button('reset')
+              self.container.find(".new-dataset-input").val("")
+              self.container.find(".dataset-name").val("")
+
+              setTimeout(->
+                self.container.find(".new-dataset-msg").removeClass("error").html("")
+              ,5000)
+
+              #If onerror was previously defined, call it
+              if oldOnError && typeof oldOnError == "function"
+                oldOnError.apply(window, arguments)
+
+            googleSpreadsheet = new SeeIt.GoogleSpreadsheetManager(self.container.find('.dataset-spreadsheet-url').val(), (collection) ->
+              self.trigger('datasets:create', collection)
+              $(button).button('reset')
+              self.container.find(".new-dataset-input").val("")
+              self.container.find(".dataset-name").val("")
+              window.onerror = oldOnError
+            )
+            googleSpreadsheet.getData()
+
+            setTimeout(->
+              window.onerror = oldOnError
+            ,2500)
+          else
+            self.container.find('.dataset-spreadsheet-url').val("")
+            msg = "URL cannot be blank"
+            tip = new Opentip($(this), msg, {style: "alert", target: self.container.find(".dataset-spreadsheet-url"), showOn: "creation"})
+            tip.setTimeout(->
+              tip.hide.call(tip)
+              return
+            , 5)
+            return false
+
           return false
         else
           title = self.container.find(".dataset-name").val()

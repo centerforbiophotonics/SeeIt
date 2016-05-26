@@ -259,7 +259,7 @@
     updateFilters: (filterData) ->
       @filterGroups.forEach (group) ->
         group.removeFilterGroup()
-        
+
       if filterData.length > 1
         @container.find(".filter-group-requirements-select").val(filterData[0])
 
@@ -531,6 +531,7 @@
 
       # @setGraphHeight()
 
+      console.log 'maximize triggered'
       @graph.trigger('size:change', @options.getValues())
       @options.trigger('graph:maximize', @maximize)
 

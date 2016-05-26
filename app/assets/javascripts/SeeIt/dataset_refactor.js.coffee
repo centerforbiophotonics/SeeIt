@@ -9,7 +9,6 @@
 		_.extend(@Validators, SeeIt.Modules.Validators)
 
 		constructor: (@app, data, @title = "New Dataset", @isLabeled = false, @editable = true) ->
-			console.log @editable
 			if !data
 				data = {
 					labels: ["1", "2", "3", "4", "5"],
@@ -101,7 +100,6 @@
 			self = @
 
 			@on 'header:change', (value, idx) ->
-				console.log "header changed"
 				self.headers[idx] = value
 				self.trigger('header:changed', value, idx)
 
@@ -138,7 +136,6 @@
 				callback(self.data.slice(0), self.types.slice(0))
 
 			@on 'request:values:unique', (colIdx, callback) ->
-				console.log "calling callback in dataset"
 				callback self.data[colIdx].uniqueData()
 
 		generateLabel: (labels) ->
@@ -237,7 +234,6 @@
 
 				getColTypes: ->
 					for i in [1...@rawDataCols()]
-						if !@getType(@rawData[1][i]) then  console.log "!!!!", @rawData[1][i], @getType(@rawData[1][i])
 						@types.push(@getType(@rawData[1][i]))
 
 				padRows: (maxCols) ->
@@ -252,10 +248,8 @@
 					arr
 
 				initData: ->
-					console.log "EDITABLE: #{@editable}"
 					# Assume data is already in array of arrays format and is uniformly padded with 'undefined's
 					for i in [1...@rawDataCols()]
-						console.log i, @types[i]
 						@data.push(SeeIt.DataColumn.new(@app, @rawData, i, @title, @types[i-1], undefined, @editable))
 
 				rawDataRows: ->
@@ -296,7 +290,6 @@
 
 				initHeaders: ->
 					for i in [0...@rawData.columns.length]
-						console.log @rawData.columns[i].header
 						@headers.push(@toString(@rawData.columns[i].header))
 
 				getColTypes: ->
@@ -304,7 +297,6 @@
 						@types.push(@rawData.columns[i].type)
 
 				initData: ->
-					console.log "EDITABLE: #{@editable}"
 					for i in [0...@rawData.columns.length]
 						@data.push(SeeIt.DataColumn.new(@app, @rawData, i, @title, @types[i], undefined, @editable))
 

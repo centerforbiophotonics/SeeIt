@@ -241,12 +241,18 @@
         app.trigger('dataset:create', title)
       )
 
+      @listenTo(app.dataCollectionView, 'datasets:create', (collection) ->
+        console.log collection
+        collection.forEach (dataset) ->
+          app.addDataset.call(app, dataset)
+      )
+
       @listenTo(app.model, 'dataset:created', (dataset) ->
         app.trigger('dataset:created', dataset)
 
-        if !app.spreadsheetVisible then app.toggleSpreadsheetVisible.call(app)
+        # if !app.spreadsheetVisible then app.toggleSpreadsheetVisible.call(app)
 
-        app.trigger('spreadsheet:load', dataset)
+        # app.trigger('spreadsheet:load', dataset)
       )
 
       @listenTo(app.graphCollectionView, 'graph:created', (graphId, dataRoles) ->

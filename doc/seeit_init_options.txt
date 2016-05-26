@@ -21,7 +21,7 @@ SeeIt.new({
               ] 
             },
             
-          is_labeled: boolean
+          isLabeled: boolean
         } 
 
     * json string representing the same as the previous option
@@ -68,7 +68,8 @@ SeeIt.new({
           {
             dataset_title: string that must match a dataset name,
             column_header: string that must match a column header,
-            comparison: if type is numeric ("lt" | "lte" | "eq" | "neq" | "gte" | "gt") else ("eq" | "neq")
+            comparison: if type is numeric ("lt" | "lte" | "eq" | "neq" | "gte" | "gt") else ("eq" | "neq"),
+            value: number or string
           }
         ]
       ]

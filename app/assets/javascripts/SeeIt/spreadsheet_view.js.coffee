@@ -204,8 +204,11 @@
         className: "SeeIt-htCenter",
         height: spreadsheetView.container.find('.SeeIt.Handsontable-Container').height(),
         colWidths: ->
-          (spreadsheetView.container.find('.SeeIt.Handsontable-Container').width() - 50) / spreadsheetView.dataset.headers.length
-        # stretchH: "all",
+          Math.max(
+            (spreadsheetView.container.find('.SeeIt.Handsontable-Container').width() - 50) / spreadsheetView.dataset.headers.length,
+            50
+          )
+        stretchH: "all",
         afterGetRowHeader: headerCallbackFactory("label"),
         afterGetColHeader: headerCallbackFactory("header")
         manualColumnResize: true,
