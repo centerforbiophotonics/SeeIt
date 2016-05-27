@@ -1,5 +1,5 @@
-@SeeIt.Graphs.PieChart = (->
-  class PieChart extends SeeIt.Graph
+@SeeIt.Graphs.stackedAreaChart = (->
+  class stackedAreaChart extends SeeIt.Graph
 
     constructor: ->
       super 
@@ -38,10 +38,13 @@
       console.log @dataset[0]
 
       @dataset[0].data.forEach (dataColumn) ->
-        data = data.concat(dataColumn.data())
-        data.forEach (d) ->
-          if d.header == undefined
-            d.header = dataColumn.header
+        each1 = []
+        dataColumn.data().forEach (d) ->
+          each2 = []
+          each2.push(d.label())
+          each2.push(d.value())
+          each1.push(each2)
+        data.push({values:each1, key:dataColumn.header}) 
 
       return data
 
@@ -54,37 +57,28 @@
 
       nv.addGraph ->
         data = graph.formatData.call(graph)
-
-        #select a specific row
-        if options[2].value
-          data.forEach (d) ->
-            if options[2].value == "default"
-              d.disabled = false
-            else
-              if d.label() != options[2].value
-                d.disabled = true
-              else
-                d.disabled = false
-
-        #header option
-        if !options[1].value
-          chart = nv.models.pieChart()
-            .x( (d) -> d.label())
-            .y( (d) -> d.value())
-            .showLabels(options[0].value)
-        else
-          chart = nv.models.pieChart()
-            .x( (d) -> d.label() + "~" +d.header)
-            .y( (d) -> d.value())
-            .showLabels(options[0].value)
-
-        console.log "data"
         console.log data
+
+        chart = nv.models.stackedAreaChart()
+                  .margin({right: 100})
+                  .x( (d) -> d[0])   
+                  .y( (d) -> d[1])  
+                  .useInteractiveGuideline(true)  
+                  .rightAlignYAxis(true)      
+                  .showControls(true)       
+                  .clipEdge(true)
+
+        chart.xAxis
+            .tickFormat( (d) -> d)         
+
+        chart.yAxis
+            .tickFormat(d3.format(',.2f'))
 
         d3.select(graph.container.find('.graph-svg')[0])
           .attr('height', '100%')
           .datum(data)
           .call(chart)
+
 
         nv.utils.windowResize(chart.update);
         graph.chartObject = chart
@@ -129,7 +123,7 @@
         }
       ]
 
-  PieChart
+  stackedAreaChart
 ).call(@)
 
-@SeeIt.GraphNames["PieChart"] = "Pie Chart"
+@SeeIt.GraphNames["stackedAreaChart"] = "Stacked Area Chart"
