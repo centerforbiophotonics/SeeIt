@@ -179,6 +179,7 @@
           var json = JSON.parse(xhr.responseText);
         } catch (e) {
           console.error(e);
+          self.callback.apply(self.callbackContext || self, [[], self, e]);
         }
         callback.call(self, json);
       };

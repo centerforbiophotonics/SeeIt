@@ -12,12 +12,16 @@
 
 			Tabletop.init({
 				key: @url,
-				callback: ((data, tabletop) -> @proccessSpreadsheet(data, tabletop)).bind(@)
+				callback: ((data, tabletop, error) -> @proccessSpreadsheet(data, tabletop, error)).bind(@)
 			})
 
-		proccessSpreadsheet: (data, tabletop) ->
+		proccessSpreadsheet: (data, tabletop, error) ->
 			self = @
 			collection = []
+
+			if error
+				@callback false
+				return
 
 			for name, dataset of data
 				types = @resolveTypes(dataset)
@@ -49,7 +53,7 @@
 
 				collection.push new_dataset
 
-			@callback collection
+			@callback true, collection
 
 		resolveTypes: (dataset) ->
 			types = []

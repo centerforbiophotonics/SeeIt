@@ -184,7 +184,7 @@
         </div>
       """)
 
-      item = @container.find(".data-drop-zone[data-id='#{data.name}']:last .data-rep-color")
+      item = @container.find(".data-drop-zone[data-id='#{data.name}'] .data-rep-color:last")
 
       @listenTo data.data, 'color:changed', ->
         item.css('background-color', data.data.color)

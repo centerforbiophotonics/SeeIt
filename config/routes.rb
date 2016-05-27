@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  get 'json_api', to: "json_api#index"
+
   root to: "application#index"
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
