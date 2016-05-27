@@ -43,11 +43,8 @@
       colors = []
       StartMajors = ["CSE", "BIS", "PHY", "MAT"]
       EndMajors = ["CSE", "BIS", "PHY", "MAT", "EVE"]
-      Pairs = {'CSE': {'CSE': {count:5, total:15}, 'BIS': {count:2, total:7}, 'MAT': {count:1, total:4}}, 
-              'BIS': {'BIS': {count:6, total:16}, 'EVE': {count:3, total:11}}, 
-              'PHY': {'PHY': {count:7, total:18}, 'MAT': {count:2, total:6}}, 
-              'MAT': {'MAT': {count:1, total:4}}
-
+      Pairs = {'CSE': {'CSE': {count:5, total:15}, 'BIS': {count:2, total:7}, 'MAT': {count:1, total:4}}, 'BIS': {'BIS': {count:6, total:16}, 'EVE': {count:3, total:11}}, 'PHY': {'PHY': {count:7, total:18}, 'MAT': {count:2, total:6}}, 'MAT': {'MAT': {count:1, total:4}}}
+              
       
       @xAxis = d3.svg.axis()
                 .scale(@x)
@@ -87,6 +84,21 @@
 
       StartMajors.forEach (entry) ->
         console.log Pairs[entry]
+        EndMajors.forEach (endEntry) ->
+          console.log Pairs[entry][endEntry]
+          if (Pairs[entry][endEntry])
+            #DRAWCELL
+            graph.svg.selectAll(".gridCell")
+              .append("rect")
+                .attr("x", -> return StartMajors.indexOf(entry))
+                .attr("y", -> return EndMajors.indexOf(endEntry))
+                .attr("rx", 4)
+                .attr("ry", 4)
+                .attr("width", gridSize)
+                .attr("height", gridSize)
+                .style("fill", "red")
+          else 
+            #DRAWEMPTYCELL
 
     destroy: ->
 
