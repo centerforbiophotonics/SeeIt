@@ -1,0 +1,142 @@
+@SeeIt.Graphs.HeatMap = (->
+  class HeatMap extends SeeIt.Graph
+
+    constructor: ->
+      super
+      @listenerInitialized = false
+      @rendered = false
+      @initListeners()
+
+    initListeners: ->
+      self = @
+
+      @eventCallbacks['data:created'] =  (options) ->
+        if self.allRolesFilled()
+          if !self.rendered
+            self.rendered = true
+            self.draw.call(self, options)
+          else
+            self.refresh.call(self, options)
+        else
+          self.draw.call(self, options)
+      @eventCallbacks['data:assigned'] = @eventCallbacks['data:created']
+      @eventCallbacks['data:destroyed'] = @eventCallbacks['data:created']
+      @eventCallbacks['column:destroyed'] = @eventCallbacks['data:created']
+      @eventCallbacks['size:change'] = @eventCallbacks['data:created']
+      @eventCallbacks['options:update'] = @eventCallbacks['data:created']
+      @eventCallbacks['label:changed'] = @eventCallbacks['data:created']
+      @eventCallbacks['header:changed'] = @eventCallbacks['data:created']
+      @eventCallbacks['color:changed'] = @eventCallbacks['data:created']
+      @eventCallbacks['data:changed'] = @eventCallbacks['data:created']
+
+      for e, cb of @eventCallbacks
+        @on e, cb
+
+    formatData: ->
+
+
+    refresh: (options) ->
+      
+
+    draw: (options) ->
+      graph = @
+      colors = []
+      StartMajors = ["CSE", "BIS", "PHY", "MAT"]
+      EndMajors = ["CSE", "BIS", "PHY", "MAT", "EVE"]
+      Pairs = {'CSE': {'CSE': {count:5, total:15}, 'BIS': {count:2, total:7}, 'MAT': {count:1, total:4}}, 
+              'BIS': {'BIS': {count:6, total:16}, 'EVE': {count:3, total:11}}, 
+              'PHY': {'PHY': {count:7, total:18}, 'MAT': {count:2, total:6}}, 
+              'MAT': {'MAT': {count:1, total:4}}
+
+      
+      @xAxis = d3.svg.axis()
+                .scale(@x)
+                .orient("top")
+
+      @style = {}
+        
+      @style.margin = {top: 20, right: 20, bottom: 30, left: 40}
+      @style.width = @container.width() - @style.margin.left - @style.margin.right
+      @style.height = Math.max(270, @container.height()) - @style.margin.top - @style.margin.bottom
+
+      gridSize = @style.height / EndMajors.length
+      @svg = d3.select(@container[0]).append("svg")
+        .attr("width", @style.width + @style.margin.left + @style.margin.right)
+        .attr("height", @style.height + @style.margin.top + @style.margin.bottom)
+        .append("g")
+        .attr("transform", "translate(" + @style.margin.left + "," + @style.margin.top + ")")
+
+      console.log(gridSize)
+      @yLabels = @svg.selectAll(".startLabel")
+                      .data(EndMajors)
+                      .enter().append("text")
+                        .text((d) -> return d)
+                        .attr("x", 0)
+                        .attr("y", (d,i) -> return i * gridSize)
+                        .style("text-anchor", "end")
+                        .attr("transform", "translate(-6, " + gridSize / 1.5 + ")")
+
+      @xLabels = @svg.selectAll(".endLabel")
+                      .data(StartMajors)
+                      .enter().append("text")
+                        .text((d) -> return d)
+                        .attr("x", (d,i) -> return i*gridSize)
+                        .attr("y", 0)
+                        .style("text-anchor", "middle")
+                        .attr("transform", "translate(" + gridSize / 2 + ", -6)")
+
+      StartMajors.forEach (entry) ->
+        console.log Pairs[entry]
+
+    destroy: ->
+
+
+    dataFormat: ->
+      [
+        {
+          name: "x-axis",
+          type: "categorical",
+          multiple: false
+        },
+        {
+          name: "y-axis",
+          type: "categorical"
+          multiple: false
+        },
+        {
+          name: "values",
+          type: "numeric"
+          multiple: false
+        }
+      ]
+
+
+    options: ->
+      [
+        {
+          label: "Test",
+          type: "checkbox",
+          default: true
+        },
+        {
+          label: "Test 2",
+          type: "numeric",
+          default: 1
+        },
+        {
+          label: "Test 3",
+          type: "select",
+          values: [1,2,3,4,5],
+          default: 3
+        },
+        {
+          label: "Test 4",
+          type: "checkbox",
+          default: false
+        }
+      ]
+
+  HeatMap
+).call(@)
+
+@SeeIt.GraphNames["HeatMap"] = "Heat Map"
