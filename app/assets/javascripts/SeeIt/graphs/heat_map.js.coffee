@@ -93,11 +93,11 @@
           
           if (Pairs[entry][endEntry])
             console.log "Drawing " + Pairs[entry][endEntry]
-            console.log options[0].value 
+            console.log options[0].value
             fillstyle = options[0].value
             console.log "fillstyle " + fillstyle
             #console.log "MAXAVG " + graph.MaxAverage + " MAXTOT "  + graph.MaxTotal + " MAXCOUNT " + graph.MaxCount
-            if (fillstyle == 1)
+            if (fillstyle == "1")
               console.log "Hello?"
               graph.svg
                 .append("rect")
@@ -112,7 +112,7 @@
                   .style("stroke", "black")
                   .style("stroke-width", "1px")
 
-            else if (fillstyle == 2) 
+            else if (fillstyle == "2") 
               graph.svg
                 .append("rect")
                   .attr("x", -> return StartMajors.indexOf(entry) * gridSize)
@@ -126,7 +126,7 @@
                   .style("stroke", "black")
                   .style("stroke-width", "1px")
 
-            else if (fillstyle == 3)
+            else if (fillstyle == "3")
               graph.svg
                 .append("rect")
                   .attr("x", -> return StartMajors.indexOf(entry) * gridSize)
