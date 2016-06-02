@@ -7,6 +7,7 @@
       @rendered = false
       @initListeners()
 
+
     initListeners: ->
       self = @
 
@@ -40,12 +41,16 @@
 
     draw: (options) ->
       graph = @
+      @MaxAverage = 4
+      @MaxCount = 7
+      @MaxTotal = 18
       colors = []
       StartMajors = ["CSE", "BIS", "PHY", "MAT"]
       EndMajors = ["CSE", "BIS", "PHY", "MAT", "EVE"]
       Pairs = {'CSE': {'CSE': {count:5, total:15}, 'BIS': {count:2, total:7}, 'MAT': {count:1, total:4}}, 'BIS': {'BIS': {count:6, total:16}, 'EVE': {count:3, total:11}}, 'PHY': {'PHY': {count:7, total:18}, 'MAT': {count:2, total:6}}, 'MAT': {'MAT': {count:1, total:4}}}
               
-      
+      StartMajors.sort()
+      EndMajors.sort()
       @xAxis = d3.svg.axis()
                 .scale(@x)
                 .orient("top")
@@ -85,21 +90,68 @@
       StartMajors.forEach (entry) ->
         console.log Pairs[entry]
         EndMajors.forEach (endEntry) ->
-          console.log Pairs[entry][endEntry]
+          
           if (Pairs[entry][endEntry])
-            #DRAWCELL
-            graph.svg.selectAll(".gridCell")
-              .append("rect")
-                .attr("x", -> return StartMajors.indexOf(entry))
-                .attr("y", -> return EndMajors.indexOf(endEntry))
-                .attr("rx", 4)
-                .attr("ry", 4)
-                .attr("width", gridSize)
-                .attr("height", gridSize)
-                .style("fill", "red")
+            console.log "Drawing " + Pairs[entry][endEntry]
+            console.log options[0].value 
+            fillstyle = options[0].value
+            console.log "fillstyle " + fillstyle
+            #console.log "MAXAVG " + graph.MaxAverage + " MAXTOT "  + graph.MaxTotal + " MAXCOUNT " + graph.MaxCount
+            if (fillstyle == 1)
+              console.log "Hello?"
+              graph.svg
+                .append("rect")
+                  .attr("x", -> return StartMajors.indexOf(entry) * gridSize)
+                  .attr("y", -> return EndMajors.indexOf(endEntry) * gridSize)
+                  .attr("rx", 3)
+                  .attr("ry", 3)
+                  .attr("width", gridSize-2)
+                  .attr("height", gridSize-2)
+                  .style("fill", "red")
+                  .style("fill-opacity", -> return ((Pairs[entry][endEntry].total / Pairs[entry][endEntry].count) / graph.MaxAverage))
+                  .style("stroke", "black")
+                  .style("stroke-width", "1px")
+
+            else if (fillstyle == 2) 
+              graph.svg
+                .append("rect")
+                  .attr("x", -> return StartMajors.indexOf(entry) * gridSize)
+                  .attr("y", -> return EndMajors.indexOf(endEntry) * gridSize)
+                  .attr("rx", 3)
+                  .attr("ry", 3)
+                  .attr("width", gridSize-2)
+                  .attr("height", gridSize-2)
+                  .style("fill", "red")
+                  .style("fill-opacity", Pairs[entry][endEntry].total / graph.MaxTotal)
+                  .style("stroke", "black")
+                  .style("stroke-width", "1px")
+
+            else if (fillstyle == 3)
+              graph.svg
+                .append("rect")
+                  .attr("x", -> return StartMajors.indexOf(entry) * gridSize)
+                  .attr("y", -> return EndMajors.indexOf(endEntry) * gridSize)
+                  .attr("rx", 3)
+                  .attr("ry", 3)
+                  .attr("width", gridSize-2)
+                  .attr("height", gridSize-2)
+                  .style("fill", "red")
+                  .style("fill-opacity", Pairs[entry][endEntry].count / graph.MaxCount)
+                  .style("stroke", "black")
+                  .style("stroke-width", "1px")
           else 
             #DRAWEMPTYCELL
-
+            graph.svg
+              .append("rect")
+                .attr("x", -> return StartMajors.indexOf(entry) * gridSize)
+                .attr("y", -> return EndMajors.indexOf(endEntry) * gridSize)
+                .attr("rx", 3)
+                .attr("ry", 3)
+                .attr("width", gridSize-2)
+                .attr("height", gridSize-2)
+                .style("fill", "white")
+                .style("stroke", "gray")
+                .style("stroke-width", "1px")
     destroy: ->
 
 
@@ -126,25 +178,10 @@
     options: ->
       [
         {
-          label: "Test",
-          type: "checkbox",
-          default: true
-        },
-        {
-          label: "Test 2",
-          type: "numeric",
-          default: 1
-        },
-        {
-          label: "Test 3",
+          label: "Average[1]/Total[2]/Count[3]",
           type: "select",
-          values: [1,2,3,4,5],
-          default: 3
-        },
-        {
-          label: "Test 4",
-          type: "checkbox",
-          default: false
+          values: [1,2,3],
+          default: 1
         }
       ]
 
