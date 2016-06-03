@@ -37,10 +37,13 @@
     initLayout: ->
       @container.html("""
         <li class="SeeIt dataset list-group-item" style="min-height: 54px">
-          <a class="SeeIt dataset-title">#{@dataset.title}</a>
-          <button class="btn btn-default show-in-spreadsheet pull-right">
-            <span class='glyphicon glyphicon-expand'></span>
-          </button>
+          <div class="btn-group-vertical dataset-view-group SeeIt" role="group">
+            <button class="SeeIt dataset-title btn btn-default" role="button">#{@dataset.title}</button>
+            <button class="SeeIt btn btn-default show-in-spreadsheet" role="button">
+              Show in Spreadsheet
+              <span class='glyphicon glyphicon-th'></span>
+            </button>
+          </div>
         </li>
         <div class="SeeIt data-columns list-group-item" style="padding: 5px; display: none">
           <ul class='SeeIt list-group data-list'>

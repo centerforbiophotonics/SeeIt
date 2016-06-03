@@ -85,6 +85,8 @@
 
 
     options: ->
+      self = @
+
       [
         {
           label: "Test",
@@ -99,8 +101,13 @@
         {
           label: "Test 3",
           type: "select",
-          values: [1,2,3,4,5],
-          default: 3
+          values: ->
+            console.log self.dataset
+            _.unique(_.flatten(self.dataset.map((role) ->
+              role.data.map((d) -> d.data.labels) || []
+            )))
+          default: ->
+            if this.values().length then this.values()[0] else null
         },
         {
           label: "Test 4",

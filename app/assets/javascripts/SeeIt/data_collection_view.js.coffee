@@ -55,7 +55,7 @@
       @container.find('.dataset-list').append("""
         <div class='SeeIt dataset-container new-dataset'>
           <li class="SeeIt list-group-item new-dataset-li">
-            <a class="SeeIt" style="font-weight: bold">New Dataset</a>
+            <a class="SeeIt" style="font-weight: bold">Add Dataset</a>
             <span class='glyphicon glyphicon-plus' style='float: right;'></span>
           </li>
         </div>
@@ -82,7 +82,7 @@
             Select CSV file <input type="file" placeholder="CSV File" class="form-control SeeIt" style='display: none'>
           </label>
           <span class="SeeIt new-dataset-msg"></span>
-          <button type="button" class="btn btn-primary" id="create-dataset" style='width: 100%' 
+          <button type="button" class="SeeIt btn btn-primary" id="create-dataset" style='width: 100%' 
                   data-loading-text="<span class='SeeIt glyphicon glyphicon-refresh spin'></span>">
             Create Dataset
           </button>
@@ -122,7 +122,7 @@
           url = self.container.find('.dataset-spreadsheet-url').val()
 
           if url.length
-            button = @
+            button = self.container.find("#create-dataset")[0]
             $(button).button('loading')
 
             googleSpreadsheet = new SeeIt.GoogleSpreadsheetManager(self.container.find('.dataset-spreadsheet-url').val(), (success, collection) ->
@@ -172,10 +172,29 @@
             return false
         when "json-endpoint"
           json_manager = new SeeIt.JsonManager()
+          button = self.container.find("#create-dataset")[0]
+          $(button).button('loading')
 
-          json_manager.downloadFromServer(self.container.find(".json-endpoint").val(), (data) ->
-            self.trigger 'datasets:create', [data]
-          )
+          error_cb = -> 
+            self.container.find(".new-dataset-msg").addClass("error").html("Error loading JSON")
+            self.container.find(".new-dataset-input").val("")
+
+            setTimeout(->
+              self.container.find(".new-dataset-msg").removeClass("error").html("")
+            ,5000)
+
+            $(button).button('reset')
+            
+          try
+            json_manager.downloadFromServer(self.container.find(".json-endpoint").val(), 
+              ((data) -> 
+                self.trigger 'datasets:create', [data]
+                $(button).button('reset')
+              ),
+              error_cb
+            )
+          catch error
+            error_cb()
 
           self.container.find(".json-endpoint").val("")
         when "json-file"
@@ -183,6 +202,58 @@
 
           json_manager.handleUpload(data.file, (d) ->
             self.trigger 'datasets:create', d
+          )
+        when "csv-endpoint"
+          csv_manager = new SeeIt.CSVManager()
+          button = self.container.find("#create-dataset")[0]
+          $(button).button('loading')
+
+          error_cb = -> 
+            self.container.find(".new-dataset-msg").addClass("error").html("Error loading CSV")
+            self.container.find(".new-dataset-input").val("")
+
+            setTimeout(->
+              self.container.find(".new-dataset-msg").removeClass("error").html("")
+            ,5000)  
+
+            $(button).button('reset')
+
+          try
+            csv_manager.downloadFromServer(self.container.find(".csv-endpoint").val(), 
+              ((data) ->
+
+                csvRows = data.data.split '\n'
+                csvData = []
+
+                csvRows.forEach (r) ->
+                  row = r.split(',')
+
+                  row.forEach (d, i) ->
+                    row[i] = if !isNaN(parseFloat(d)) then parseFloat(d) else d
+
+                  csvData.push row
+
+                dataset = {
+                  isLabeled: true,
+                  dataset: csvData
+                }
+
+                self.trigger 'datasets:create', [dataset]
+                $(button).button('reset')
+              ),
+              error_cb
+            )
+          catch error
+            error_cb()
+
+
+          self.container.find(".csv-endpoint").val("")
+        when "csv-file"
+          csv_manager = new SeeIt.CSVManager()
+
+          csv_manager.handleUpload(data.file, (d) ->
+
+            self.trigger 'datasets:create', [{isLabeled: true, dataset: d}]
           )
 
 

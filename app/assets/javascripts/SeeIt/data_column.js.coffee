@@ -115,6 +115,9 @@
       @color = color
       @trigger('color:changed')
 
+    getHeader: ->
+      return @header
+
     setHeader: (header) ->
       @header = header
       @trigger('header:changed')

@@ -19,6 +19,20 @@
   padding-bottom: 15px;
 }
 
+.SeeIt.dataset-view-group {
+  width: 100%;
+}
+
+.SeeIt.dataset-title {
+  color: #428bca;
+  font-weight: bold;
+}
+
+.SeeIt.dataset-view-group button {
+  width: 100%;
+  white-space: normal !important
+}
+
 .SeeIt.graph-panel-content {
   min-height: 300px;
 /*  height: calc(100% - 54px);*/
@@ -29,6 +43,7 @@
  {
   height: 100%;
 }
+
 
 .SeeIt.nav-el.left {
   padding-left: 10px;
@@ -67,6 +82,9 @@
   height: -webkit-calc(100% - 54px);
   height: -moz-calc(100% - 54px);
   height: calc(100% - 54px);
+  min-height: -webkit-calc(100% - 54px);
+  min-height: -moz-calc(100% - 54px);
+  min-height: calc(100% - 54px);
 }
 
 .SeeIt.remove-options {
@@ -109,10 +127,37 @@
   white-space: normal !important;
 }
 
-@media (min-width: 980px) {
-  .SeeIt.row {
+@media (min-width: 992px) {
+  .SeeIt.row .SeeIt.Data {
     height: 100%;
   }
+
+  .SeeIt.Graphs .SeeIt.graph-buttons {
+    float: right;
+  }
+}
+
+@media (max-width: 991px) {
+  .SeeIt.row .SeeIt.Data {
+    height: auto;
+  }
+
+  .SeeIt.Graphs .SeeIt.graph-buttons {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .SeeIt.Graphs .SeeIt.graph-buttons button {
+    width: 20%;
+  }
+
+/*  .SeeIt.graph-title .glyphicon {
+    float: right;
+  }*/
+}
+
+.SeeIt.row {
+  height: 100%;
 }
 
 .SeeIt.col-md-2, .SeeIt.col-md-3, .SeeIt.col-md-9, .SeeIt.col-md-10, .SeeIt.col-md-12 {
@@ -169,7 +214,7 @@
 }
 
 .SeeIt.Graphs {
-  max-height: calc(100% - 52px);
+  max-height: 100%;
   overflow-y: auto;
 }
 
@@ -281,7 +326,7 @@ div.SeeIt.expanded-data-zone {
 }
 
 .SeeIt.Graphs.spreadsheet-visible, .SeeIt.Spreadsheet {
-  max-height: calc(50% - 26px);
+  max-height: 50%;
   overflow-y: auto;
 }
 

@@ -329,7 +329,8 @@
       [{
         label: "Box Plot",
         type: "checkbox",
-        default: false
+        default: ->
+          self.dataset
       },
       {
         label: "Show Median",

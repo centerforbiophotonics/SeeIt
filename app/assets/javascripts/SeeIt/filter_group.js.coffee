@@ -11,7 +11,7 @@
       @container.html("""
         <div class='SeeIt filter-group-tools'>
           <div class='SeeIt form-group'>
-            <label for='filter-group-type' class='filter-group-type'>Filter requirements:</label>
+            <label for='filter-group-type' class='SeeIt filter-group-type'>Filter requirements:</label>
             <select name='filter-group-type' class='form-control SeeIt filter-group-type filter-group-type-select'>
               <option value='AND'>All filters must be fulfilled</option>
               <option value='OR'>At least one filter must be fulfilled</option>

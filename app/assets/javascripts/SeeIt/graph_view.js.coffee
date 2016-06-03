@@ -180,7 +180,7 @@
         <div class="SeeIt data-rep btn-group" role="group" data-id='#{data.data.header}'>
           <button class="SeeIt data-rep-color btn btn-default" style="background-color: #{data.data.color}"></button>
           <button class="SeeIt data-rep-text btn btn-default">#{data.data.header}</button>
-          <button class="SeeIt data-rep-remove btn btn-default"><span class="glyphicon glyphicon-remove"></span></button>
+          <button class="SeeIt data-rep-remove btn btn-default" title='Remove Data'><span class="glyphicon glyphicon-remove"></span></button>
         </div>
       """)
 
@@ -325,16 +325,16 @@
       @container.html("""
         <div class="SeeIt graph-panel panel panel-default">
           <div class="SeeIt panel-heading">
-            <button role="button" class="options-button btn btn-default"><span data-id=#{@id}" class="glyphicon glyphicon-wrench" style="float: left"></span></button>
+            <div class="btn-group SeeIt graph-buttons" role="group">
+              <button role="button" class="SeeIt options-button btn btn-default" title="Graph Options"><span data-id=#{@id}" class="glyphicon glyphicon-wrench"></span></button>
+              <button class="SeeIt collapse-footer btn btn-default" title='Show/Hide Footer'><span data-id="#{@id}" class="glyphicon glyphicon-chevron-up"></span></button>
+              <button class="SeeIt collapse-btn btn btn-default" title='Show/Hide Graph'><span data-id="#{@id}" class="glyphicon glyphicon-collapse-down"></span></ button>
+              <button class="SeeIt maximize btn btn-default" title='Maximize Graph'><span data-id="#{@id}" class="glyphicon glyphicon-resize-full"></span></button>
+              #{if @graph_editable then '<button class="SeeIt remove btn btn-default" title="Remove Graph"><span data-id="#{@id}" class="glyphicon glyphicon-remove"></span></button>' else ''}
+            </div>
             <div class="SeeIt graph-title">
               <div class="SeeIt graph-title-content">#{@id}</div>
-              <span class="SeeIt graph-title-edit-icon glyphicon glyphicon-pencil"></span>
-            </div>
-            <div class="btn-group" role="group" style="float: right">
-              <button class="collapse-footer btn btn-default"><span data-id="#{@id}" class="glyphicon glyphicon-chevron-up"></span></button>
-              <button class="collapse-btn btn btn-default"><span data-id="#{@id}" class="glyphicon glyphicon-collapse-down"></span></ button>
-              <button class="maximize btn btn-default"><span data-id="#{@id}" class="glyphicon glyphicon-resize-full"></span></button>
-              #{if @graph_editable then '<button class="remove btn btn-default"><span data-id="#{@id}" class="glyphicon glyphicon-remove"></span></button>' else ''}
+              <span class="SeeIt graph-title-edit-icon glyphicon glyphicon-pencil" title='Edit Title'></span>
             </div>
           </div>
           <div id="collapse_#{@id.split(' ').join('-')}" class="SeeIt graph-panel-content panel-collapse collapse in">

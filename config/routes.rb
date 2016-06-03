@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  get 'csv_api', to: "csv_api#index"
+
   get 'json_api', to: "json_api#index"
 
   root to: "application#index"

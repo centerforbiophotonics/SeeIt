@@ -12,11 +12,11 @@
       @container.html("""
         <div class="SeeIt data-column-panel panel panel-default">
           <div class="SeeIt data-column-panel-body panel-body">
-            <div class="btn-group" role="group" style="width: 100%">
-              <button type="button" class="color-picker data-column-button SeeIt btn btn-default" style="background-color: #{@data.color}; width: 15%">
+            <div class="SeeIt btn-group" role="group" style="width: 100%">
+              <button type="button" title='Change Color' class="color-picker data-column-button SeeIt btn btn-default" style="background-color: #{@data.color}; width: 15%">
               </button>
               <button type="button" class="data-column-button SeeIt btn btn-default data" style='width: 60%'>#{@data.header}</button>
-              <div role="group" class="data-column-button SeeIt btn-group SeeIt dropdown-container" style='width: 25%'></div>
+              <div role="group" title='Add to graph' class="data-column-button SeeIt btn-group SeeIt dropdown-container" style='width: 25%'></div>
             </div>
           </div>
         </div>
@@ -132,9 +132,9 @@
           return htmlStr
 
         @container.find('.dropdown-menu').append("""
-          <li class='add_to_graph_submenu dropdown-submenu' style='box-shadow: none'>
-            <a href='#' style='box-shadow: none' class='dropdown_child dropdown-toggle' data-id='#{graphId}' id='#{graphId}' data-toggle='dropdown' aria-haspopup="true">#{graphId}</a>
-            <ul class="dropdown-menu text-center" aria-labelledby='#{graphId}' style='position: fixed'>
+          <li class='SeeIt add_to_graph_submenu dropdown-submenu' style='box-shadow: none'>
+            <a href='#' style='box-shadow: none' class='SeeIt dropdown_child dropdown-toggle' data-id='#{graphId}' id='#{graphId}' data-toggle='dropdown' aria-haspopup="true">#{graphId}</a>
+            <ul class="SeeIt dropdown-menu text-center" aria-labelledby='#{graphId}' style='position: fixed'>
               <span style='text-align: center; display: block; opacity: 0.75'>Data Roles</span>
               <li role="separator" class="divider"></li>
                 #{appendRoles()}
@@ -143,9 +143,9 @@
         """)
 
 
-
         $('.add_to_graph_submenu').click(->
           dropDownFixPosition($(@),$(@).find('.dropdown-menu'))
+          # $(window).on 'scroll'
         )
 
 
@@ -167,8 +167,8 @@
 
   dropDownFixPosition = (button,dropdown) ->
     dropDownTop = button.offset().top + button.innerHeight() - 18;
-    dropdown.css('top', dropDownTop + "px");
-    dropdown.css('left', button.offset().left + button.outerWidth() + "px")
+    dropdown.css('top', dropDownTop + button.height() + "px");
+    dropdown.css('left', button.offset().left + "px")
 
   DataColumnView
 ).call(@)

@@ -15,10 +15,10 @@
       @container.html("""
         <div class='SeeIt panel-body form-group'>
           <label for='dataset'>Filter by column from dataset:</label>
-          <select class="form-control dataset-select" name='dataset' placeholder='Dataset'>
+          <select class="SeeIt form-control dataset-select" name='dataset' placeholder='Dataset'>
           </select>
-          <label class='hidden data-column' for="dataColumn">Select a column to filter by:</label>
-          <select class="data-column data-column-select form-control hidden" name="dataColumn">
+          <label class='SeeIt hidden data-column' for="dataColumn">Select a column to filter by:</label>
+          <select class="SeeIt data-column data-column-select form-control hidden" name="dataColumn">
           </select>
           <label class='SeeIt numeric-filter hidden' for='numeric-filter-comparison'>Only inlclude data points</label>
           <select class='SeeIt numeric-filter numeric-filter-comparison hidden form-control' name='numeric-filter-comparison'>

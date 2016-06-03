@@ -24,7 +24,7 @@
             <span class="SeeIt title-edit-icon glyphicon glyphicon-pencil"></span>
           </div>
           <div class="SeeIt panel-body spreadsheet">
-            <div class="SeeIt Handsontable-Container" style="position: relative; overflow: hidden; height: 100%"></div>
+            <div class="SeeIt Handsontable-Container" style="position: relative; overflow: hidden; height: 100%; min-height: 100%"></div>
           </div>
         </div>
       """)
@@ -91,6 +91,9 @@
           if !self.editingTitle
             self.container.find(".title").html("<input id='title-input' type='text' value='#{self.dataset.title}'>")
             self.container.find('#title-input').off('keyup', self.handlers.titleInputKeyup).on('keyup', self.handlers.titleInputKeyup)
+            self.container.find("#title-input").blur ->
+              self.container.find(".title-edit-icon").trigger 'click'
+            self.container.find("#title-input").focus()
             self.editingTitle = true
           else
             oldTitle = self.dataset.title
@@ -159,6 +162,12 @@
 
             $(TH.firstChild).toggle()
 
+            $(input).focus()
+
+            $(input).blur ->
+              console.log 'blur called for header'
+              $(input).trigger { type : 'keypress', which : 13, keyCode: 13 }
+
             $(input).keyup (event) ->
               event.stopPropagation()
               event.preventDefault()
@@ -195,7 +204,6 @@
 
           $(TH).off('dblclick').on('dblclick', headerDblclick)
 
-      console.log spreadsheetView.dataset.data.length, spreadsheetView.dataset.data[0].data().length
       settings = {
         rowHeaders: @dataset.labels,
         colHeaders: @dataset.headers,

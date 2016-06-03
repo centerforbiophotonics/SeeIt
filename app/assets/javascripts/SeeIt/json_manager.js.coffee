@@ -4,7 +4,7 @@
 
     constructor: ->
 
-    downloadFromServer: (url, success) ->
+    downloadFromServer: (url, success, error) ->
       self = @
 
       current_hostname = document.location.hostname + "#{if document.location.port then ":"+document.location.port else ""}"
@@ -18,17 +18,24 @@
         console.log url, target_hostname
 
         $.ajax({
+            timeout: 5000,
             url: url,
             # crossOrigin: true,
             jsonp: "callback",
             dataType: "jsonp",
-            success: success
+            success: success,
+            error: error
           })
       else
         relative_path = getPathFromURL(url)
         console.log relative_path
 
-        $.getJSON(relative_path, success)
+        $.ajax({
+          dataType: "json",
+          url: relative_path,
+          success: success,
+          error: error
+        });
 
     handleUpload: (file, callback) ->
       self = @
@@ -55,7 +62,7 @@
         	
 
     handleDownload: (dataCollection) ->
-      blob = new Blob([JSON.stringify(dataCollection.toJsonString())]);
+      blob = new Blob([JSON.stringify(dataCollection.toJson())]);
       filename = prompt("Please enter the name of the file you want to save to (will save with .json extension)");
 
       if filename == "" || (filename != null && filename.trim() == "")

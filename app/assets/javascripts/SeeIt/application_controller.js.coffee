@@ -69,8 +69,6 @@
 
         toolbar_params = [
           {class: "addGraph", title: "Add graph", handler: @handlers.addGraph, icon: "<span class='glyphicon glyphicon-plus'></span>", type: "dropdown", options: @graphTypes},
-          {class: "uploadCSV", title: "Upload CSV", handler: @handlers.uploadCSV, type:"button"},
-          {class: "uploadJSON", title: "Upload JSON", handler: @handlers.uploadJson, type: "button"},
           {class: "downloadJSON", title: "Download JSON", handler: @handlers.downloadJson, type: "button"},
           {class: "downloadInitOptions", title: "Save SeeIt", handler: @handlers.saveInitJson, type: "button"}
         ]

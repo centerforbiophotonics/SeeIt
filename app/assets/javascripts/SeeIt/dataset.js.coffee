@@ -1,124 +1,308 @@
 @SeeIt.Dataset = (->
-  class Dataset
-    _.extend(@prototype, Backbone.Events)
-    @Validators = {}
-    _.extend(@Validators, SeeIt.Modules.Validators)
+	extend = (obj, mixin) ->
+		obj[name] = method for name, method of mixin
+		obj
 
-    constructor: (@app, data, @title, @isLabeled) ->
-      #Data will be an array of DataColumns
-      @labels = []
-      @headers = []
-      @rawFormat = Dataset.getFormat(data)
-      @data = []
-      @loadData(data)
+	class Dataset
+		_.extend(@prototype, Backbone.Events)
+		@Validators = {}
+		_.extend(@Validators, SeeIt.Modules.Validators)
 
-    loadData: (data) ->
-      if Dataset.validateData(data)
-        #Data in spreadsheet format
-        @rawData = data
-        @formatRawData()
-        @initData()
-        @trigger("data:loaded")
-      else
-        alert "Error: Invalid data format"
+		constructor: (@app, data, @title = "New Dataset", @isLabeled = false, @editable = true) ->
+			if !data
+				data = {
+					labels: ["1", "2", "3", "4", "5"],
+					columns: [
+						{
+							header: "A",
+							type: "numeric",
+							data: [null,null,null,null,null]
+						},
+						{
+							header: "B",
+							type: "numeric",
+							data: [null,null,null,null,null]
+						},
+						{
+							header: "C",
+							type: "numeric",
+							data: [null,null,null,null,null]
+						},
+						{
+							header: "D",
+							type: "numeric",
+							data: [null,null,null,null,null]
+						},
+						{
+							header: "E",
+							type: "numeric",
+							data: [null,null,null,null,null]
+						},
+					]
+				}
 
-    formatRawData: ->
-      #Array of arrays
-      if @rawFormat == "array"
-        if !@isLabeled
-          privateMethods.addLabels.call(@)
-        else
-          privateMethods.stringifyLabels.call(@)
+			#Data will be an array of DataColumns
+			@labels = []
+			@headers = []
+			@types = []
+			@rawFormat = Dataset.getFormat(data)
+			@data = []
+			extend(@, ConverterFactory(@rawFormat))
+			@loadData(data)
+			@registerListeners()
 
-        maxCols = privateMethods.maxNumCols.call(@)
-        privateMethods.padRows.call(@,maxCols)
-        @initHeaders()
-      else
-        #array of json
+		getByHeader: (header) ->
+			idx = @headers.indexOf(header)
 
-    initData: ->
-      # Assume data is already in array of arrays format and is uniformly padded with 'undefined's
-      for i in [1...@rawDataCols()]
-        @data.push(SeeIt.DataColumn.new(@app, @rawData, i, @title))
+			if idx < 0 then return null else return @data[idx]
 
-    rawDataRows: ->
-      if @rawFormat == "array" then @rawData.length else @rawData.columns.length
+		setTitle: (title) ->
+			@title = title
 
-    rawDataCols: ->
-      if @rawFormat == "array"
-        if @rawData.length then @rawData[0].length else 0
-      else
-        if @rawData.columns.length then @rawData.columns[0].length else 0
+			@data.forEach (d) ->
+				d.setDatasetTitle.call(d, title)
 
-    # updateColumn: (idx, column) ->
-    #   for i in [1...@getNumRows()]
-    #     @data[i][idx] = column[i - 1]
+			@trigger('dataset:title:changed')
 
-    # updateRow: (idx, row) ->
-    #   start = (if @isLabeled then 1 else 0)
-    #   for i in [start...@getNumCols()]
-    #     @data[idx][i] = row[i - start]
+		loadData: (data) ->
+			if Dataset.validateData(data)
+				@rawData = data
+				@formatRawData()
+				@getColTypes()
+				@initData()
+				@trigger("data:loaded")
+			else
+				alert "Error: Invalid data format"
 
-    # updateLabel: (idx, label) ->
+		toJson: ->
+			obj = {
+				title: @title,
+				dataset: {
+					labels: @labels.slice(0)
+					columns: []
+				},
+				isLabeled: true
+			}
 
-    # updateHeader: (idx, header) ->
+			@data.forEach (d) ->
+				obj.dataset.columns.push d.toJson()
 
-    initHeaders: ->
-      for i in [1...@rawDataCols()]
-        @headers.push(@rawData[0][i])
+			return obj
 
-    @validateData: (data) ->
-      valid = true
+		getType: (d) ->
+			switch typeof d
+				when "number"
+					return "numeric"
+				else
+					return "categorical"
 
-      for key in @Validators
-        valid = valid && @Validators[key](@rawData)
+		registerListeners: ->
+			self = @
 
-      return valid
+			@on 'header:change', (value, idx) ->
+				self.headers[idx] = value
+				self.trigger('header:changed', value, idx)
 
-    @getFormat: (data) ->
-      $.type data
+				self.data[idx].setHeader(value)
 
-  #privateMethods: methods for Dataset class
-  privateMethods = {
-    toString: (val) ->
-      return val + ''
+			@on 'label:change', (value, idx) ->
+				self.labels[idx] = value
+				self.trigger('label:changed', value, idx)
 
-    stringifyLabels: ->
-      for i in [1...@rawDataRows()]
-        @rawData[i][0] = privateMethods.toString.call(@,@rawData[i][0])
-        @labels.push(@rawData[i][0])
+				self.data.forEach (d) ->
+					d.setLabel(idx, value)
 
-      @isLabeled = true
+			@on 'dataColumn:destroy', (col) ->
+				self.destroyColumn.call(self, col)
 
-    addLabels: ->
-      @rawData[0].unshift('')
+			@on 'dataColumn:create', (col) ->
+				self.createColumn.call(self, col)
 
-      for i in [1...@rawDataRows()]
-        @rawData[i].unshift(privateMethods.toString.call(@, i))
-        @labels.push(@rawData[i][0])
+			@on 'row:destroy', (row) ->
+				self.destroyRow.call(self, row)
 
-      @isLabeled = true
+			@on 'row:create', (row) ->
+				self.createRow.call(self, row)
 
-    maxNumCols: ->
-      maxCols = @rawData[0].length
-      for i in [1...@rawDataRows()]
-        if @rawData[i].length > maxCols
-          maxCols = @rawData[i].length
+			@on 'dataColumn:type:change', (col, type, callback) ->
 
-      maxCols
+				self.data[col].setType(type, (success, msg) ->
+					if success then self.types[col] = type
 
-    padRows: (maxCols) ->
-      for i in [0...@rawDataRows()]
-        if @rawData[i].length < maxCols
-          @rawData[i] = privateMethods.fillWithUndefined(@rawData[i], maxCols - @rawData[i].length)
+					callback(success, msg)
+				)
 
-    fillWithUndefined: (arr,count) ->
-      for i in [0...count]
-        arr.push(undefined)
+			@on 'request:columns', (callback) ->
+				callback(self.data.slice(0), self.types.slice(0))
 
-      arr
+			@on 'request:values:unique', (colIdx, callback) ->
+				callback self.data[colIdx].uniqueData()
 
-  }
+		generateLabel: (labels) ->
+			i = 1
 
-  Dataset
+			while labels.indexOf(i.toString()) >= 0
+				i++
+
+			return i.toString()
+
+		createRow: (row) ->
+			label = @generateLabel(@labels)
+			for i in [0...@data.length]
+				@data[i].insertElement(row, label, null)
+
+			@labels.splice(row, 0, label)
+			@trigger('row:created', row)
+
+		createColumn: (col) ->
+			header = @generateLabel(@headers)
+
+			dataColumn = []
+
+			for i in [0...@labels.length]
+				dataColumn.push({label: @labels[i], value: null})
+
+			@data.splice(col, 0, new SeeIt.DataColumn(@app, header, dataColumn, @title, undefined, @editable))
+			@headers.splice(col, 0, header)
+			@trigger('dataColumn:created', col)
+
+		destroyRow: (row) ->
+			for i in [0...@data.length]
+				@data[i].removeElement(row)
+
+			@labels.splice(row, 1)
+			@trigger('row:destroyed', row)
+
+		destroyColumn: (col) ->
+			destroyedColumn = @data.splice(col, 1)[0]
+			@headers.splice(col, 1)
+
+			destroyedColumn.trigger('destroy')
+			@trigger('dataColumn:destroyed')
+
+		@validateData: (data) ->
+			valid = true
+
+			for key in @Validators
+			  valid = valid && @Validators[key](@rawData)
+
+			return valid
+
+		@getFormat: (data) ->
+			$.type data
+
+
+
+		ConverterFactory = (format) ->
+			ArrayConverter = {
+				formatRawData: ->
+					if !@isLabeled
+						@addLabels()
+					else
+						@stringifyLabels()
+
+					maxCols = @maxNumCols()
+					@padRows(maxCols)
+					@initHeaders()
+
+				toString: (val) ->
+					return val + ''
+
+				stringifyLabels: ->
+					for i in [1...@rawDataRows()]
+						@rawData[i][0] = @toString(@rawData[i][0])
+						@labels.push(@rawData[i][0])
+
+					@isLabeled = true
+
+				addLabels: ->
+					@rawData[0].unshift('')
+
+					for i in [1...@rawDataRows()]
+						@rawData[i].unshift(@toString(i))
+						@labels.push(@rawData[i][0])
+
+					@isLabeled = true
+
+				maxNumCols: ->
+					maxCols = @rawData[0].length
+					for i in [1...@rawDataRows()]
+						if @rawData[i].length > maxCols
+							maxCols = @rawData[i].length
+
+					maxCols
+
+				getColTypes: ->
+					for i in [1...@rawDataCols()]
+						@types.push(@getType(@rawData[1][i]))
+
+				padRows: (maxCols) ->
+					for i in [0...@rawDataRows()]
+						if @rawData[i].length < maxCols
+							@rawData[i] = @fillWithUndefined(@rawData[i], maxCols - @rawData[i].length)
+
+				fillWithUndefined: (arr,count) ->
+					for i in [0...count]
+						arr.push(undefined)
+
+					arr
+
+				initData: ->
+					# Assume data is already in array of arrays format and is uniformly padded with 'undefined's
+					for i in [1...@rawDataCols()]
+						@data.push(SeeIt.DataColumn.new(@app, @rawData, i, @title, @types[i-1], undefined, @editable))
+
+				rawDataRows: ->
+					@rawData.length
+
+				rawDataCols: ->
+					if @rawData.length then @rawData[0].length else 0
+
+				initHeaders: ->
+					for i in [1...@rawDataCols()]
+						@headers.push(@toString(@rawData[0][i]))
+			}
+
+
+			JsonConverter = {
+				formatRawData: ->
+					if !@isLabeled
+						@addLabels()
+					else
+						@stringifyLabels()
+
+					@initHeaders()
+
+				toString: (val) ->
+					return val + ''
+
+				addLabels: ->
+					for i in [0...@rawData.columns.length]
+						for j in [0...@rawData.columns[i].data.length]
+							@labels.push(@toString(j+1))
+
+					@rawData.labels = @labels          
+					@isLabeled = true
+
+				stringifyLabels: ->
+					for i in [0...@rawData.labels.length]
+						@labels.push(@toString(@rawData.labels[i]))
+
+				initHeaders: ->
+					for i in [0...@rawData.columns.length]
+						@headers.push(@toString(@rawData.columns[i].header))
+
+				getColTypes: ->
+					for i in [0...@rawData.columns.length]
+						@types.push(@rawData.columns[i].type)
+
+				initData: ->
+					for i in [0...@rawData.columns.length]
+						@data.push(SeeIt.DataColumn.new(@app, @rawData, i, @title, @types[i], undefined, @editable))
+
+			}
+
+			if format == "array" then ArrayConverter else JsonConverter
+
+	Dataset
 ).call(@)
