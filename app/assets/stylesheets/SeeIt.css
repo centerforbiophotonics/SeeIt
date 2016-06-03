@@ -151,6 +151,26 @@
     width: 20%;
   }
 
+  .SeeIt.data-rep.btn-group {
+    width: 100%;
+  }
+
+  .SeeIt.data-rep.btn-group .data-rep-color {
+    width: 20%;
+  }
+
+  .SeeIt.data-rep.btn-group .data-rep-remove {
+    width: 20%;
+  }
+
+  .SeeIt.data-rep.btn-group .data-rep-text {
+    width: 60%;
+  }
+
+  .SeeIt.graph-panel .SeeIt.panel-heading {
+    text-align: center;
+  }
+
 /*  .SeeIt.graph-title .glyphicon {
     float: right;
   }*/
@@ -182,6 +202,10 @@
   padding: 0;
 }
 
+.SeeIt.dataset-list {
+  margin-bottom: 200px;
+}
+
 .SeeIt.dataset a.SeeIt.selected, .SeeIt.new-dataset-li a.SeeIt.selected {
   color: white;
 }
@@ -209,7 +233,7 @@
 }
 
 .SeeIt.Data .SeeIt.list-group{
-    max-height: 100%;
+/*    max-height: 100%;*/
     /*overflow-y: auto; */
 }
 

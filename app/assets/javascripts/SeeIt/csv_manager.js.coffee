@@ -56,7 +56,7 @@
               row = r.split(',')
 
               row.forEach (d, i) ->
-                row[i] = if !isNaN(parseFloat(d)) then parseFloat(d) else d
+                row[i] = if !isNaN(Number(d)) then Number(d) else d
 
               data.push row
 

@@ -141,7 +141,7 @@
         )
         value: (
           if @filterType == "numeric"
-            parseFloat(@container.find(".numeric-filter-value").val())
+            Number(@container.find(".numeric-filter-value").val())
           else
             @container.find(".categorical-filter-value").val()
         )

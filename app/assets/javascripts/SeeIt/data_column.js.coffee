@@ -30,7 +30,7 @@
         @trigger('data:changed', @)
 
       @setValue = (idx, value) ->
-        if editable
+        if editable && @typeIsCorrect(value)
           data[idx].value = value
           @trigger('data:changed',@, idx)
           @staleData = true
@@ -48,13 +48,13 @@
       @setType = (type, callback) ->
         if type == "numeric"
           for i in [0...data.length]
-            if isNaN(parseFloat(data[i].value))
+            if isNaN(Number(data[i].value))
               if callback then callback(false, "Could not change type to numeric because column has non-numeric values")
               return
 
         @type = type
         for i in [0...data.length]
-          data[i].value = if @type == "numeric" then parseFloat(data[i].value) else data[i].value + ''
+          data[i].value = if @type == "numeric" then Number(data[i].value) else data[i].value + ''
 
         if callback then callback(true, "Data type changed to #{type}")
 
@@ -70,6 +70,9 @@
         data[idx].label = value
         @staleData = true
         @trigger('label:changed', idx)
+
+      @getLabel = (idx) ->
+        return data[idx].label
 
       @removeElement = (idx) ->
         @staleData = true
@@ -105,6 +108,12 @@
       @isEditable = ->
         editable
 
+    typeIsCorrect: (value) ->
+      (
+        @type == "numeric" && Number(value) ||
+        @type == "categorical" && typeof value == "string"
+      )
+
     setDatasetTitle: (title) ->
       @datasetTitle = title
 
@@ -117,6 +126,7 @@
 
     getHeader: ->
       return @header
+
 
     setHeader: (header) ->
       @header = header

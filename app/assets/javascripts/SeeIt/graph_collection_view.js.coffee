@@ -76,9 +76,11 @@
         @graphId = "Graph #{++idx}"
 
     changeGraphId: (oldId, newId) ->
+      console.log oldId, newId
       graph = @graphs[oldId]
 
-      @container.find("#graph_#{oldId}").attr('id', "graph_#{newId}")
+      @container.find("#graph_#{oldId.split(' ').join('-')}").attr('id', "graph_#{newId.split(' ').join('-')}")
+      @container.find("#collapse_#{oldId.split(' ').join('-')}").attr('id', "collapse_#{newId.split(' ').join('-')}")
 
       delete @graphs[oldId]
       @graphs[newId] = graph
@@ -122,6 +124,7 @@
       self = @
 
       @findValidId()
+      console.log @graphId, @graphs
 
       @container.find(".graph-list").append("""
       <li class="SeeIt graph list-group-item" id="graph_#{@graphId.split(' ').join('-')}">

@@ -8,6 +8,7 @@
 
 			@wrapOptions(options)
 
+			@visible = false
 			@initLayout()
 			@initHandlers()
 
@@ -126,9 +127,15 @@
 
 			@button.on 'click', ->
 				self.container.css('max-height', self.container.next().height())
-				self.trigger('options:show')
+				self.visible = !self.visible
+
+				if self.visible
+					self.trigger('options:show')
+				else
+					self.trigger('options:hide')
 
 			@container.find('.remove-options').on 'click', ->
+				self.visible = false
 				self.trigger('options:hide')
 
 			@on 'graph:maximize', (maximize) ->

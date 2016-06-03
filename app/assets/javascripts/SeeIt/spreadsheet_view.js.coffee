@@ -152,21 +152,32 @@
             event.stopPropagation()
             event.preventDefault()
 
-            $(TH).off('dblclick')
+            console.log 'headerDblclick called'
+
+            $(TH).off('dblclick', headerDblclick)
 
             input = document.createElement('input')
             input.type = 'text'
             input.value = TH.firstChild.textContent
+            input.className = 'SeeIt spreadsheet-header-input'
 
             TH.appendChild(input)
 
             $(TH.firstChild).toggle()
 
-            $(input).focus()
+            $(input).click (event) ->
+              event.stopPropagation()
+              event.preventDefault()
+              return false
 
-            $(input).blur ->
-              console.log 'blur called for header'
-              $(input).trigger { type : 'keypress', which : 13, keyCode: 13 }
+            $(input).focusout (event) ->
+              e = $.Event("keyup")
+              console.log 'blur called for header', e, event
+              e.which = 13
+              e.keyCode = 13
+              $(input).trigger e
+
+            $(input).focus()
 
             $(input).keyup (event) ->
               event.stopPropagation()

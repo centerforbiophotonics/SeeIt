@@ -48,7 +48,7 @@
 								if types[i-1] == "categorical"
 									element[column_name] 
 								else 
-									if element[column_name].trim().length then parseFloat(element[column_name]) else undefined
+									if element[column_name].trim().length then Number(element[column_name]) else undefined
 							)
 
 				collection.push new_dataset
@@ -63,7 +63,7 @@
 				types.push "numeric"
 
 				for element in dataset.elements
-					if isNaN(parseFloat(element[column_name])) && element[column_name].trim().length > 0
+					if isNaN(Number(element[column_name])) && element[column_name].trim().length > 0
 						types[i-1] = "categorical"
 						break
 

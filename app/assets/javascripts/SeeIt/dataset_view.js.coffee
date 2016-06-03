@@ -4,6 +4,7 @@
 
     constructor: (@app, @container, @dataset) ->
       @dataColumnViews = []
+      @inSpreadsheet = false
       @initListeners()
       @initLayout()
 
@@ -111,8 +112,22 @@
 
       showInSpreadsheet = (event) ->
         event.stopPropagation()
-        self.trigger('spreadsheet:load', self.dataset)
 
+        if !self.inSpreadsheet
+          self.trigger('spreadsheet:load', self.dataset)
+          self.inSpreadsheet = true
+          $(@).html("""
+            Remove from Spreadsheet
+            <span class='glyphicon glyphicon-th'></span>
+          """)
+        else
+          self.inSpreadsheet = false
+          $(@).html("""
+            Show in Spreadsheet
+            <span class='glyphicon glyphicon-th'></span>
+          """)
+
+        $(@).toggleClass('btn-default btn-primary')
 
       @container.find('.dataset').off('click', toggleData).on('click', toggleData)
       @container.find('.show-in-spreadsheet').off('click', showInSpreadsheet).on('click', showInSpreadsheet)
