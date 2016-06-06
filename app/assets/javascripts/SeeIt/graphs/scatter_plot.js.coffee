@@ -24,11 +24,11 @@
 						else
 							groups[d.label()].y = d.value()
 
-						getRandomIntInclusive = (min, max) ->
-							Math.floor(Math.random() * (max - min + 1)) + min
+						#getRandomIntInclusive = (min, max) ->
+						#	Math.floor(Math.random() * (max - min + 1)) + min
 
 						groups[d.label()].size = Math.random()
-						groups[d.label()].shape = if Math.random() > 0.9 then shapes[getRandomIntInclusive(1,5)] else 'circle'
+						#groups[d.label()].shape = if Math.random() > 0.9 then shapes[getRandomIntInclusive(1,5)] else 'circle'
 
 				for key, val of groups
 					data.push {key: key, values: [val]}
@@ -83,9 +83,9 @@
 
 			nv.addGraph ->
 				chart = nv.models.scatterChart().showLegend(false)
-					# .showDistX(true)
-					# .showDistY(true)
-					# .color(d3.scale.category10.range())
+						.showDistX(true)
+						.showDistY(true)
+						#.color(d3.scale.category10.range())
 
 				chart.tooltip.contentGenerator (data) ->
 					"<h3>#{data.series[0].key}</h3>"
