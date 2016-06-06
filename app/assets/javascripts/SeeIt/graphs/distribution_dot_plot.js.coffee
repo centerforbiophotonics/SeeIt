@@ -13,12 +13,15 @@
 
       @eventCallbacks['data:created'] =  (options) ->
         prevOptions = options
+
         if self.allRolesFilled()
           if !self.rendered
             self.rendered = true
             self.draw.call(self, options)
           else
             self.refresh.call(self, options)
+        else
+          self.clearGraph.call(self)
 
       @eventCallbacks['data:assigned'] = @eventCallbacks['data:created']
       @eventCallbacks['data:destroyed'] = @eventCallbacks['data:created']
@@ -68,6 +71,10 @@
       return [min - adjustment,max + adjustment]
 
     formatData: ->
+
+    clearGraph: ->
+      @container.html("")
+      @rendered = false
 
     refresh: (options = []) ->
       @container.html("")
@@ -322,7 +329,8 @@
       [{
         label: "Box Plot",
         type: "checkbox",
-        default: false
+        default: ->
+          self.dataset
       },
       {
         label: "Show Median",

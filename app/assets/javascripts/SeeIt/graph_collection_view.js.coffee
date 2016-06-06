@@ -34,6 +34,11 @@
           graphContainer.graphs[graphData.graph].addData(graphData.data)
       )
 
+      graphContainer.listenTo(@app, 'graph:filter', (graphData) ->
+        if graphContainer.graphs[graphData.graph]
+          graphContainer.graphs[graphData.graph].updateFilters(graphData.filters)
+      )
+
       @listenTo(@app, 'graph:create', (graphType) ->
         graphContainer.addGraph.call(graphContainer, graphType)
       )
@@ -71,19 +76,55 @@
         @graphId = "Graph #{++idx}"
 
     changeGraphId: (oldId, newId) ->
+      console.log oldId, newId
       graph = @graphs[oldId]
 
-      @container.find("#graph_#{oldId}").attr('id', "graph_#{newId}")
+      @container.find("#graph_#{oldId.split(' ').join('-')}").attr('id', "graph_#{newId.split(' ').join('-')}")
+      @container.find("#collapse_#{oldId.split(' ').join('-')}").attr('id', "collapse_#{newId.split(' ').join('-')}")
 
       delete @graphs[oldId]
       @graphs[newId] = graph
 
       @trigger('graph:id:change', oldId, newId)
 
+
+    getGraphSettings: ->
+      settings = []
+
+      for id, graph of @graphs
+        settings.push graph.getGraphSettings()
+
+      return settings
+
+    getGraphTypes: ->
+      types = []
+
+      for id, graph of @graphs
+        types.push graph.getGraphType()
+
+      return types
+
+    getGraphStates: ->
+      states = []
+
+      for id, graph of @graphs
+        states.push graph.getGraphState()
+
+      return states
+
+    getGraphFilters: ->
+      filters = []
+
+      for id, graph of @graphs
+        states.push graph.getGraphFilters()
+
+      return filters
+
     addGraph: (graphType) ->
       self = @
 
       @findValidId()
+      console.log @graphId, @graphs
 
       @container.find(".graph-list").append("""
       <li class="SeeIt graph list-group-item" id="graph_#{@graphId.split(' ').join('-')}">
@@ -107,6 +148,9 @@
 
       @listenTo newGraph, 'request:values:unique', (dataset, colIdx, callback) ->
         self.trigger 'request:values:unique', dataset, colIdx, callback
+
+      @listenTo newGraph, 'request:dataset', (name, callback) ->
+        self.trigger 'request:dataset', name, callback
 
       newGraph.trigger('request:dataRoles', (dataRoles) ->
         self.trigger('graph:created', self.graphId, dataRoles)

@@ -9,6 +9,7 @@
       # @param {Object} container - jQuery object referencing container SeeIt will live in
     ###
     constructor: (params = {}) ->
+      @params = params
       @container = if params.container then $(params.container) else $("body")
 
       ui = if params.ui then params.ui else {}
@@ -68,9 +69,8 @@
 
         toolbar_params = [
           {class: "addGraph", title: "Add graph", handler: @handlers.addGraph, icon: "<span class='glyphicon glyphicon-plus'></span>", type: "dropdown", options: @graphTypes},
-          {class: "uploadCSV", title: "Upload CSV", handler: @handlers.uploadCSV, type:"button"},
-          {class: "uploadJSON", title: "Upload JSON", handler: @handlers.uploadJson, type: "button"},
-          {class: "downloadJSON", title: "Download JSON", handler: @handlers.downloadJson, type: "button"}
+          {class: "downloadJSON", title: "Download JSON", handler: @handlers.downloadJson, type: "button"},
+          {class: "downloadInitOptions", title: "Save SeeIt", handler: @handlers.saveInitJson, type: "button"}
         ]
 
         if @ui.dataMenu then toolbar_params.unshift {class: "toggleData", title: "Show/Hide Data", handler: @handlers.toggleDataVisible, type: "button"}
@@ -109,8 +109,13 @@
                 new_data.push {name: data.role_in_graph, data: column}
 
           obj = {graph: self.lastGraphId, data: new_data}
-          console.log obj
           self.trigger('graph:addData', obj)
+          if d.filters && d.filters.length
+            ((lastGraphId) ->
+              setTimeout(->
+                self.trigger('graph:filter', {graph: lastGraphId, filters: d.filters})
+              50)
+            )(self.lastGraphId)
 
 
     loadGraphs: ->
@@ -187,6 +192,9 @@
 
           return false
 
+        saveInitJson: (event) ->
+          app.saveInitOptions.call(app)
+
         downloadJson: (event) ->
           app.jsonManager.handleDownload(app.model)
       }
@@ -231,12 +239,18 @@
         app.trigger('dataset:create', title)
       )
 
+      @listenTo(app.dataCollectionView, 'datasets:create', (collection) ->
+        console.log collection
+        collection.forEach (dataset) ->
+          app.addDataset.call(app, dataset)
+      )
+
       @listenTo(app.model, 'dataset:created', (dataset) ->
         app.trigger('dataset:created', dataset)
 
-        if !app.spreadsheetVisible then app.toggleSpreadsheetVisible.call(app)
+        # if !app.spreadsheetVisible then app.toggleSpreadsheetVisible.call(app)
 
-        app.trigger('spreadsheet:load', dataset)
+        # app.trigger('spreadsheet:load', dataset)
       )
 
       @listenTo(app.graphCollectionView, 'graph:created', (graphId, dataRoles) ->
@@ -265,6 +279,9 @@
       @listenTo app.graphCollectionView, 'request:values:unique', (dataset, colIdx, cb) ->
         app.trigger 'request:values:unique', dataset, colIdx, cb
 
+      @listenTo app.graphCollectionView, 'request:dataset', (name, callback) ->
+        app.trigger 'request:dataset', name, callback
+
     ###*
       # Toggles visibility of SpreadsheetView
     ###
@@ -289,6 +306,20 @@
 
       @dataVisible = !@dataVisible
       @trigger('width:toggle')
+
+
+    saveInitOptions: ->
+      @params.container = @container.selector
+      @params.data = @model.toJson()
+      @params.graphs = @graphCollectionView.getGraphSettings()
+      
+      blob = new Blob([JSON.stringify(@params)]);
+      filename = prompt("Please enter the name of the file you want to save to (will save with .json extension)");
+
+      if filename == "" || (filename != null && filename.trim() == "")
+        alert('Filename cannot be blank');
+      else if filename && filename != "null" 
+        saveAs(blob, filename+".json");      
 
   ApplicationController
 ).call(@)

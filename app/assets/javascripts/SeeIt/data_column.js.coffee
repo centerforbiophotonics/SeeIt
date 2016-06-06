@@ -21,10 +21,18 @@
 
       @staleData = false
 
+      @length = ->
+        data.length
+
+      @changeData = (_data) ->
+        data = _data
+        @staleData = true
+        @trigger('data:changed', @)
+
       @setValue = (idx, value) ->
-        if editable
+        if editable && @typeIsCorrect(value)
           data[idx].value = value
-          @trigger('data:changed',@)
+          @trigger('data:changed',@, idx)
           @staleData = true
           return true
 
@@ -40,15 +48,15 @@
       @setType = (type, callback) ->
         if type == "numeric"
           for i in [0...data.length]
-            if isNaN(parseFloat(data[i].value))
-              callback(false, "Could not change type to numeric because column has non-numeric values")
+            if isNaN(Number(data[i].value))
+              if callback then callback(false, "Could not change type to numeric because column has non-numeric values")
               return
 
         @type = type
         for i in [0...data.length]
-          data[i].value = if @type == "numeric" then parseFloat(data[i].value) else data[i].value + ''
+          data[i].value = if @type == "numeric" then Number(data[i].value) else data[i].value + ''
 
-        callback(true, "Data type changed to #{type}")
+        if callback then callback(true, "Data type changed to #{type}")
 
         @trigger('type:changed', type)
 
@@ -62,6 +70,9 @@
         data[idx].label = value
         @staleData = true
         @trigger('label:changed', idx)
+
+      @getLabel = (idx) ->
+        return data[idx].label
 
       @removeElement = (idx) ->
         @staleData = true
@@ -81,8 +92,8 @@
         {
           header: @header,
           type: @type,
-          data: @data.map (d) ->
-            d.value
+          data: @data().map (d) ->
+            d.value()
         }
 
       @uniqueData = ->
@@ -92,8 +103,16 @@
           if unique_data.indexOf(data[i].value) == -1
             unique_data.push(data[i].value)
 
-        console.log unique_data
         return unique_data
+
+      @isEditable = ->
+        editable
+
+    typeIsCorrect: (value) ->
+      (
+        @type == "numeric" && Number(value) ||
+        @type == "categorical" && typeof value == "string"
+      )
 
     setDatasetTitle: (title) ->
       @datasetTitle = title
@@ -105,6 +124,10 @@
       @color = color
       @trigger('color:changed')
 
+    getHeader: ->
+      return @header
+
+
     setHeader: (header) ->
       @header = header
       @trigger('header:changed')
@@ -112,23 +135,23 @@
     @new: ->
       # Being created from array of arrays
       if $.isArray(arguments[1])
-        return ((app, dataset, column, title, color, editable) ->
-          header = dataset[0][column]
+        return ((app, dataset, column, title, type, color, editable) ->
+          header = dataset[0][column] + ''
           data = []
 
           for i in [1...dataset.length]
             data.push({label: dataset[i][0], value: dataset[i][column]})
 
-          return new DataColumn(app, header, data, title, color, editable)
+          return new DataColumn(app, header, data, title, type, color, editable)
         ).apply(@, arguments)
       else
-        return ((app, data, column, title, color, editable) ->
+        return ((app, data, column, title, type, color, editable) ->
           dataColumn = []
 
           for i in [0...data.columns[column].data.length]
             dataColumn.push({label: data.labels[i], value: data.columns[column].data[i]})
 
-          return new DataColumn(app, data.columns[column].header, dataColumn, title, color, editable)
+          return new DataColumn(app, data.columns[column].header, dataColumn, title, type, color, editable)
         ).apply(@,arguments)
 
 

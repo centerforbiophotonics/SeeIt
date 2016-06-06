@@ -24,7 +24,7 @@
             <span class="SeeIt title-edit-icon glyphicon glyphicon-pencil"></span>
           </div>
           <div class="SeeIt panel-body spreadsheet">
-            <div class="SeeIt Handsontable-Container" style="position: relative; overflow: hidden; height: 100%"></div>
+            <div class="SeeIt Handsontable-Container" style="position: relative; overflow: hidden; height: 100%; min-height: 100%"></div>
           </div>
         </div>
       """)
@@ -72,7 +72,6 @@
 
 
       @listenTo(@app, 'spreadsheet:load', (dataset) ->
-        console.log 'spreadsheet:load triggered', dataset
         if dataset != self.dataset
           self.updateDataset.call(self, dataset)
       )
@@ -92,6 +91,9 @@
           if !self.editingTitle
             self.container.find(".title").html("<input id='title-input' type='text' value='#{self.dataset.title}'>")
             self.container.find('#title-input').off('keyup', self.handlers.titleInputKeyup).on('keyup', self.handlers.titleInputKeyup)
+            self.container.find("#title-input").blur ->
+              self.container.find(".title-edit-icon").trigger 'click'
+            self.container.find("#title-input").focus()
             self.editingTitle = true
           else
             oldTitle = self.dataset.title
@@ -150,16 +152,32 @@
             event.stopPropagation()
             event.preventDefault()
 
-            $(TH).off('dblclick')
+            console.log 'headerDblclick called'
+
+            $(TH).off('dblclick', headerDblclick)
 
             input = document.createElement('input')
             input.type = 'text'
             input.value = TH.firstChild.textContent
+            input.className = 'SeeIt spreadsheet-header-input'
 
             TH.appendChild(input)
 
-            TH.style.position = 'relative'
-            TH.firstChild.style.display = 'none'
+            $(TH.firstChild).toggle()
+
+            $(input).click (event) ->
+              event.stopPropagation()
+              event.preventDefault()
+              return false
+
+            $(input).focusout (event) ->
+              e = $.Event("keyup")
+              console.log 'blur called for header', e, event
+              e.which = 13
+              e.keyCode = 13
+              $(input).trigger e
+
+            $(input).focus()
 
             $(input).keyup (event) ->
               event.stopPropagation()
@@ -183,8 +201,7 @@
                 })
 
                 $(input).remove()
-                TH.style.position = 'auto'
-                TH.firstChild.style.display = 'table-cell'
+                $(TH.firstChild).toggle()
 
                 registerDblclick()
               return false
@@ -198,17 +215,19 @@
 
           $(TH).off('dblclick').on('dblclick', headerDblclick)
 
-      console.log spreadsheetView.dataset.data.length, spreadsheetView.dataset.data[0].data().length
       settings = {
         rowHeaders: @dataset.labels,
         colHeaders: @dataset.headers,
         data: privateMethods.formatModelData(),
         columns: privateMethods.formatColumns(),
-        className: "htCenter",
+        className: "SeeIt-htCenter",
         height: spreadsheetView.container.find('.SeeIt.Handsontable-Container').height(),
         colWidths: ->
-          (spreadsheetView.container.find('.SeeIt.Handsontable-Container').width() - 50) / spreadsheetView.dataset.headers.length
-        # stretchH: "all",
+          Math.max(
+            (spreadsheetView.container.find('.SeeIt.Handsontable-Container').width() - 50) / spreadsheetView.dataset.headers.length,
+            50
+          )
+        stretchH: "all",
         afterGetRowHeader: headerCallbackFactory("label"),
         afterGetColHeader: headerCallbackFactory("header")
         manualColumnResize: true,

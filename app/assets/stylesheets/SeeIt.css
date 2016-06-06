@@ -19,8 +19,23 @@
   padding-bottom: 15px;
 }
 
+.SeeIt.dataset-view-group {
+  width: 100%;
+}
+
+.SeeIt.dataset-title {
+  color: #428bca;
+  font-weight: bold;
+}
+
+.SeeIt.dataset-view-group button {
+  width: 100%;
+  white-space: normal !important
+}
+
 .SeeIt.graph-panel-content {
-  height: calc(100% - 54px);
+  min-height: 300px;
+/*  height: calc(100% - 54px);*/
 }
 
 .SeeIt.graph-panel-content .panel-body,
@@ -28,6 +43,7 @@
  {
   height: 100%;
 }
+
 
 .SeeIt.nav-el.left {
   padding-left: 10px;
@@ -66,6 +82,9 @@
   height: -webkit-calc(100% - 54px);
   height: -moz-calc(100% - 54px);
   height: calc(100% - 54px);
+  min-height: -webkit-calc(100% - 54px);
+  min-height: -moz-calc(100% - 54px);
+  min-height: calc(100% - 54px);
 }
 
 .SeeIt.remove-options {
@@ -108,6 +127,55 @@
   white-space: normal !important;
 }
 
+@media (min-width: 992px) {
+  .SeeIt.row .SeeIt.Data {
+    height: 100%;
+  }
+
+  .SeeIt.Graphs .SeeIt.graph-buttons {
+    float: right;
+  }
+}
+
+@media (max-width: 991px) {
+  .SeeIt.row .SeeIt.Data {
+    height: auto;
+  }
+
+  .SeeIt.Graphs .SeeIt.graph-buttons {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .SeeIt.Graphs .SeeIt.graph-buttons button {
+    width: 20%;
+  }
+
+  .SeeIt.data-rep.btn-group {
+    width: 100%;
+  }
+
+  .SeeIt.data-rep.btn-group .data-rep-color {
+    width: 20%;
+  }
+
+  .SeeIt.data-rep.btn-group .data-rep-remove {
+    width: 20%;
+  }
+
+  .SeeIt.data-rep.btn-group .data-rep-text {
+    width: 60%;
+  }
+
+  .SeeIt.graph-panel .SeeIt.panel-heading {
+    text-align: center;
+  }
+
+/*  .SeeIt.graph-title .glyphicon {
+    float: right;
+  }*/
+}
+
 .SeeIt.row {
   height: 100%;
 }
@@ -132,6 +200,10 @@
 
 .SeeIt.data-column-panel-body {
   padding: 0;
+}
+
+.SeeIt.dataset-list {
+  margin-bottom: 200px;
 }
 
 .SeeIt.dataset a.SeeIt.selected, .SeeIt.new-dataset-li a.SeeIt.selected {
@@ -161,12 +233,12 @@
 }
 
 .SeeIt.Data .SeeIt.list-group{
-    max-height: 100%;
+/*    max-height: 100%;*/
     /*overflow-y: auto; */
 }
 
 .SeeIt.Graphs {
-  max-height: calc(100% - 52px);
+  max-height: 100%;
   overflow-y: auto;
 }
 
@@ -234,7 +306,7 @@ div.SeeIt.data-drop-zone-container, div.SeeIt.expanded-data-container {
   width: 40%;
 }
 
-.SeeIt.add-filter-group, .SeeIt.remove-filter {
+.SeeIt.add-filter-group, .SeeIt.remove-filter, .SeeIt.save-filters, .SeeIt.toggle-filters {
   margin-top: 10px;
   width: 100%;
 }
@@ -245,11 +317,14 @@ h3.SeeIt.role-name {
 }
 
 div.SeeIt.data-drop-zone {
-  background-color: white;
   border: 1px inset transparent;
   min-height: 50px;
   border-radius: 4px;
   box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+}
+
+div.SeeIt.data-drop-zone:not(.bg-primary) {
+  background-color: white;
 }
 
 div.SeeIt.expanded-data-zone {
@@ -275,7 +350,7 @@ div.SeeIt.expanded-data-zone {
 }
 
 .SeeIt.Graphs.spreadsheet-visible, .SeeIt.Spreadsheet {
-  max-height: calc(50% - 26px);
+  max-height: 50%;
   overflow-y: auto;
 }
 
@@ -288,12 +363,16 @@ div.SeeIt.expanded-data-zone {
   min-height: 300px;
 */}
 
+.SeeIt-htCenter {
+  text-align: center !important;
+}
+
 .SeeIt.graph-panel {
   height: 100%;
 }
 
 .SeeIt.numeric-filter, .SeeIt.categorical-filter,
-.SeeIt.filter-group-type  {
+.SeeIt.filter-group-type, .SeeIt.filter-group-requirements  {
   margin-top: 10px;
   display: inline-block;
   width: auto;
@@ -309,6 +388,7 @@ div.SeeIt.expanded-data-zone {
 
 .SeeIt.icon-container {
   display: inline-block;
+  padding-right: 10px;
 }
 
 .addGraph .iconContainer {
@@ -333,12 +413,65 @@ div.SeeIt.expanded-data-zone {
   padding-right: 10px;
 }
 
+.SeeIt.new-dataset-msg {
+  display: none;
+  width: 100%;
+  text-align: center;
+}
+
+.SeeIt.new-dataset-msg.error {
+  color: red;
+  display: inline;
+}
+
+.SeeIt.spin{
+  -webkit-transform-origin: 50% 58%;
+  transform-origin:50% 58%;
+  -ms-transform-origin:50% 58%; /* IE 9 */
+  -webkit-animation: spin .6s infinite linear;
+  -moz-animation: spin .6s infinite linear;
+  -o-animation: spin .6s infinite linear;
+  animation: spin .6s infinite linear;
+}
+
+@-moz-keyframes spin {
+  from {
+    -moz-transform: rotate(0deg);
+  }
+  to {
+    -moz-transform: rotate(360deg);
+  }
+}
+
+@-webkit-keyframes spin {
+  from {
+    -webkit-transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(360deg);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
 .SeeIt.graph-panel .panel-collapse {
   min-height: 300px;
 }
 
 .SeeIt.maximized {
-  height: 100%;
+/*  min-height: 100vh*/
+/*  min-height: 300px;*/
+}
+
+.SeeIt.maximized .SeeIt.graph-wrapper {
+  min-height: calc(100vh - 150px);
+  height: calc(100vh - 150px);
 }
 
 .SeeIt.axis path,

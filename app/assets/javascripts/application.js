@@ -25,15 +25,16 @@
 //= require nv.d3.min
 //= require opentip-jquery-excanvas.min
 //= require FileSaver.min.js
+//= require tabletop.js
 //= require jquery.serialize-object.min.js
-
 //= require SeeIt/init
 //= require SeeIt/utils
 //= require SeeIt/validators_module
 //= require SeeIt/google_spreadsheet_manager
 //= require SeeIt/data_column
-//= require SeeIt/dataset_refactor
+//= require SeeIt/dataset
 //= require SeeIt/data_collection
+//= require SeeIt/filtered_column_factory
 //= require SeeIt/toolbar_view
 //= require SeeIt/data_column_view
 //= require SeeIt/dataset_view

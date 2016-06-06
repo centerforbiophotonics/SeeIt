@@ -39,11 +39,19 @@
           found_dataset.trigger 'request:columns', callback
 
       @listenTo @app, 'request:values:unique', (dataset, colIdx, callback) ->
+        console.log dataset, colIdx
         found_dataset = self.datasets.filter((d) -> d.title == dataset)
 
         if found_dataset.length
           found_dataset = found_dataset[0]
           found_dataset.trigger 'request:values:unique', colIdx, callback  
+
+      @listenTo @app, 'request:dataset', (name, callback) ->
+        found_dataset = self.datasets.filter((d) -> d.title == name)
+
+        if found_dataset.length
+          found_dataset = found_dataset[0]
+          callback found_dataset
 
     getByTitle: (dataset_title) ->
       for i in [0...@datasets.length]
@@ -67,13 +75,13 @@
 
       return dataset
 
-    toJsonString: ->
+    toJson: ->
       obj = []
 
       @datasets.forEach (d) ->
         obj.push d.toJson()
 
-      return JSON.stringify obj
+      return obj
 
   DataCollection
 ).call(@)

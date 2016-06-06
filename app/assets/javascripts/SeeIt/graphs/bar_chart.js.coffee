@@ -18,6 +18,8 @@
             self.draw.call(self, options)
           else
             self.refresh.call(self, options)
+        else
+          self.clearGraph.call(self)
 
       @eventCallbacks['data:assigned'] = @eventCallbacks['data:created']
       @eventCallbacks['data:destroyed'] = @eventCallbacks['data:created']
@@ -31,6 +33,10 @@
 
       for e, cb of @eventCallbacks
         @on e, cb
+
+    clearGraph: ->
+      @container.html("")
+      @rendered = false
 
     formatData: ->
       data = []
@@ -79,6 +85,8 @@
 
 
     options: ->
+      self = @
+
       [
         {
           label: "Test",
@@ -93,8 +101,13 @@
         {
           label: "Test 3",
           type: "select",
-          values: [1,2,3,4,5],
-          default: 3
+          values: ->
+            console.log self.dataset
+            _.unique(_.flatten(self.dataset.map((role) ->
+              role.data.map((d) -> d.data.labels) || []
+            )))
+          default: ->
+            if this.values().length then this.values()[0] else null
         },
         {
           label: "Test 4",
