@@ -32,6 +32,9 @@
       @on 'populate:dropdowns', ->
         self.populateDropdowns.call(self)
 
+      @on 'spreadsheet:unloaded', ->
+        if self.inSpreadsheet then self.container.find('.show-in-spreadsheet').trigger('click')
+
       @listenTo @dataset, 'dataset:title:changed', ->
         self.updateTitle.call(self)
 
@@ -126,6 +129,7 @@
             Show in Spreadsheet
             <span class='glyphicon glyphicon-th'></span>
           """)
+          self.trigger('spreadsheet:unload')
 
         $(@).toggleClass('btn-default btn-primary')
 

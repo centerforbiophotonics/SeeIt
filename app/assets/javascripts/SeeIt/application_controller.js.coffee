@@ -227,6 +227,12 @@
         app.trigger('spreadsheet:load', dataset)
       )
 
+      @listenTo(app.dataCollectionView, 'spreadsheet:unload', ->
+        app.trigger('spreadsheet:unload')
+
+        if app.spreadsheetVisible then app.toggleSpreadsheetVisible.call(app)
+      )
+
       @listenTo(app.spreadsheetView, 'data:changed', (origin) ->
         app.trigger('data:changed', origin)
       )

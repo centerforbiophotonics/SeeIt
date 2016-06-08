@@ -11,12 +11,9 @@
       current_hostname = document.location.hostname + "#{if document.location.port then ":"+document.location.port else ""}"
       target_hostname = getHostnameFromString(url)
 
-      console.log current_hostname
-
       is_jsonp = current_hostname != target_hostname
 
       if is_jsonp
-        console.log url, target_hostname
 
         $.ajax({
             url: url,
@@ -29,7 +26,6 @@
           })
       else
         relative_path = getPathFromURL(url)
-        console.log relative_path
 
         $.ajax({
           dataType: "json",
@@ -49,17 +45,17 @@
           txtRes = filereader.result
 
           try
-            csvRows = txtRes.split '\n'
-            csvData = []
+            # csvRows = txtRes.split '\n'
+            # csvData = []
 
-            csvRows.forEach (r) ->
-              row = r.split(',')
+            # csvRows.forEach (r) ->
+            #   row = r.split(',')
 
-              row.forEach (d, i) ->
-                row[i] = if !isNaN(Number(d)) then Number(d) else d
+            #   row.forEach (d, i) ->
+            #     row[i] = if !isNaN(Number(d)) then Number(d) else d
 
-              data.push row
-
+            #   data.push row
+            data = CSVManager.parseCSV(txtRes)
             callback data
           catch err
           
@@ -67,6 +63,33 @@
         filereader.readAsText file
       else
         console.log "error in handleUpload"
+
+    @parseCSV = (text) ->
+      re_value = /(?!\s*$)\s*(?:'([^'\\]*(?:\\[\S\s][^'\\]*)*)'|"([^"\\]*(?:\\[\S\s][^"\\]*)*)"|([^,'"\s\\]*(?:\s+[^,'"\s\\]+)*))\s*(?:,|$)/g
+      data = []
+
+      text.split('\n').forEach (line) ->
+        a = []
+        line.replace(re_value,
+          (m0, m1, m2, m3) ->
+            # Remove backslash from \' in single quoted values.
+            if      (m1 != undefined) 
+              a.push(m1.replace(/\\'/g, "'"))
+            # Remove backslash from \" in double quoted values.
+            else if (m2 != undefined) 
+              a.push(m2.replace(/\\"/g, '"'))
+            else if (m3 != undefined) 
+              a.push(if !isNaN(Number(m3)) then Number(m3) else m3)
+
+            return '' # Return empty string.
+        )
+
+        # Handle special case of empty last value.
+        if (/,\s*$/.test(text)) then a.push('')
+
+        data.push a
+
+      return data
 
   getPathFromURL = (url) ->
     if url[0] == "/"
@@ -83,8 +106,6 @@
 
   getHostnameFromString = (url) ->
     split_url = url.split("/")
-
-    console.log split_url
 
     if !split_url[0].length
       return document.location.hostname + "#{if document.location.port then ":"+document.location.port else ""}"

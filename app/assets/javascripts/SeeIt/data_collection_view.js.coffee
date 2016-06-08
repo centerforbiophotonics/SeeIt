@@ -6,7 +6,6 @@
       @datasetViewCollection = []
       @init()
       @visible = true
-      @
 
     init: ->
       @container.html("""
@@ -44,7 +43,15 @@
       self = @
 
       @listenTo(datasetView, 'spreadsheet:load', (dataset) ->
+        self.datasetViewCollection.forEach (d) ->
+          if d != datasetView
+            d.trigger('spreadsheet:unloaded')
+
         self.trigger('spreadsheet:load', dataset)
+      )
+
+      @listenTo(datasetView, 'spreadsheet:unload', ->
+        self.trigger('spreadsheet:unload')
       )
 
       @listenTo(datasetView, 'graphs:requestIDs', (cb) ->
@@ -222,19 +229,11 @@
             csv_manager.downloadFromServer(self.container.find(".csv-endpoint").val(), 
               ((data) ->
 
-                csvRows = data.data.split '\n'
-                csvData = []
-
-                csvRows.forEach (r) ->
-                  row = r.split(',')
-
-                  row.forEach (d, i) ->
-                    row[i] = if !isNaN(Number(d)) then Number(d) else d
-
-                  csvData.push row
+                csvData = SeeIt.CSVManager.parseCSV(data.data)
 
                 dataset = {
                   isLabeled: true,
+                  title: data.name,
                   dataset: csvData
                 }
 
@@ -250,10 +249,9 @@
           self.container.find(".csv-endpoint").val("")
         when "csv-file"
           csv_manager = new SeeIt.CSVManager()
-
+          filename = data.file.name.split('.')[0]
           csv_manager.handleUpload(data.file, (d) ->
-
-            self.trigger 'datasets:create', [{isLabeled: true, dataset: d}]
+            self.trigger 'datasets:create', [{isLabeled: true, title: filename, dataset: d}]
           )
 
 

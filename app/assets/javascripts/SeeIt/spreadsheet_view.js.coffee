@@ -43,7 +43,7 @@
       @isFullscreen = !@isFullscreen
 
     updateTitle: ->
-      @container.find('.panel-heading .title').html(@dataset.title)
+      @container.find('.panel-heading .title').html(@dataset && @dataset.title || '')
 
 
     updateDataset: (dataset) ->
@@ -70,10 +70,17 @@
     initHandlers: ->
       self = @
 
+      @container.click (event) ->
+        if self.container.find('.spreadsheet-header-input').length && event.target != self.container.find('.spreadsheet-header-input')[0]
+          self.container.find('.spreadsheet-header-input').blur()
 
       @listenTo(@app, 'spreadsheet:load', (dataset) ->
         if dataset != self.dataset
           self.updateDataset.call(self, dataset)
+      )
+
+      @listenTo(@app, 'spreadsheet:unload', ->
+        self.updateDataset.call(self, null)
       )
 
       @listenTo(@app, 'width:toggle', ->
@@ -132,7 +139,12 @@
       $(window).triggerHandler('resize')
 
     resetTable: ->
-      if !@dataset then return
+      if !@dataset
+        if @hot
+          @hot.destroy()
+          @hot = null
+
+        return
 
       spreadsheetView = @
 
@@ -165,12 +177,12 @@
 
             $(TH.firstChild).toggle()
 
-            $(input).click (event) ->
-              event.stopPropagation()
-              event.preventDefault()
-              return false
+            # $(input).click (event) ->
+            #   event.stopPropagation()
+            #   event.preventDefault()
+            #   return false
 
-            $(input).focusout (event) ->
+            $(input).on 'focusout', (event) ->
               e = $.Event("keyup")
               console.log 'blur called for header', e, event
               e.which = 13
@@ -179,7 +191,11 @@
 
             $(input).focus()
 
+            console.log document.activeElement
+
             $(input).keyup (event) ->
+              $(input).focus()
+              console.log 'in keyup', document.activeElement, event
               event.stopPropagation()
               event.preventDefault()
 
@@ -235,6 +251,17 @@
         copyPaste: true,
         maxCols: spreadsheetView.dataset.data.length,
         maxRows: spreadsheetView.dataset.data[0].data().length,
+        beforeKeyDown: (event) ->
+          if $(event.realTarget).hasClass('spreadsheet-header-input')
+            console.log 'propagation stopped'
+            event.stopImmediatePropagation()
+            return false
+        beforeOnCellMouseDown: (event, coords, TD) ->
+          console.log 'afterOnCellMouseDown triggered', event, coords, TD
+          if (coords.row < 0 || coords.col < 0) && $(TD).find("input").length
+            event.stopImmediatePropagation()
+            event.preventDefault()
+            return false
         contextMenu: if !spreadsheetView.dataset.editable then null else {
           items: {
             "my_row_above": {
