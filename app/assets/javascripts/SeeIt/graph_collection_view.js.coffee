@@ -79,13 +79,14 @@
       console.log oldId, newId
       graph = @graphs[oldId]
 
-      @container.find("#graph_#{oldId.split(' ').join('-')}").attr('id', "graph_#{newId.split(' ').join('-')}")
-      @container.find("#collapse_#{oldId.split(' ').join('-')}").attr('id', "collapse_#{newId.split(' ').join('-')}")
+      if @graphs[newId]
+        return false
+      else
+        delete @graphs[oldId]
+        @graphs[newId] = graph
 
-      delete @graphs[oldId]
-      @graphs[newId] = graph
-
-      @trigger('graph:id:change', oldId, newId)
+        @trigger('graph:id:change', oldId, newId)
+        return true
 
 
     getGraphSettings: ->
@@ -127,15 +128,15 @@
       console.log @graphId, @graphs
 
       @container.find(".graph-list").append("""
-      <li class="SeeIt graph list-group-item" id="graph_#{@graphId.split(' ').join('-')}">
-      </li>
+        <li class="SeeIt graph list-group-item">
+        </li>
       """)
 
-      newGraph = new SeeIt.GraphView(@app, @graphId, @container.find("#graph_#{@graphId.split(' ').join('-')}"), @handlers.removeGraph, graphType, @graphs_editable)
+      newGraph = new SeeIt.GraphView(@app, @graphId, @container.find(".graph.list-group-item:last"), @handlers.removeGraph, graphType, @graphs_editable)
       @graphs[@graphId] = newGraph
 
-      @listenTo newGraph, 'graph:id:change', (oldId, newId) ->
-        self.changeGraphId.call(self, oldId, newId)
+      @listenTo newGraph, 'graph:id:change', (oldId, newId, cb) ->
+        cb self.changeGraphId.call(self, oldId, newId)
 
       @listenTo newGraph, 'graphSettings:get', (graphName, cb) ->
         self.trigger('graphSettings:get', graphName, cb)

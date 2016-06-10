@@ -53,7 +53,7 @@
 
     updateHeaders: (options) ->
       @container.find('.legend').remove()
-      @drawLegend(options)
+      #@drawLegend(options)
 
     updateLabels: (options) ->
 
@@ -67,8 +67,8 @@
           max = if d.value() then Math.max(max, d.value()) else max
           min = if d.value() then Math.min(min, d.value()) else min
 
-      adjustment = Math.max(padding*(max - min),0.05)
-      return [min - adjustment,max + adjustment]
+      adjustment = Math.max(padding*(max - min),0)
+      return [Math.floor(min) - adjustment,Math.ceil(max) + adjustment]
 
     formatData: ->
 
@@ -89,7 +89,7 @@
 
       @x = d3.scale.linear().range([0,@style.width])
       @y = d3.scale.linear().range([@style.height,0])
-      @x.domain(@minMaxWPadding(.05))
+      @x.domain(@minMaxWPadding(0))
       @y.domain([0,@style.height])
 
     placeData: ->
@@ -144,13 +144,21 @@
 
       @initSvg()
 
+      histIdx = options.map((option) -> option.label).indexOf('Show Histogram')
+      binIdx = options.map((option) -> option.label).indexOf('Number of bins in histogram')
+
+      if histIdx > -1 && options[histIdx].value
+        hist = new HistogramBuilder(@dataset, @style, @svg, 
+          if binIdx > -1 && options[binIdx].value then options[binIdx].value else 10
+        )
+
       boxPlotIdx = options.map((option) -> option.label).indexOf('Box Plot')
 
       if boxPlotIdx > -1 && options[boxPlotIdx].value then @drawBoxPlot()
 
       @svg.append("g")
         .attr("class", "x axis SeeIt")
-        .attr("transform", "translate(0," + (@style.height - 2*R) + ")")
+        .attr("transform", "translate(0," + (@style.height - 8) + ")")
         .call(@xAxis)
 
       @svg.selectAll(".dot.SeeIt")
@@ -162,7 +170,7 @@
           return graph.x(d.data.value())
         )
         .attr("cy", (d) ->
-          return graph.y(d.y + 2*R)
+          return graph.y(d.y + 8)
         )
         .style("fill", (d) ->
           return d.color()
@@ -173,11 +181,15 @@
     draw: (options = []) ->
       graph = @
 
+      radiusIdx = options.map((option) -> option.label).indexOf("Dot Radius")
+
+      if radiusIdx > -1 && options[radiusIdx].value then R = Math.max(options[radiusIdx].value, 1)
+
       @setViewMembers()
       @placeData()
 
       @drawGraph(options)
-      @drawLegend(options)
+      #@drawLegend(options)
 
 
     drawStats: (options) ->
@@ -203,13 +215,13 @@
             .data([mean])
             .enter().append("rect")
             .attr("class", "mean SeeIt")
-            .attr("width", R*4)
-            .attr("height", R*4)
+            .attr("width", 16)
+            .attr("height", 16)
             .attr("x", (d) ->
               return graph.x(mean)
             )
             .attr("y", (d) ->
-              return graph.y(-4*R + 2)
+              return graph.y(-4*4 + 2)
             )
             .style("fill", 'red')
             .style("opacity", 0.8)
@@ -229,11 +241,11 @@
             .data([median])
             .enter().append("circle")
             .attr("class", "median SeeIt")
-            .attr("r", 2*R)
+            .attr("r", 2*4)
             .attr("cx", (d) ->
               graph.x(d)
             )
-            .attr("cy", graph.y(-6*R + 2))
+            .attr("cy", graph.y(-6*4 + 2))
             .style("fill", "blue")
             .style("opacity", 0.8)
 
@@ -271,7 +283,7 @@
             .enter().append("polyline")
             .attr("class", "mode SeeIt")
             .attr('points', (d) ->
-              "#{graph.x(d) - 2*R},#{graph.y(-8*R + 2)} #{graph.x(d) + 2*R},#{graph.y(-8*R + 2)} #{graph.x(d)},#{graph.y(-4*R + 2)}"
+              "#{graph.x(d) - 2*4},#{graph.y(-8*4 + 2)} #{graph.x(d) + 4*R},#{graph.y(-8*4 + 2)} #{graph.x(d)},#{graph.y(-4*4 + 2)}"
             )
             .style("fill", 'green')
             .style("opacity", 0.8)
@@ -303,14 +315,15 @@
         )
         .whiskers(iqr(1.5))
         .width(@style.width)
-        .height(@style.height)
-        .domain(@minMaxWPadding(.05))
+        .height(Math.min(@style.height, 270))
+        .domain(@minMaxWPadding(0))
 
       @svg.selectAll(".box-plot.SeeIt")
         .data([@graphData.dataArray])
         .enter()
         .append("g")
           .attr('class', "box-plot SeeIt")
+          .attr('transform', "translate(0, #{Math.max(@style.height - 270, 0) / 2 - (2*R)})")
           .call(chart)
 
     destroy: ->
@@ -346,10 +359,87 @@
         label: "Show Mode",
         type: "checkbox",
         default: false
+      },{
+        label: "Dot Radius",
+        type: "numeric",
+        default: 4
+      },{
+        label: "Show Histogram",
+        type: "checkbox",
+        default: false
+      },{
+        label: "Number of bins in histogram",
+        type: "numeric",
+        default: 10
       }]
 
     DistributionDotPlot.name = ->
       "Distribution Dot Plot"
+
+
+  HistogramBuilder = (->
+    class HistogramBuilder
+      constructor: (@_dataset, @style, @svg, @nBins = 10) ->
+        self = @
+        @data = []
+
+        @x = d3.scale.linear().range([0, @style.width])
+        @y = d3.scale.linear().range([@style.height,0])
+        @x.domain(@minMaxWPadding(0))
+
+        @_dataset[0].data.forEach (dataColumn) ->
+          dataColumn.compact().forEach (d, i) ->
+            self.data.push d.value()
+
+        @drawHistogram()
+
+      minMaxWPadding: (padding) ->
+        min = Infinity
+        max = -Infinity
+
+        @_dataset[0].data.forEach (dataColumn) ->
+          dataColumn.data().forEach (d) ->
+            max = if d.value() then Math.max(max, d.value()) else max
+            min = if d.value() then Math.min(min, d.value()) else min
+
+        adjustment = padding*(max - min)
+        return [Math.floor(min) - adjustment,Math.ceil(max) + adjustment]
+
+      drawHistogram: ->
+        self = @
+
+        console.log @nBins
+
+        bins = d3.layout.histogram().
+          bins(@nBins)(@data)
+
+        @y.domain([0,d3.max(bins, (d) -> d.length)])
+
+        bar = @svg.selectAll(".SeeIt.bar")
+          .data(bins)
+          .enter().append("g")
+            .attr('class', 'bar SeeIt')
+            .attr('transform', (d, i) -> "translate(#{self.x(d.x) - i},#{self.y(d.y) - 8 + 1})")
+
+        bar.append("rect")
+          .attr("x", (d) -> d.x)
+          .attr("width", (d) -> 
+            self.x(d.dx)
+          )
+          .attr("height", (d) -> 
+            return self.style.height - self.y(d.y)
+          )
+
+        formatCount = d3.format(",.0f")
+
+        bar.append("text")
+          .attr("dy", ".75em")
+          .attr("y", 6)
+          .attr("x", (d) -> self.x(d.dx / 2))
+          .attr("text-anchor", "middle")
+          .text((d) -> formatCount(d.length))
+
+  ).call(@)
 
 
   DistPlotBuilder = (->
