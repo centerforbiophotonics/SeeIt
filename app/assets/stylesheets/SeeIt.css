@@ -206,6 +206,22 @@
   margin-bottom: 200px;
 }
 
+.SeeIt.bar rect {
+  fill: steelblue;
+/*  border: 2px inset black;*/
+}
+
+.SeeIt.bar text {
+  fill: #fff;
+  font: 12px sans-serif;
+}
+
+.SeeIt.axis .label {
+  color: black;
+  opacity: 1;
+  fill: black;
+}
+
 .SeeIt.dataset a.SeeIt.selected, .SeeIt.new-dataset-li a.SeeIt.selected {
   color: white;
 }
@@ -333,6 +349,10 @@ div.SeeIt.expanded-data-zone {
   border-radius: 4px;
   min-height: 100px;
   box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+}
+
+.SeeIt .boxplot .whole-box {
+  fill: transparent;
 }
 
 /*div.SeeIt.footer-row.row {

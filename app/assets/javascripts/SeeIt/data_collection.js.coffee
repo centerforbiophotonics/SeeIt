@@ -62,8 +62,13 @@
 
 
     initDatasets: (data) ->
+      self = @
+
       for i in [0...data.length]
-        @datasets.push(new SeeIt.Dataset(@app, data[i].dataset, data[i].title, data[i].isLabeled, @editable))
+        DataCollection.coerceDataset(data[i], (dataset) ->
+          console.log dataset
+          if dataset then self.addDataset.call(self, dataset)
+        )
 
       @initialized = true
 
@@ -83,5 +88,57 @@
 
       return obj
 
-  DataCollection
+    @coerceDataset = (dataset, callback) ->
+      if !dataset.url then callback dataset
+
+      error_cb = ->
+        callback null
+
+      switch dataset.type
+        when "json"
+          json_manager = new SeeIt.JsonManager()
+
+          error_cb = -> 
+            callback null
+            
+          try
+            json_manager.downloadFromServer(dataset.url, 
+              callback,
+              error_cb
+            )
+          catch error
+            error_cb()
+
+        when "csv"
+          csv_manager = new SeeIt.CSVManager()
+
+          try
+            csv_manager.downloadFromServer(dataset.url, 
+              ((data) ->
+
+                csvData = SeeIt.CSVManager.parseCSV(data.data)
+
+                new_dataset = {
+                  isLabeled: true,
+                  title: data.name,
+                  dataset: csvData
+                }
+
+                callback new_dataset
+              ),
+              error_cb
+            )
+          catch error
+            error_cb()
+        when "google spreadsheet"
+            googleSpreadsheet = new SeeIt.GoogleSpreadsheetManager(dataset.url, (success, collection) ->
+              if success
+                collection.forEach (dataset) ->
+                  callback dataset
+              else
+                callback null 
+            )
+            googleSpreadsheet.getData()
+
+  DataCollection  
 ).call(@)

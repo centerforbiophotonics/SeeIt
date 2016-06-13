@@ -304,12 +304,22 @@
             graph.editing = true
           else
             oldId = graph.id
-            value = graph.container.find("#graph-title-input").val()
-            graph.id = value
-            newId = graph.id
-            graph.container.find(".graph-title-content").html(value)
-            graph.editing = false
-            graph.trigger('graph:id:change', oldId, newId)
+            newId = graph.container.find("#graph-title-input").val()
+            graph.trigger('graph:id:change', oldId, newId, (success) ->
+              if success
+                graph.id = value
+                graph.container.find(".graph-title-content").html(newId)
+              else
+                graph.container.find(".graph-title-content").html(oldId)
+                msg = "Graph title must be unique"
+                tip = new Opentip(graph.container.find('.graph-title-content'), msg, {style: "alert", target: graph.container.find('.graph-title-content'), showOn: "creation"})
+                tip.setTimeout(->
+                  tip.hide.call(tip)
+                  return
+                , 5)
+
+              graph.editing = false
+            )
 
         graphTitleInputKeyup: (event) ->
           if event.keyCode == 13
@@ -326,18 +336,18 @@
         <div class="SeeIt graph-panel panel panel-default">
           <div class="SeeIt panel-heading">
             <div class="btn-group SeeIt graph-buttons" role="group">
-              <button role="button" class="SeeIt options-button btn btn-default" title="Graph Options"><span data-id=#{@id}" class="glyphicon glyphicon-wrench"></span></button>
-              <button class="SeeIt collapse-footer btn btn-default" title='Show/Hide Footer'><span data-id="#{@id}" class="glyphicon glyphicon-chevron-up"></span></button>
-              <button class="SeeIt collapse-btn btn btn-default" title='Show/Hide Graph'><span data-id="#{@id}" class="glyphicon glyphicon-collapse-down"></span></ button>
-              <button class="SeeIt maximize btn btn-default" title='Maximize Graph'><span data-id="#{@id}" class="glyphicon glyphicon-resize-full"></span></button>
-              #{if @graph_editable then '<button class="SeeIt remove btn btn-default" title="Remove Graph"><span data-id="#{@id}" class="glyphicon glyphicon-remove"></span></button>' else ''}
+              <button role="button" class="SeeIt options-button btn btn-default" title="Graph Options"><span class="glyphicon glyphicon-wrench"></span></button>
+              <button class="SeeIt collapse-footer btn btn-default" title='Show/Hide Footer'><span class="glyphicon glyphicon-chevron-up"></span></button>
+              <button class="SeeIt collapse-btn btn btn-default" title='Show/Hide Graph'><span class="glyphicon glyphicon-collapse-down"></span></ button>
+              <button class="SeeIt maximize btn btn-default" title='Maximize Graph'><span class="glyphicon glyphicon-resize-full"></span></button>
+              #{if @graph_editable then '<button class="SeeIt remove btn btn-default" title="Remove Graph"><span class="glyphicon glyphicon-remove"></span></button>' else ''}
             </div>
             <div class="SeeIt graph-title">
               <div class="SeeIt graph-title-content">#{@id}</div>
               <span class="SeeIt graph-title-edit-icon glyphicon glyphicon-pencil" title='Edit Title'></span>
             </div>
           </div>
-          <div id="collapse_#{@id.split(' ').join('-')}" class="SeeIt graph-panel-content panel-collapse collapse in">
+          <div class="SeeIt graph-panel-content panel-collapse collapse in">
             <div class="SeeIt panel-body" style='min-height: 300px'>
               <div class="SeeIt options-wrapper hidden col-md-3"></div>
               <div class="SeeIt graph-wrapper"></div>
@@ -539,7 +549,7 @@
       if @maximized
         @container.find(".maximize").trigger('click')
 
-      @container.find("#collapse_#{@id.split(' ').join('-')}").toggleClass('in')
+      @container.find(".graph-panel-content").toggleClass('in')
       @container.find('.collapse-btn .glyphicon').toggleClass('glyphicon-collapse-down glyphicon-collapse-up')
       @collapsed = !@collapsed
 
