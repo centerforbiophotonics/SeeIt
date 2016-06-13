@@ -7,13 +7,21 @@
 
       dataArray = []
 
+      self = @
+
       setDataArray = ->
         dataArray = []
-        data.forEach (d) ->
+        data.forEach (d, i) ->
           dataArray.push({
             label: ->
+              if arguments.length
+                self.setLabel.call(self, i, arguments[0])
+
               d.label
             value: ->
+              if arguments.length
+                self.setValue.call(self, i, arguments[0])
+
               d.value
           })
 

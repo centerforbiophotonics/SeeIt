@@ -84,7 +84,7 @@
 				else if option.type() == "select"
 					values.push {label: option.label(), value: $("##{option.id}").val()}
 				else if option.type() == "numeric"
-					values.push {label: option.label(), value: parseInt($("##{option.id}").val())}
+					values.push {label: option.label(), value: Number($("##{option.id}").val())}
 
 			return values
 
@@ -116,7 +116,7 @@
 					return selectStr
 				when "numeric"
 					#Generate number input
-					numericInputStr = "<div class='form-group #{if is_disabled then 'hidden' else ''}'><label for='#{id}'>#{option.label()}</label><input type='number' class='form-control' id='#{id}'></div>"
+					numericInputStr = "<div class='form-group #{if is_disabled then 'hidden' else ''}'><label for='#{id}'>#{option.label()}</label><input type='number' step='any' class='form-control' id='#{id}'></div>"
 					option.id = id
 
 					return numericInputStr

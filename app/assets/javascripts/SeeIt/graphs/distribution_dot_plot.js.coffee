@@ -144,6 +144,11 @@
 
       @initSvg()
 
+      @svg.append("g")
+        .attr("class", "x axis SeeIt")
+        .attr("transform", "translate(0," + (@style.height - 8) + ")")
+        .call(@xAxis)
+
       histIdx = options.map((option) -> option.label).indexOf('Show Histogram')
       binIdx = options.map((option) -> option.label).indexOf('Number of bins in histogram')
 
@@ -155,11 +160,6 @@
       boxPlotIdx = options.map((option) -> option.label).indexOf('Box Plot')
 
       if boxPlotIdx > -1 && options[boxPlotIdx].value then @drawBoxPlot()
-
-      @svg.append("g")
-        .attr("class", "x axis SeeIt")
-        .attr("transform", "translate(0," + (@style.height - 8) + ")")
-        .call(@xAxis)
 
       @svg.selectAll(".dot.SeeIt")
         .data(@graphData.dataArray)
@@ -415,16 +415,27 @@
 
         @y.domain([0,d3.max(bins, (d) -> d.length)])
 
+        t = @svg.selectAll('.x.axis .tick')[0].map((d) -> 
+          console.log d
+          d3.transform(d3.select(d).attr('transform'))
+        )
+
+
+        width = t[t.length - 1].translate[0] - t[0].translate[0] - (t.length - 2)
+
+        xVals = [0..@nBins].map((d) -> d*width / self.nBins )
+
+
         bar = @svg.selectAll(".SeeIt.bar")
           .data(bins)
           .enter().append("g")
             .attr('class', 'bar SeeIt')
-            .attr('transform', (d, i) -> "translate(#{self.x(d.x) - i},#{self.y(d.y) - 8 + 1})")
+            .attr('transform', (d, i) -> "translate(#{xVals[i]},#{self.y(d.y) - 8 + 1})")
 
         bar.append("rect")
           .attr("x", (d) -> d.x)
-          .attr("width", (d) -> 
-            self.x(d.dx)
+          .attr("width", (d, i) -> 
+            xVals[i+1] - xVals[i]
           )
           .attr("height", (d) -> 
             return self.style.height - self.y(d.y)
@@ -435,7 +446,7 @@
         bar.append("text")
           .attr("dy", ".75em")
           .attr("y", 6)
-          .attr("x", (d) -> self.x(d.dx / 2))
+          .attr("x", (d,i) -> (xVals[i+1] - xVals[i] - 1) / 2 + Math.floor(i  * (t.length - 1) / self.nBins))
           .attr("text-anchor", "middle")
           .text((d) -> formatCount(d.length))
 
