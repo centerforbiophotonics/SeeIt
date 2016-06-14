@@ -48,7 +48,7 @@
 
     updateDataset: (dataset) ->
       #Unsubscribe from old dataset
-      @stopListening('dataColumn:destroyed dataColumn:created row:destroyed row:created')
+      @stopListening('dataColumn:destroyed dataColumn:created row:destroyed row:created data:changed')
 
       #Update dataset
       @dataset = dataset
@@ -63,7 +63,8 @@
     subscribeToDataset: ->
       self = @
 
-      @listenTo(@dataset, 'dataColumn:destroyed dataColumn:created row:destroyed row:created', ->
+      @listenTo(@dataset, 'dataColumn:destroyed dataColumn:created row:destroyed row:created data:changed', ->
+        console.log 'spreadsheet reset'
         self.resetTable.call(self)
       )
 
@@ -116,9 +117,9 @@
         resize: (event) ->
           if self.hot
             self.hot.updateSettings({
-              height: self.container.find('.SeeIt.Handsontable-Container').height(),
+              height: Math.max(270, self.container.find('.SeeIt.Handsontable-Container').parent().height()),
               colWidths: ->
-                (self.container.find('.SeeIt.Handsontable-Container').width() - 50) / self.dataset.headers.length
+                (self.container.find('.SeeIt.Handsontable-Container').parent().width() - 50) / self.dataset.headers.length
             })
 
             self.container.find("td").css('text-align', 'center')
@@ -164,8 +165,6 @@
             event.stopPropagation()
             event.preventDefault()
 
-            console.log 'headerDblclick called'
-
             $(TH).off('dblclick', headerDblclick)
 
             input = document.createElement('input')
@@ -177,25 +176,17 @@
 
             $(TH.firstChild).toggle()
 
-            # $(input).click (event) ->
-            #   event.stopPropagation()
-            #   event.preventDefault()
-            #   return false
 
             $(input).on 'focusout', (event) ->
               e = $.Event("keyup")
-              console.log 'blur called for header', e, event
               e.which = 13
               e.keyCode = 13
               $(input).trigger e
 
             $(input).focus()
 
-            console.log document.activeElement
-
             $(input).keyup (event) ->
               $(input).focus()
-              console.log 'in keyup', document.activeElement, event
               event.stopPropagation()
               event.preventDefault()
 
@@ -237,13 +228,14 @@
         data: privateMethods.formatModelData(),
         columns: privateMethods.formatColumns(),
         className: "SeeIt-htCenter",
-        height: spreadsheetView.container.find('.SeeIt.Handsontable-Container').height(),
+        height: Math.max(270, spreadsheetView.container.find('.SeeIt.Handsontable-Container').parent().height()),
         colWidths: ->
           Math.max(
-            (spreadsheetView.container.find('.SeeIt.Handsontable-Container').width() - 50) / spreadsheetView.dataset.headers.length,
+            (spreadsheetView.container.find('.SeeIt.Handsontable-Container').parent().width() - 50) / spreadsheetView.dataset.headers.length,
             50
           )
         stretchH: "all",
+        renderAllRows: SeeIt.Utils.isMobile(),
         afterGetRowHeader: headerCallbackFactory("label"),
         afterGetColHeader: headerCallbackFactory("header")
         manualColumnResize: true,
@@ -253,11 +245,9 @@
         maxRows: spreadsheetView.dataset.data[0].data().length,
         beforeKeyDown: (event) ->
           if $(event.realTarget).hasClass('spreadsheet-header-input')
-            console.log 'propagation stopped'
             event.stopImmediatePropagation()
             return false
         beforeOnCellMouseDown: (event, coords, TD) ->
-          console.log 'afterOnCellMouseDown triggered', event, coords, TD
           if (coords.row < 0 || coords.col < 0) && $(TD).find("input").length
             event.stopImmediatePropagation()
             event.preventDefault()
@@ -323,7 +313,6 @@
                     key: "change_col_type:numeric"
                     name: "Numeric",
                     callback: (key, options) ->
-                      console.log key, options
                       spreadsheetView.dataset.trigger('dataColumn:type:change', options.end.col, "numeric", (success, msg) ->
                         spreadsheetView.displayTypeChangeMsg(options.end.col, success, msg)
                       )
@@ -380,6 +369,7 @@
 
       for i in [0...privateMembers.dataset.data.length]
         column = {data: this.property(i), type: if privateMembers.dataset.data[i].type == "numeric" then "numeric" else "text"}
+        if privateMembers.dataset.data[i].type == "numeric" then column.format = '0[.]00000'
         if !privateMembers.dataset.editable then column.editor = false
         columns.push(column)
 

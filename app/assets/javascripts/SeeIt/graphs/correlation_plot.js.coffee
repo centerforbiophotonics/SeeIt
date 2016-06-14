@@ -138,16 +138,29 @@
 
           if self.leastSquaresVisible
             idx = self.data.indexOf(d)
-            data = self.data.slice(0)
-            oldData = data[idx]
+            data = []
+
+            self.data.forEach (d) ->
+              label = d.label.call(d)
+              x = d.x.call(d)
+              y = d.y.call(d)
+
+              data.push {
+                label: ->
+                  label
+                x: ->
+                  x
+                y: ->
+                  y
+              }
+
             element = d3.select(@)
             x = xScale.invert(element.attr('cx'))
-            y = yScale.invert(element.attr('cy'))
+            y = yScale.invert(element.attr('cy'))              
 
             data[idx].x = -> x
             data[idx].y = -> y    
 
-            console.log data, idx
 
             self.drawLeastSquares.call(self, xScale, yScale, min, max, tooltip, data)
         )  

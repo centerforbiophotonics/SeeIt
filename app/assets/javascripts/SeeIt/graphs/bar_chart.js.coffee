@@ -102,7 +102,6 @@
           label: "Test 3",
           type: "select",
           values: ->
-            console.log self.dataset
             _.unique(_.flatten(self.dataset.map((role) ->
               role.data.map((d) -> d.data.labels) || []
             )))

@@ -43,7 +43,6 @@
 			@register()
 
 			@listenTo child, 'filter:changed', (_filter) ->
-				console.log 'filter:changed triggered'
 				self.updateFilter.call(self, _filter)
 
 			return child
@@ -52,8 +51,15 @@
 			@listenTo parent, 'data:changed', (source, idx) ->
 				child_idx = filter.indexOf(idx)
 
-				if child_idx > -1
-					child.setValue(child_idx, parent.getValue(idx))
+				console.log source
+				if child_idx > -1 && source != child
+					child.setValue(child_idx, parent.getValue(idx), parent)
+
+			@listenTo child, 'data:changed', (source, idx) ->
+				parent_idx = filter[idx]
+
+				if parent_idx > -1 && source != parent
+					parent.setValue(parent_idx, child.getValue(idx), child)
 
 			@listenTo parent, 'type:changed', (type) ->
 				child.setType(type)

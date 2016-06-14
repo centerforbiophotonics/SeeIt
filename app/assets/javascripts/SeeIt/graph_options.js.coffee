@@ -3,7 +3,6 @@
 		_.extend(@prototype, Backbone.Events)
 
 		constructor: (@button, @container, options = [], @disabled = [], @defaults = []) ->
-			console.log @disabled, @defaults
 			@options = []
 
 			@wrapOptions(options)
@@ -28,8 +27,6 @@
 
 					return option
 				)(_option)
-
-			console.log @options
 
 
 		initLayout: ->
@@ -126,7 +123,11 @@
 			self = @
 
 			@button.on 'click', ->
-				self.container.css('max-height', self.container.next().height())
+				if $(window).width() >= 992 
+					self.container.css('max-height', self.container.next().height())
+				else
+					self.container.css('max-height', "")
+					
 				self.visible = !self.visible
 
 				if self.visible
@@ -139,7 +140,16 @@
 				self.trigger('options:hide')
 
 			@on 'graph:maximize', (maximize) ->
-				self.container.css('max-height', self.container.next().height())
+				if $(window).width() >= 992 
+					self.container.css('max-height', self.container.next().height())
+				else
+					self.container.css('max-height', "")
+
+			$(window).on 'resize', ->
+				if $(window).width() >= 992 
+					self.container.css('max-height', self.container.next().height())
+				else
+					self.container.css('max-height', "")
 
 		@randString: (x) ->
 			s = ""

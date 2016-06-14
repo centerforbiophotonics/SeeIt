@@ -39,7 +39,6 @@
           found_dataset.trigger 'request:columns', callback
 
       @listenTo @app, 'request:values:unique', (dataset, colIdx, callback) ->
-        console.log dataset, colIdx
         found_dataset = self.datasets.filter((d) -> d.title == dataset)
 
         if found_dataset.length
@@ -66,7 +65,6 @@
 
       for i in [0...data.length]
         DataCollection.coerceDataset(data[i], (dataset) ->
-          console.log dataset
           if dataset then self.addDataset.call(self, dataset)
         )
 

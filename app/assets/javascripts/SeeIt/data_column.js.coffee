@@ -20,6 +20,7 @@
               d.label
             value: ->
               if arguments.length
+                console.log arguments
                 self.setValue.call(self, i, arguments[0])
 
               d.value
@@ -37,10 +38,12 @@
         @staleData = true
         @trigger('data:changed', @)
 
-      @setValue = (idx, value) ->
+      @setValue = (idx, value, context) ->
+        if !context then context = @
+        
         if editable && @typeIsCorrect(value)
           data[idx].value = value
-          @trigger('data:changed',@, idx)
+          @trigger('data:changed',context, idx)
           @staleData = true
           return true
 

@@ -48,7 +48,6 @@
     draw: (options) ->
       graph = @
       @container.html("<svg class='SeeIt graph-svg' style='width: 100%; min-height: 270px'></svg>")
-      console.log options[0].value
 
       nv.addGraph ->
         chart = nv.models.pieChart()

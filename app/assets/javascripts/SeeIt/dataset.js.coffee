@@ -155,6 +155,8 @@
 			@trigger('row:created', row)
 
 		createColumn: (col) ->
+			self = @
+
 			header = @generateLabel(@headers)
 
 			dataColumn = []
@@ -162,7 +164,12 @@
 			for i in [0...@labels.length]
 				dataColumn.push({label: @labels[i], value: null})
 
-			@data.splice(col, 0, new SeeIt.DataColumn(@app, header, dataColumn, @title, undefined, @editable))
+			column = new SeeIt.DataColumn(@app, header, dataColumn, @title, undefined, @editable)
+			@data.splice(col, 0, column)
+			@listenTo column, 'data:changed', (source, idx) ->
+				console.log 'data:changed triggered in dataset'
+				self.trigger('data:changed', source, idx)
+
 			@headers.splice(col, 0, header)
 			@trigger('dataColumn:created', col)
 
@@ -248,9 +255,15 @@
 					arr
 
 				initData: ->
+					self = @
 					# Assume data is already in array of arrays format and is uniformly padded with 'undefined's
 					for i in [1...@rawDataCols()]
-						@data.push(SeeIt.DataColumn.new(@app, @rawData, i, @title, @types[i-1], undefined, @editable))
+						column = SeeIt.DataColumn.new(@app, @rawData, i, @title, @types[i-1], undefined, @editable)
+						@data.push(column)
+						@listenTo column, 'data:changed', (source, idx) ->
+							console.log 'data:changed triggered in dataset'
+							self.trigger('data:changed', source, idx)
+
 
 				rawDataRows: ->
 					@rawData.length
@@ -297,8 +310,13 @@
 						@types.push(@rawData.columns[i].type)
 
 				initData: ->
+					self = @
 					for i in [0...@rawData.columns.length]
-						@data.push(SeeIt.DataColumn.new(@app, @rawData, i, @title, @types[i], undefined, @editable))
+						column = SeeIt.DataColumn.new(@app, @rawData, i, @title, @types[i], undefined, @editable) 
+						@data.push(column)
+						@listenTo column, 'data:changed', (source, idx) ->
+							console.log 'data:changed triggered in dataset'
+							self.trigger('data:changed', source, idx)
 
 			}
 

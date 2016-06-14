@@ -10,12 +10,9 @@
       current_hostname = document.location.hostname + "#{if document.location.port then ":"+document.location.port else ""}"
       target_hostname = getHostnameFromString(url)
 
-      console.log current_hostname
-
       is_jsonp = current_hostname != target_hostname
 
       if is_jsonp
-        console.log url, target_hostname
 
         $.ajax({
             timeout: 5000,
@@ -28,7 +25,6 @@
           })
       else
         relative_path = getPathFromURL(url)
-        console.log relative_path
 
         $.ajax({
           dataType: "json",
@@ -86,8 +82,6 @@
 
   getHostnameFromString = (url) ->
     split_url = url.split("/")
-
-    console.log split_url
 
     if !split_url[0].length
       return document.location.hostname + "#{if document.location.port then ":"+document.location.port else ""}"

@@ -106,6 +106,7 @@
               )
 
               @listenTo(this_data.data, 'header:changed', ->
+                self.updateFooterData.call(self)
                 self.graph.trigger('header:changed', self.options.getValues())
               )
 
@@ -541,7 +542,6 @@
 
       # @setGraphHeight()
 
-      console.log 'maximize triggered'
       @graph.trigger('size:change', @options.getValues())
       @options.trigger('graph:maximize', @maximize)
 
