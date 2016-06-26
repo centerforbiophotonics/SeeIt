@@ -64,12 +64,6 @@
 }
 
 
-.SeeIt.options-wrapper {
-  min-height: 270px;
-  overflow-y: auto;
-}
-
-
 .SeeIt.Handsontable-Container {
 /*  width: 100%;*/
 /*  width: -webkit-calc(100% - 50px);
@@ -127,6 +121,16 @@
   white-space: normal !important;
 }
 
+.SeeIt.dropdown-container a.disabled {
+/*  background-color:#d9d9d9 !important;*/
+  color:#aaa !important;
+}
+
+.SeeIt.dropdown-submenu > .dropdown-menu {
+  top: 100%;
+  left: 0;
+}
+
 @media (min-width: 992px) {
   .SeeIt.row .SeeIt.Data {
     height: 100%;
@@ -135,9 +139,28 @@
   .SeeIt.Graphs .SeeIt.graph-buttons {
     float: right;
   }
+
+  .SeeIt.options-wrapper {
+    min-height: 270px;
+    overflow-y: auto;
+  }
+
+  .SeeIt.Graphs {
+    max-height: 100%;
+    overflow-y: auto;
+  }
+
+  .SeeIt.Graphs.spreadsheet-visible, .SeeIt.Spreadsheet {
+    max-height: 50%;
+    overflow-y: auto;
+  }
 }
 
 @media (max-width: 991px) {
+  .SeeIt.Spreadsheet {
+    height: auto !important;
+  }
+
   .SeeIt.row .SeeIt.Data {
     height: auto;
   }
@@ -253,11 +276,6 @@
     /*overflow-y: auto; */
 }
 
-.SeeIt.Graphs {
-  max-height: 100%;
-  overflow-y: auto;
-}
-
 div.SeeIt.footer-row.row, div.SeeIt.footer-expanded-row.row {
   margin-right: -5px;
   margin-left: -5px;
@@ -369,10 +387,6 @@ div.SeeIt.expanded-data-zone {
   display: none;
 }
 
-.SeeIt.Graphs.spreadsheet-visible, .SeeIt.Spreadsheet {
-  max-height: 50%;
-  overflow-y: auto;
-}
 
 .SeeIt.graph-list {
   height: 100%;

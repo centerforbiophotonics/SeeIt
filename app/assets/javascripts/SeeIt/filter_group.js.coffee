@@ -46,7 +46,6 @@
 
 
     updateFilters: (filter_data) ->
-      console.log filter_data
       self = @
 
       if filter_data.length > 1

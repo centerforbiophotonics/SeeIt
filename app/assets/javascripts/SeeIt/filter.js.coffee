@@ -58,7 +58,6 @@
 
       options = '<option value="" selected disabled>Please select a dataset</option>'
 
-      console.log @
       @datasets.forEach (dataset) ->
         options += "<option value='#{dataset}'>#{dataset}</option>"
 
@@ -217,7 +216,6 @@
 
       @selectedColumn = columns[idx]
 
-      console.log typeof $column_select.val(),$column_select.val(), columns, idx, @selectedColumn, 'in initValueField'
       if type == "numeric" 
         @filterType = "numeric"
         @container.find(".categorical-filter").addClass("hidden")
