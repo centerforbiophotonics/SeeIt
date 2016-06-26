@@ -1,5 +1,5 @@
-@SeeIt.Graphs.stackedAreaChart = (->
-  class stackedAreaChart extends SeeIt.Graph
+@SeeIt.Graphs.StackedAreaChart = (->
+  class StackedAreaChart extends SeeIt.Graph
 
     constructor: ->
       super 
@@ -123,7 +123,7 @@
         }
       ]
 
-  stackedAreaChart
+  StackedAreaChart
 ).call(@)
 
-@SeeIt.GraphNames["stackedAreaChart"] = "Stacked Area Chart"
+@SeeIt.GraphNames["StackedAreaChart"] = "Stacked Area Chart"
