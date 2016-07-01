@@ -50,7 +50,29 @@
             },{
                 type: 'google spreadsheet',
                 url: 'https://docs.google.com/spreadsheets/d/1DHbcvH_HOk5O8Y8uDW2ESrxWFSuOTAk2519TgzeFAUM/pubhtml'
-		}];
+		    },{
+                title: "Mosaic plot test",
+                dataset: {
+                  labels: ['A', 'B', 'C', 'D', 'E'],
+                  columns: [
+                    {
+                      header: 'predictor',
+                      type: "categorical",
+                      data: ["Male", "Female","Male","Female","Male"]
+                    },
+                    {
+                      header: 'response',
+                      type: "categorical",
+                      data: ["true","false","true","true","false"]
+                    },
+                    {
+                      header: 'Ethnicity',
+                      type: "categorical",
+                      data: ["Asian","White","Asian","White","Asian"]
+                    }
+                  ]
+              }}
+            ];
 
 	var newData = {
 		title: "Random Data",
@@ -90,37 +112,17 @@
     	],
     	graphs: [
     		{
-    			type: "Bar Chart",
+    			type: "Mosaic Plot",
     			data: [
     				{
-    					dataset_title: "Dataset 1",
-    					column_header: "Kia",
-    					role_in_graph: "default"
+    					dataset_title: "Mosaic plot test",
+    					column_header: "predictor",
+    					role_in_graph: "Independent"
     				},
     				{
-    					dataset_title: "Dataset 1",
-    					column_header: "Nissan",
-    					role_in_graph: "default"
-    				},
-    				{
-    					dataset_title: "Dataset 1",
-    					column_header: "Toyota",
-    					role_in_graph: "default"
-    				}
-    			]
-    		},
-    		{
-    			type: "Distribution Dot Plot",
-    			data: [
-    				{
-    					dataset_title: "Random Data",
-    					column_header: "1",
-    					role_in_graph: "default"
-    				},
-    				{
-    					dataset_title: "Random Data",
-    					column_header: "2",
-    					role_in_graph: "default"
+    					dataset_title: "Mosaic plot test",
+    					column_header: "response",
+    					role_in_graph: "Dependent"
     				}
     			]
     		}

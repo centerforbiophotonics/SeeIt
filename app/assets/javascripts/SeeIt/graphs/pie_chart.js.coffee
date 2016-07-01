@@ -46,14 +46,14 @@
       nv.utils.windowResize(@chartObject.update);
 
     draw: (options) ->
+      console.log @dataset[0].data
       graph = @
       @container.html("<svg class='SeeIt graph-svg' style='width: 100%; min-height: 270px'></svg>")
       console.log options[0].value
 
       nv.addGraph ->
         chart = nv.models.pieChart()
-          .x( (d) -> 
-            return d.label())
+          .x( (d) -> return d.label())
           .y( (d) -> return d.value())
           .showLabels(options[0].value);
 

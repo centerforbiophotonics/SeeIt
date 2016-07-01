@@ -41,7 +41,6 @@
     formatData: ->
       data = []
 
-
       @dataset[0].data.forEach (dataColumn) ->
         data.push({values: dataColumn.data(), key: dataColumn.header, color: dataColumn.color})
 
@@ -59,7 +58,7 @@
         chart = nv.models.multiBarChart()
             .x((d) -> d.label() )
             .y((d) -> d.value() )
-
+        
         data = graph.formatData.call(graph)
 
         d3.select(graph.container.find('.graph-svg')[0])
