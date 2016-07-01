@@ -76,7 +76,6 @@
         @graphId = "Graph #{++idx}"
 
     changeGraphId: (oldId, newId) ->
-      console.log oldId, newId
       graph = @graphs[oldId]
 
       if @graphs[newId]
@@ -125,7 +124,6 @@
       self = @
 
       @findValidId()
-      console.log @graphId, @graphs
 
       @container.find(".graph-list").append("""
         <li class="SeeIt graph list-group-item">

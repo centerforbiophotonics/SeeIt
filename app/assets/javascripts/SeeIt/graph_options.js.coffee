@@ -3,7 +3,6 @@
 		_.extend(@prototype, Backbone.Events)
 
 		constructor: (@button, @container, options = [], @disabled = [], @defaults = []) ->
-			console.log @disabled, @defaults
 			@options = []
 
 			@wrapOptions(options)
@@ -28,8 +27,6 @@
 
 					return option
 				)(_option)
-
-			console.log @options
 
 
 		initLayout: ->
@@ -84,7 +81,7 @@
 				else if option.type() == "select"
 					values.push {label: option.label(), value: $("##{option.id}").val()}
 				else if option.type() == "numeric"
-					values.push {label: option.label(), value: parseInt($("##{option.id}").val())}
+					values.push {label: option.label(), value: Number($("##{option.id}").val())}
 
 			return values
 
@@ -116,7 +113,7 @@
 					return selectStr
 				when "numeric"
 					#Generate number input
-					numericInputStr = "<div class='form-group #{if is_disabled then 'hidden' else ''}'><label for='#{id}'>#{option.label()}</label><input type='number' class='form-control' id='#{id}'></div>"
+					numericInputStr = "<div class='form-group #{if is_disabled then 'hidden' else ''}'><label for='#{id}'>#{option.label()}</label><input type='number' step='any' class='form-control' id='#{id}'></div>"
 					option.id = id
 
 					return numericInputStr
@@ -126,7 +123,11 @@
 			self = @
 
 			@button.on 'click', ->
-				self.container.css('max-height', self.container.next().height())
+				if $(window).width() >= 992 
+					self.container.css('max-height', self.container.next().height())
+				else
+					self.container.css('max-height', "")
+					
 				self.visible = !self.visible
 
 				if self.visible
@@ -139,7 +140,16 @@
 				self.trigger('options:hide')
 
 			@on 'graph:maximize', (maximize) ->
-				self.container.css('max-height', self.container.next().height())
+				if $(window).width() >= 992 
+					self.container.css('max-height', self.container.next().height())
+				else
+					self.container.css('max-height', "")
+
+			$(window).on 'resize', ->
+				if $(window).width() >= 992 
+					self.container.css('max-height', self.container.next().height())
+				else
+					self.container.css('max-height', "")
 
 		@randString: (x) ->
 			s = ""

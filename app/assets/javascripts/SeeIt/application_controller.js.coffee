@@ -246,7 +246,6 @@
       )
 
       @listenTo(app.dataCollectionView, 'datasets:create', (collection) ->
-        console.log collection
         collection.forEach (dataset) ->
           app.addDataset.call(app, dataset)
       )

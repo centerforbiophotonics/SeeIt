@@ -43,7 +43,7 @@
         <li class="SeeIt dataset list-group-item" style="min-height: 54px">
           <div class="btn-group-vertical dataset-view-group SeeIt" role="group">
             <button class="SeeIt dataset-title btn btn-default" role="button">#{@dataset.title}</button>
-            <button class="SeeIt btn btn-default show-in-spreadsheet" role="button">
+            <button class="SeeIt btn btn-default show-in-spreadsheet #{if @app.ui.spreadsheet then '' else 'hidden'}" role="button">
               Show in Spreadsheet
               <span class='glyphicon glyphicon-th'></span>
             </button>

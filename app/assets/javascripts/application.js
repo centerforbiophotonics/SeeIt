@@ -29,6 +29,7 @@
 //= require jquery.serialize-object.min.js
 //= require SeeIt/init
 //= require SeeIt/utils
+//= require SeeIt/least_squares
 //= require SeeIt/validators_module
 //= require SeeIt/google_spreadsheet_manager
 //= require SeeIt/data_column

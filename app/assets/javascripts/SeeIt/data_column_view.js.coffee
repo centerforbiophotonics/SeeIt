@@ -3,6 +3,7 @@
     _.extend(@prototype, Backbone.Events)
 
     constructor: (@app, @container, @data) ->
+      @graphRoles = {}
       @init()
 
     init: ->
@@ -13,10 +14,10 @@
         <div class="SeeIt data-column-panel panel panel-default">
           <div class="SeeIt data-column-panel-body panel-body">
             <div class="SeeIt btn-group" role="group" style="width: 100%">
-              <button type="button" title='Change Color' class="color-picker data-column-button SeeIt btn btn-default" style="background-color: #{@data.color}; width: 15%">
-              </button>
-              <button type="button" class="data-column-button SeeIt btn btn-default data" style='width: 60%'>#{@data.header}</button>
               <div role="group" title='Add to graph' class="data-column-button SeeIt btn-group SeeIt dropdown-container" style='width: 25%'></div>
+              <button type="button" class="data-column-button SeeIt btn btn-default data" style='width: 50%'>#{@data.header}</button>
+              <button type="button" title='Change Color' class="color-picker data-column-button SeeIt btn btn-default" style="background-color: #{@data.color}; width: 25%">
+              </button>
             </div>
           </div>
         </div>
@@ -95,11 +96,11 @@
 
     dropdownTemplate: ->
       """
-        <button class="btn btn-primary dropdown-toggle SeeIt graph-dropdown" type="button" data-toggle="dropdown" aria-haspopup="true" id="dropdown_#{@data.header}" style="width: 100%">
+        <button class="btn btn-primary dropdown-toggle SeeIt graph-dropdown" type="button" data-toggle="dropdown" aria-haspopup="true" style="width: 100%">
           <div style='display: inline-block'><span class="glyphicon glyphicon-stats"></span></div>
           <span class="caret"></span>
         </button>
-        <ul class="dropdown-menu text-center" aria-labelledby="dropdown_#{@data.header}" style="position: fixed">
+        <ul class="dropdown-menu SeeIt main-graph-dropdown text-center">
           <span style='text-align: center; display: block; opacity: 0.75'>Add to graph...</span>
           <li role="separator" class="divider"></li>
         </ul>
@@ -107,20 +108,25 @@
 
     updateGraphOption: (oldId, newId) ->
       @container.find("li a[data-id='#{oldId}']").attr('data-id', newId).html(newId)
+      @graphRoles[oldId] = @graphRoles[newId]
+      delete @graphRoles[oldId]
 
     removeGraphOption: (graphId) ->
       @container.find("li a[data-id='#{graphId}']").remove()
+      delete @graphRoles[graphId]
 
     addGraphOption: (graphId, dataRoles) ->
       self = @
 
+      @graphRoles[graphId] = dataRoles
 
       if dataRoles.length == 1
-        @container.find('.dropdown-menu').append("<li class='add_to_graph' style='box-shadow: none'><a href='#' class='dropdown_child' data-id='#{graphId}'>#{graphId}</a></li>")
+        @container.find('.SeeIt.dropdown-menu.main-graph-dropdown').append("<li class='add_to_graph graph_li' style='box-shadow: none'><a href='#' class='dropdown_child' data-id='#{graphId}'>#{graphId}</a></li>")
 
         selectGraph = (event) ->
           #data: {name: "default", data: self.data} is a temporary placeholder. I need to pass the data-role info to this view
-          self.trigger('graph:addData', {graph: $(@).find('.dropdown_child').attr('data-id'), data: [{name: dataRoles[0].name, data: self.data}]})
+          if $(@).find('.disabled').length == 0
+            self.trigger('graph:addData', {graph: $(@).find('.dropdown_child').attr('data-id'), data: [{name: dataRoles[0].name, data: self.data}]})
 
         @container.find('.add_to_graph').off('click', selectGraph).on('click', selectGraph)
       else
@@ -132,9 +138,9 @@
           return htmlStr
 
         @container.find('.dropdown-menu').append("""
-          <li class='SeeIt add_to_graph_submenu dropdown-submenu' style='box-shadow: none'>
-            <a href='#' style='box-shadow: none' class='SeeIt dropdown_child dropdown-toggle' data-id='#{graphId}' id='#{graphId}' data-toggle='dropdown' aria-haspopup="true">#{graphId}</a>
-            <ul class="SeeIt dropdown-menu text-center" aria-labelledby='#{graphId}' style='position: fixed'>
+          <li class='SeeIt add_to_graph_submenu dropdown-submenu graph_li' style='box-shadow: none'>
+            <a href='#' style='box-shadow: none' class='SeeIt dropdown_child dropdown-toggle' data-id='#{graphId}' data-toggle='dropdown' aria-haspopup="true">#{graphId}</a>
+            <ul class="SeeIt dropdown-menu text-center">
               <span style='text-align: center; display: block; opacity: 0.75'>Data Roles</span>
               <li role="separator" class="divider"></li>
                 #{appendRoles()}
@@ -144,25 +150,50 @@
 
 
         $('.add_to_graph_submenu').click(->
-          dropDownFixPosition($(@),$(@).find('.dropdown-menu'))
+          self.disableInvalidGraphs.call(self)
+          #dropDownFixPosition($(@),$(@).find('.dropdown-menu'))
           # $(window).on 'scroll'
         )
 
 
         selectGraphDataRole = ->
-          self.trigger('graph:addData', {graph: $(@).attr('data-graph'), data: [{name: $(@).attr('data-id'), data: self.data}]})
+          if $(@).find('.disabled').length == 0
+            self.trigger('graph:addData', {graph: $(@).attr('data-graph'), data: [{name: $(@).attr('data-id'), data: self.data}]})
         
         @container.find('.add_to_data_role').off('click', selectGraphDataRole).on('click', selectGraphDataRole)
 
 
       true
-          
+       
+
+    disableInvalidGraphs: ->
+      self = @
+
+      @container.find('.dropdown-menu .graph_li a:first').removeClass('disabled')
+
+      @container.find('.dropdown-menu .graph_li').each  ->
+        li = @
+        graphId = $(li).find('a:first').attr('data-id')
+
+        if self.graphRoles[graphId] && self.graphRoles[graphId].length > 1
+          $(li).find('.add_to_data_role').each (i) ->
+            child_li = @
+            if self.graphRoles[graphId][i].type != self.data.type 
+              $(child_li).find('a:first').addClass('disabled')
+        else if self.graphRoles[graphId]
+          if self.graphRoles[graphId][0].type != self.data.type 
+            $(li).find('a:first').addClass('disabled')
+
+
     populateGraphSelectBox: ->
+      self = @
+
       @container.find('.SeeIt.dropdown-container').html(@dropdownTemplate())
       @populateGraphDropdown()
 
       $('.SeeIt.graph-dropdown').click(->
-        dropDownFixPosition($(@),$(@).next())
+        self.disableInvalidGraphs()
+        #dropDownFixPosition($(@),$(@).next())
       )
 
   dropDownFixPosition = (button,dropdown) ->

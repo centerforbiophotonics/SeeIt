@@ -1,8 +1,8 @@
-@SeeIt.Graphs.BarChart = (->
-  class BarChart extends SeeIt.Graph
+@SeeIt.Graphs.StackedAreaChart = (->
+  class StackedAreaChart extends SeeIt.Graph
 
     constructor: ->
-      super
+      super 
       @chartObject = null
       @listenerInitialized = false
       @rendered = false
@@ -11,15 +11,13 @@
     initListeners: ->
       self = @
 
-      @eventCallbacks['data:created'] =  (options) ->
+      @eventCallbacks['data:created'] = (options) ->
         if self.allRolesFilled()
           if !self.rendered
             self.rendered = true
             self.draw.call(self, options)
           else
             self.refresh.call(self, options)
-        else
-          self.clearGraph.call(self)
 
       @eventCallbacks['data:assigned'] = @eventCallbacks['data:created']
       @eventCallbacks['data:destroyed'] = @eventCallbacks['data:created']
@@ -34,87 +32,98 @@
       for e, cb of @eventCallbacks
         @on e, cb
 
-    clearGraph: ->
-      @container.html("")
-      @rendered = false
-
     formatData: ->
       data = []
+      console.log "formatData:"
+      console.log @dataset[0]
 
       @dataset[0].data.forEach (dataColumn) ->
-        data.push({values: dataColumn.data(), key: dataColumn.header, color: dataColumn.color})
+        each1 = []
+        dataColumn.data().forEach (d) ->
+          each2 = []
+          each2.push(d.label())
+          each2.push(d.value())
+          each1.push(each2)
+        data.push({values:each1, key:dataColumn.header}) 
 
       return data
 
     refresh: (options) ->
-      d3.select(@container.find('.graph-svg')[0]).datum(@formatData()).transition().duration(500).call(@chartObject);
-      nv.utils.windowResize(@chartObject.update);
+      @draw(options)
 
     draw: (options) ->
       graph = @
       @container.html("<svg class='SeeIt graph-svg' style='width: 100%; min-height: 270px'></svg>")
-          
+
       nv.addGraph ->
-        chart = nv.models.multiBarChart()
-            .x((d) -> d.label() )
-            .y((d) -> d.value() )
-        
         data = graph.formatData.call(graph)
+        console.log data
+
+        chart = nv.models.stackedAreaChart()
+                  .margin({right: 100})
+                  .x( (d) -> d[0])   
+                  .y( (d) -> d[1])  
+                  .useInteractiveGuideline(true)  
+                  .rightAlignYAxis(true)      
+                  .showControls(true)       
+                  .clipEdge(true)
+
+        chart.xAxis
+            .tickFormat( (d) -> d)         
+
+        chart.yAxis
+            .tickFormat(d3.format(',.2f'))
 
         d3.select(graph.container.find('.graph-svg')[0])
-            .attr('height', '100%')
-            .datum(data)
-            .call(chart);
+          .attr('height', '100%')
+          .datum(data)
+          .call(chart)
 
-        nv.utils.windowResize(chart.update)
+
+        nv.utils.windowResize(chart.update);
         graph.chartObject = chart
         return chart
-      
-    destroy: ->
 
+    destroy: ->
 
     dataFormat: ->
       [
         {
           name: "default",
           type: "numeric",
-          multiple: true
+          multiple: false
         }
       ]
-
 
     options: ->
       self = @
-
       [
         {
-          label: "Test",
-          type: "checkbox",
-          default: true
+        	label: "Show/Hide Labels"
+        	type: "checkbox"
+        	default: true
         },
         {
-          label: "Test 2",
-          type: "numeric",
-          default: 1
-        },
-        {
-          label: "Test 3",
-          type: "select",
-          values: ->
-            _.unique(_.flatten(self.dataset.map((role) ->
-              role.data.map((d) -> d.data.labels) || []
-            )))
-          default: ->
-            if this.values().length then this.values()[0] else null
-        },
-        {
-          label: "Test 4",
-          type: "checkbox",
+          label: "Show/Hide Headers"
+          type: "checkbox"
           default: false
+        },
+        {
+          label: "Specific Row"
+          type: "select"
+          values: (->
+            labels = ["default"]
+
+            self.dataset[0].data.forEach (dataColumn) ->
+              labels = labels.concat(dataColumn.data().map((d) -> d.label()))
+
+            return labels
+          )()
+          default: null
         }
       ]
 
-  BarChart
+  StackedAreaChart
 ).call(@)
 
-@SeeIt.GraphNames["BarChart"] = "Bar Chart"
+@SeeIt.GraphNames["StackedAreaChart"] = "Stacked Area Chart"
