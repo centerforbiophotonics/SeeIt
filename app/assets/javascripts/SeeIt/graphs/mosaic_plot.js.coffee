@@ -8,6 +8,7 @@
       @rendered = false
       @graph = []
       @initListeners()
+      @total_n = 0
 
 
     initListeners: ->
@@ -64,6 +65,8 @@
         counts[values.Independent]["__total"]++ # total number of males or females
         counts[values.Independent][values.Dependent]++ # total number of true/false
 
+      @total_n = counts["__total"]
+
       for independent_variable, dependent_variables of counts 
         if independent_variable != "__total"
           for dependent_variable, total of dependent_variables
@@ -71,6 +74,9 @@
               @graph.push {
                 w: dependent_variables.__total/counts.__total,
                 h: total/dependent_variables.__total,
+                total: total,
+                overall_total: counts.__total,
+                dependent_total: dependent_variables.__total,
                 independent: independent_variable,
                 dependent: dependent_variable
               }
@@ -100,30 +106,13 @@
 
       tooltip = d3.select("body").append("div")
         .attr("class", "tooltip")
-        .style("opacity", 0.5);
+        .style("opacity", 0);
 
       @svg = d3.select(graph.container.find('.graph-svg')[0])
         .attr('width', width + margin.left + margin.right)
         .attr('height', height + margin.top + margin.bottom)
         .append('g')
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-
-      @svg.append('g')
-        .attr('class', 'y axis SeeIt')
-        .style('fill', 'none')
-        .style('stroke', '#000')
-        .style('font-size',  "12px")
-        .attr('font-family', 'sans-serif')
-        .call(yAxis)
-
-      @svg.append('g')
-        .attr('class', 'x axis SeeIt')
-        .attr("transform", "translate(0," + height + ")")
-        .style('fill', 'none')
-        .style('stroke', '#000')
-        .style('font-size', "12px")
-        .attr('font-family', 'sans-serif')
-        .call(xAxis)
 
       segments = d3.nest() # separate independent variables into nested arrays
         .key((d) -> d.independent).sortKeys(d3.ascending)
@@ -153,11 +142,15 @@
         );
 
       rects = @segment.selectAll('.rects')
-        .data((d) -> d.values).enter()
+        .data((d) -> d.values);
+
+      rects.enter()
         .append('rect')
         .attr('class', 'rects')
         .attr('width', (d) -> d.w * width)
         .attr('height', (d) -> d.h * height)
+        .attr('stroke', 'white')
+        .attr('stroke-width', '2px')
         .style('fill', (d,i) -> color(i))
         .attr('transform', (d,i) -> 
           segment_index = parseInt(this.parentNode.getAttribute('data-index'))
@@ -170,27 +163,76 @@
         )
         .on("mouseover", (d, i) ->
               this_rect = d3.select(@)
-              this_rect.style('opacity', 0.7)
+              this_rect.style('stroke', 'black')
+              this_rect.style('stroke-width', '1.5px')
               tooltip.transition()
-                 .duration(200)
-                 .style("opacity", .9)
-                 .style('visibility', 'visible')
-              tooltip.html("<br/> [" + d.independent + ": " + d3.round(d.w * 100, 1) + "%, " +
-                                       d.dependent + ": "+ d3.round(d.h * 100, 1) + "%]")
-                 .style("left", (d3.event.pageX + 5) + "px")
-                 .style("top", (d3.event.pageY - 28) + "px")
+                .duration(200)
+                .style("opacity", .9)
+                .style('visibility', 'visible')
+              tooltip.html("<div>
+                <strong>#{d.independent}</strong>: #{d.dependent_total}/#{d.overall_total} (#{d3.round(d.w * 100, 1) + '%'})<br/>
+                <strong>#{d.dependent}</strong>: #{d.total}/#{d.dependent_total} (#{d3.round(d.h * 100, 1) + '%'})<br/>
+                <strong>Total</strong>: #{d.total} (#{d3.round((d.total/d.overall_total) * 100, 1)}%)
+                </div>")
+                .style("background-color", "white")
+                .style("border", "1px solid black")
+                .style("padding", "3px")
+                .style("border-radius", "3px")
+                .style("left", (d3.event.pageX + 5) + "px")
+                .style("top", (d3.event.pageY - 28) + "px")
+        
         )
         .on('mousemove', () -> tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px"))
         .on("mouseout", () ->
             this_rect = d3.select(@)
-            this_rect.style('opacity', 1)
+            this_rect.style('stroke', 'white')
             tooltip.transition()
                  .duration(500)
                  .style('visibility', 'hidden')
         )
-        .attr('opacity', 0.3)
-        .transition().duration(300)
-        .attr('opacity', 1);
+
+        .attr('opacity', 0.3);
+
+      rects.transition().duration(300)
+        .attr('opacity', 0.9);
+
+      console.log rects
+
+      rects.append('text')
+        .style('text-anchor', 'middle')
+        .text((d) -> d.independent + ', ' + d.dependent);
+
+      @svg.append('g').append('text')
+        .attr('y', -10)
+        .style('text-anchor', 'middle')
+        .style('font-size', '12px')
+        .text('n = ' + @total_n)
+
+      @svg.append('g')
+        .style('fill', 'none')
+        .style('stroke', '#000')
+        .style('font-size',  "12px")
+        .style('font-family', 'sans-serif')
+        .call(yAxis)
+        .append('text')
+        .attr('transform', 'rotate(-90)')
+        .attr('y', 6)
+        .attr('dy', '.71em')
+        .style('text-anchor', 'end')
+        .text('Response')
+
+      @svg.append('g')
+        .attr("transform", "translate(0," + height + ")")
+        .style('fill', 'none')
+        .style('stroke', '#000')
+        .style('font-size', "12px")
+        .style('font-family', 'sans-serif')
+        .call(xAxis)
+        .append("text")
+        .attr("x", width)
+        .attr("y", -6)
+        .style("text-anchor", "end")
+        .text('Predictor')
 
 
       @graph = []
