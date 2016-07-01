@@ -39,6 +39,10 @@
         = hidden_field_tag 'ui[dataset_add_remove]', 'false'
         = check_box_tag 'ui[dataset_add_remove]', 'true'
 
+      .field
+        = button_tag "Customize Appearance", :type => "button", :id => "customize-appearance"
+
+
       %h2 Data
       #data
       .field
@@ -49,9 +53,13 @@
       .field
         = button_tag "Add Graph", :type => "button", :id => "add-graph"
 
+      %h2 Start and Share
       .field
-        = button_tag "Display JSON", :type => "button", :id => "display"
-        = button_tag "Load", :type => "button", :id => "load"
+        = button_tag "Display Unique Link For This Configuration", :type => "button", :id => "show_link"
+      .field
+        = button_tag "Show Javascript Initialization Code For This Configuration", :type => "button", :id => "show_init_code"
+      .field
+        = button_tag "Run SeeIt With This Configuration", :type => "button", :id => "run"
 
 #data-menu-template
   = label_tag '', 'Data Type:'
