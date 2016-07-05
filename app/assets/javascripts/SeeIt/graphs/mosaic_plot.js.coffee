@@ -164,10 +164,11 @@
         .attr('stroke-width', '2px')
         .style('fill', (d,i) -> color(i))
         .on("mouseover", (d, i) ->
-              d3.select(@).style('opacity', 0.95)
-              this_rect = d3.select(@)
-              this_rect.style('stroke', 'black')
-              this_rect.style('stroke-width', '0.5px')
+              element = d3.select(@)
+              element.transition().duration(200)
+                .style('opacity', 0.95)
+              element.style('stroke', 'black')
+              element.style('stroke-width', '0.5px')
               tooltip.transition()
                 .duration(200)
                 .style("opacity", .9)
@@ -187,16 +188,17 @@
         )
         .on('mousemove', () -> tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px"))
         .on("mouseout", () ->
-            d3.select(@).style('opacity', 0.8)
-            this_rect = d3.select(@)
-            this_rect.style('stroke', 'white')
+            element = d3.select(@)
+            element.transition().duration(200)
+                .style('opacity', 0.75)
+            element.style('stroke', 'white')
             tooltip.transition()
                  .duration(500)
                  .style('visibility', 'hidden')
         )
         .attr('opacity', 0.3)
         .transition().duration(300)
-        .attr('opacity', 0.8);
+        .attr('opacity', 0.75);
 
       cell.append('text')
         .style('pointer-events', 'none')
@@ -212,6 +214,9 @@
         .style('font-size', '12px')
         .text('n = ' + @total_n);
 
+      xAxisLabel = @dataset.filter((d) -> d.name == "Independent")[0].data[0].header
+      yAxisLabel = @dataset.filter((d) -> d.name == "Dependent")[0].data[0].header
+
       @svg.append('g')
         .style('fill', 'none')
         .style('stroke', '#000')
@@ -223,7 +228,7 @@
         .attr('y', 6)
         .attr('dy', '.71em')
         .style('text-anchor', 'end')
-        .text('Response');
+        .text(yAxisLabel);
 
       @svg.append('g')
         .attr("transform", "translate(0," + height + ")")
@@ -236,7 +241,7 @@
         .attr("x", width)
         .attr("y", -6)
         .style("text-anchor", "end")
-        .text('Predictor');
+        .text(xAxisLabel);
 
 
       @graph = [];
