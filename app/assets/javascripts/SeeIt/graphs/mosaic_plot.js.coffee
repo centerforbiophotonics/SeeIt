@@ -128,9 +128,9 @@
 
       console.log segments
 
-      @segment = @svg.selectAll('.segment')
+      columns = @svg.selectAll('.column')
         .data(segments).enter().append('g')
-        .attr('class', 'segment')
+        .attr('class', 'column')
         .attr('data-index', (d,i) -> i)
         .attr('transform', (d,i) -> 
           x_offset = 0
@@ -141,26 +141,29 @@
           return 'translate(' + x(x_offset) + ')'
         );
 
-      rects = @segment.selectAll('.rects')
-        .data((d) -> d.values);
+      cell = columns.selectAll(".cell")
+        .data((d) -> d.values)
+        .enter().append('g')
+          .attr('class', 'cell')
+          .attr('transform', (d,i) ->
+            segment_index = parseInt(this.parentNode.getAttribute('data-index'))
+            y_offset = 0
+            segments[segment_index].values.forEach (rect,rect_i) ->
+              if rect_i < i
+                y_offset += rect.h
 
-      rects.enter()
-        .append('rect')
+            return 'translate(0,' + y(1 - y_offset) + ')'
+          )
+      ;
+
+
+      cell.append('rect')
         .attr('class', 'rects')
         .attr('width', (d) -> d.w * width)
         .attr('height', (d) -> d.h * height)
         .attr('stroke', 'white')
         .attr('stroke-width', '2px')
         .style('fill', (d,i) -> color(i))
-        .attr('transform', (d,i) -> 
-          segment_index = parseInt(this.parentNode.getAttribute('data-index'))
-          y_offset = 0
-          segments[segment_index].values.forEach (rect,rect_i) ->
-            if rect_i < i
-              y_offset += rect.h
-          
-          return 'translate(0,' + y(1 - y_offset) + ')'
-        )
         .on("mouseover", (d, i) ->
               this_rect = d3.select(@)
               this_rect.style('stroke', 'black')
@@ -190,17 +193,17 @@
                  .duration(500)
                  .style('visibility', 'hidden')
         )
-
-        .attr('opacity', 0.3);
-
-      rects.transition().duration(300)
+        .attr('opacity', 0.3)
+        .transition().duration(300)
         .attr('opacity', 0.9);
 
-      console.log rects
-
-      rects.append('text')
+      cell.append('text')
         .style('text-anchor', 'middle')
+        .attr('x', (d) -> d.w * width/2)
+        .attr('y', (d) -> d.h * height/2)
         .text((d) -> d.independent + ', ' + d.dependent);
+
+
 
       @svg.append('g').append('text')
         .attr('y', -10)
