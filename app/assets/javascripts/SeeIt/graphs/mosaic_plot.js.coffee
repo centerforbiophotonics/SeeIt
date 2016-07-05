@@ -112,7 +112,7 @@
         .attr('width', width + margin.left + margin.right)
         .attr('height', height + margin.top + margin.bottom)
         .append('g')
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
       segments = d3.nest() # separate independent variables into nested arrays
         .key((d) -> d.independent).sortKeys(d3.ascending)
@@ -153,8 +153,7 @@
                 y_offset += rect.h
 
             return 'translate(0,' + y(1 - y_offset) + ')'
-          )
-      ;
+          );
 
 
       cell.append('rect')
@@ -165,9 +164,10 @@
         .attr('stroke-width', '2px')
         .style('fill', (d,i) -> color(i))
         .on("mouseover", (d, i) ->
+              d3.select(@).style('opacity', 0.95)
               this_rect = d3.select(@)
               this_rect.style('stroke', 'black')
-              this_rect.style('stroke-width', '1.5px')
+              this_rect.style('stroke-width', '0.5px')
               tooltip.transition()
                 .duration(200)
                 .style("opacity", .9)
@@ -187,6 +187,7 @@
         )
         .on('mousemove', () -> tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px"))
         .on("mouseout", () ->
+            d3.select(@).style('opacity', 0.8)
             this_rect = d3.select(@)
             this_rect.style('stroke', 'white')
             tooltip.transition()
@@ -195,50 +196,50 @@
         )
         .attr('opacity', 0.3)
         .transition().duration(300)
-        .attr('opacity', 0.9);
+        .attr('opacity', 0.8);
 
       cell.append('text')
+        .style('pointer-events', 'none')
         .style('text-anchor', 'middle')
-        .attr('x', (d) -> d.w * width/2)
-        .attr('y', (d) -> d.h * height/2)
-        .text((d) -> d.independent + ', ' + d.dependent);
-
-
+        .style('font-family', 'Times')
+        .attr('x', (d) -> (d.w * width) / 2)
+        .attr('y', (d) -> (d.h * height) / 2)
+        .text((d) -> d.independent + ', ' + d.dependent + ': ' + d3.round(d.w * d.h * 100, 1) + '%');
 
       @svg.append('g').append('text')
         .attr('y', -10)
         .style('text-anchor', 'middle')
         .style('font-size', '12px')
-        .text('n = ' + @total_n)
+        .text('n = ' + @total_n);
 
       @svg.append('g')
         .style('fill', 'none')
         .style('stroke', '#000')
         .style('font-size',  "12px")
-        .style('font-family', 'sans-serif')
+        .style('font-family', 'Times')
         .call(yAxis)
         .append('text')
         .attr('transform', 'rotate(-90)')
         .attr('y', 6)
         .attr('dy', '.71em')
         .style('text-anchor', 'end')
-        .text('Response')
+        .text('Response');
 
       @svg.append('g')
         .attr("transform", "translate(0," + height + ")")
         .style('fill', 'none')
         .style('stroke', '#000')
         .style('font-size', "12px")
-        .style('font-family', 'sans-serif')
+        .style('font-family', 'Times')
         .call(xAxis)
         .append("text")
         .attr("x", width)
         .attr("y", -6)
         .style("text-anchor", "end")
-        .text('Predictor')
+        .text('Predictor');
 
 
-      @graph = []
+      @graph = [];
 
 
     destroy: ->
