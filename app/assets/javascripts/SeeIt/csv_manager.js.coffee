@@ -65,31 +65,9 @@
         console.log "error in handleUpload"
 
     @parseCSV = (text) ->
-      re_value = /(?!\s*$)\s*(?:'([^'\\]*(?:\\[\S\s][^'\\]*)*)'|"([^"\\]*(?:\\[\S\s][^"\\]*)*)"|([^,'"\s\\]*(?:\s+[^,'"\s\\]+)*))\s*(?:,|$)/g
-      data = []
+      text = text.replace(/[r|rn]/g, "n");
+      return $.csv.toArrays(text);
 
-      text.split('\n').forEach (line) ->
-        a = []
-        line.replace(re_value,
-          (m0, m1, m2, m3) ->
-            # Remove backslash from \' in single quoted values.
-            if      (m1 != undefined) 
-              a.push(m1.replace(/\\'/g, "'"))
-            # Remove backslash from \" in double quoted values.
-            else if (m2 != undefined) 
-              a.push(m2.replace(/\\"/g, '"'))
-            else if (m3 != undefined) 
-              a.push(if !isNaN(Number(m3)) then Number(m3) else m3)
-
-            return '' # Return empty string.
-        )
-
-        # Handle special case of empty last value.
-        if (/,\s*$/.test(text)) then a.push('')
-
-        data.push a
-
-      return data
 
   getPathFromURL = (url) ->
     if url[0] == "/"
