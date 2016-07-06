@@ -6,6 +6,19 @@
       @datasetViewCollection = []
       @init()
       @visible = true
+      @dataLoadingMsg = new Opentip(
+        @container, '', "Loading",
+        {
+          showOn: null,
+          style:"glass",
+          stem: false,
+          target:@app.container,
+          tipJoint:"center",
+          targetJoint: "center",
+          showEffectDuration: 0,
+          showEffect: "none"
+        }
+      )
 
     init: ->
       @container.html("""
@@ -121,6 +134,7 @@
       self.container.find(".json-file input, .csv-file input").on 'change', (event) ->
         return self.handleDatasetCreate.call(self, self.container.find("#dataset-select").val(), {file: @files[0]})
 
+
     handleDatasetCreate: (selected, data = {}) ->
       self = @
 
@@ -206,9 +220,10 @@
           self.container.find(".json-endpoint").val("")
         when "json-file"
           json_manager = new SeeIt.JsonManager()
-
+          self.dataLoadingMsg.show()
           json_manager.handleUpload(data.file, (d) ->
             self.trigger 'datasets:create', d
+            self.dataLoadingMsg.hide()
           )
         when "csv-endpoint"
           csv_manager = new SeeIt.CSVManager()
@@ -250,8 +265,10 @@
         when "csv-file"
           csv_manager = new SeeIt.CSVManager()
           filename = data.file.name.split('.')[0]
+          self.dataLoadingMsg.show()
           csv_manager.handleUpload(data.file, (d) ->
             self.trigger 'datasets:create', [{isLabeled: true, title: filename, dataset: d}]
+            self.dataLoadingMsg.hide()
           )
 
 

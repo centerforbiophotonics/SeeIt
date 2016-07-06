@@ -65,8 +65,8 @@
         console.log "error in handleUpload"
 
     @parseCSV = (text) ->
-      text = text.replace(/[r|rn]/g, "n");
-      return $.csv.toArrays(text);
+      return Papa.parse(text, {skipEmptyLines: true}).data
+
 
 
   getPathFromURL = (url) ->

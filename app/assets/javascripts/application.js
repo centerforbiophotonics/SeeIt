@@ -11,7 +11,7 @@
 // about supported directives.
 //
 //= require jquery
-//= require jquery.csv.min
+//= require papaparse.min.js
 //= require turbolinks
 //= require handsontable.full.min
 //= require twitter/bootstrap
