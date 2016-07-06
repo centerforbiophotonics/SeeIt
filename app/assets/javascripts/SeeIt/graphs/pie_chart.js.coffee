@@ -48,6 +48,50 @@
     refresh: (options) ->
       @draw(options)
 
+
+    # Aggregate
+    draw: (options) ->
+      console.log @dataset[0].data 
+      graph = @
+      @container.html("<svg class='SeeIt graph-svg' style='width: 100%; min-height: 270px'></svg>")
+
+      nv.addGraph ->
+        data = graph.formatData.call(graph)
+
+      counts = []
+
+      data.forEach (d) ->
+        if !counts[d.header]
+          counts[d.header] = 0
+        counts[d.header]++
+
+      dat = []
+      Object.keys(counts).forEach (key) ->
+        dat.push
+          label: key,
+          count: counts[key]
+
+      console.log "dat"
+      console.log dat    
+
+      console.log "data"
+      console.log data
+
+      d3.select(graph.container.find('.graph-svg')[0])
+        .attr('height', '100%')
+        .datum(data)
+        .call(chart)
+
+      nv.utils.windowResize(chart.update);
+      graph.chartObject = chart
+      return chart        
+
+
+    
+
+
+
+
     draw: (options) ->
       console.log @dataset[0].data
       graph = @
@@ -73,6 +117,26 @@
             .x( (d) -> d.label())
             .y( (d) -> d.value())
             .showLabels(options[0].value)
+
+        else if !options[2].value
+          counts = []
+          data.forEach (d) ->
+            if !counts[d.header]
+              counts[d.header] = 0
+            counts[d.header]++
+
+          dat = []
+          Object.keys(counts).forEach (key) ->
+            dat.push
+              label: key,
+              count: counts[key]
+
+          chart = nv.models.pieChart()
+            .x( (d) -> d.label() + "~" +d.header)
+            .y( (d) -> d.value())
+            .showLabels(options[0].value)
+
+
         else
           chart = nv.models.pieChart()
             .x( (d) -> d.label() + "~" +d.header)
@@ -97,11 +161,12 @@
       [
         {
           name: "default",
-          type: "numeric",
+          type: "categorical",
           multiple: false
         }
       ]
 
+      # // new option.. agre. or indiv.
     options: ->
       self = @
       [
@@ -127,6 +192,11 @@
             return labels
           )()
           default: null
+        },
+        {
+          label: "Show/Hide Individual"
+          type: "checkbox"
+          default: false
         }
       ]
 
