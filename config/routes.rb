@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   root to: "application#index"
 
   get "init" => "application#init"
+  get "no_data" => "application#no_data"
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
