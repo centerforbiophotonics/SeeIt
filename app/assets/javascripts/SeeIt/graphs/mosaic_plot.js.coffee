@@ -21,6 +21,8 @@
             self.draw.call(self, options)
           else
             self.refresh.call(self, options)
+        else
+          @container.html("")
 
       @eventCallbacks['data:assigned'] = @eventCallbacks['data:created']
       @eventCallbacks['data:destroyed'] = @eventCallbacks['data:created']
@@ -112,7 +114,7 @@
         .attr('width', width + margin.left + margin.right)
         .attr('height', height + margin.top + margin.bottom)
         .append('g')
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
       segments = d3.nest() # separate independent variables into nested arrays
         .key((d) -> d.independent).sortKeys(d3.ascending)
@@ -128,9 +130,9 @@
 
       console.log segments
 
-      @segment = @svg.selectAll('.segment')
+      columns = @svg.selectAll('.column')
         .data(segments).enter().append('g')
-        .attr('class', 'segment')
+        .attr('class', 'column')
         .attr('data-index', (d,i) -> i)
         .attr('transform', (d,i) -> 
           x_offset = 0
@@ -141,30 +143,34 @@
           return 'translate(' + x(x_offset) + ')'
         );
 
-      rects = @segment.selectAll('.rects')
-        .data((d) -> d.values);
+      cell = columns.selectAll(".cell")
+        .data((d) -> d.values)
+        .enter().append('g')
+          .attr('class', 'cell')
+          .attr('transform', (d,i) ->
+            segment_index = parseInt(this.parentNode.getAttribute('data-index'))
+            y_offset = 0
+            segments[segment_index].values.forEach (rect,rect_i) ->
+              if rect_i < i
+                y_offset += rect.h
 
-      rects.enter()
-        .append('rect')
+            return 'translate(0,' + y(1 - y_offset) + ')'
+          );
+
+
+      cell.append('rect')
         .attr('class', 'rects')
         .attr('width', (d) -> d.w * width)
         .attr('height', (d) -> d.h * height)
         .attr('stroke', 'white')
         .attr('stroke-width', '2px')
         .style('fill', (d,i) -> color(i))
-        .attr('transform', (d,i) -> 
-          segment_index = parseInt(this.parentNode.getAttribute('data-index'))
-          y_offset = 0
-          segments[segment_index].values.forEach (rect,rect_i) ->
-            if rect_i < i
-              y_offset += rect.h
-          
-          return 'translate(0,' + y(1 - y_offset) + ')'
-        )
         .on("mouseover", (d, i) ->
-              this_rect = d3.select(@)
-              this_rect.style('stroke', 'black')
-              this_rect.style('stroke-width', '1.5px')
+              element = d3.select(@)
+              element.transition().duration(200)
+                .style('opacity', 0.95)
+              element.style('stroke', 'black')
+              element.style('stroke-width', '0.5px')
               tooltip.transition()
                 .duration(200)
                 .style("opacity", .9)
@@ -184,58 +190,63 @@
         )
         .on('mousemove', () -> tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px"))
         .on("mouseout", () ->
-            this_rect = d3.select(@)
-            this_rect.style('stroke', 'white')
+            element = d3.select(@)
+            element.transition().duration(200)
+                .style('opacity', 0.75)
+            element.style('stroke', 'white')
             tooltip.transition()
                  .duration(500)
                  .style('visibility', 'hidden')
         )
+        .attr('opacity', 0.3)
+        .transition().duration(300)
+        .attr('opacity', 0.75);
 
-        .attr('opacity', 0.3);
-
-      rects.transition().duration(300)
-        .attr('opacity', 0.9);
-
-      console.log rects
-
-      rects.append('text')
+      cell.append('text')
+        .style('pointer-events', 'none')
         .style('text-anchor', 'middle')
-        .text((d) -> d.independent + ', ' + d.dependent);
+        .style('font-family', 'Times')
+        .attr('x', (d) -> (d.w * width) / 2)
+        .attr('y', (d) -> (d.h * height) / 2)
+        .text((d) -> d.independent + ', ' + d.dependent + ': ' + d3.round(d.w * d.h * 100, 1) + '%');
 
       @svg.append('g').append('text')
         .attr('y', -10)
         .style('text-anchor', 'middle')
         .style('font-size', '12px')
-        .text('n = ' + @total_n)
+        .text('n = ' + @total_n);
+
+      xAxisLabel = @dataset.filter((d) -> d.name == "Independent")[0].data[0].header
+      yAxisLabel = @dataset.filter((d) -> d.name == "Dependent")[0].data[0].header
 
       @svg.append('g')
         .style('fill', 'none')
         .style('stroke', '#000')
         .style('font-size',  "12px")
-        .style('font-family', 'sans-serif')
+        .style('font-family', 'Times')
         .call(yAxis)
         .append('text')
         .attr('transform', 'rotate(-90)')
         .attr('y', 6)
         .attr('dy', '.71em')
         .style('text-anchor', 'end')
-        .text('Response')
+        .text(yAxisLabel);
 
       @svg.append('g')
         .attr("transform", "translate(0," + height + ")")
         .style('fill', 'none')
         .style('stroke', '#000')
         .style('font-size', "12px")
-        .style('font-family', 'sans-serif')
+        .style('font-family', 'Times')
         .call(xAxis)
         .append("text")
         .attr("x", width)
         .attr("y", -6)
         .style("text-anchor", "end")
-        .text('Predictor')
+        .text(xAxisLabel);
 
 
-      @graph = []
+      @graph = [];
 
 
     destroy: ->
