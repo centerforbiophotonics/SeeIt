@@ -2,7 +2,7 @@
   class PieChart extends SeeIt.Graph
 
     constructor: ->
-      super 
+      super
       @chartObject = null
       @listenerInitialized = false
       @rendered = false
