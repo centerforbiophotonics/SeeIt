@@ -264,6 +264,8 @@
 
 .SeeIt.spreadsheet.panel-body {
   /*padding: 0;*/
+  display: block;
+  overflow: auto;
 }
 
 .SeeIt.spreadsheet-panel {
@@ -520,18 +522,17 @@ div.SeeIt.expanded-data-zone {
 }
 
 .SeeIt.info {
-  width: 20px;
+  width: 80px;
   height: 20px;
-  margin-bottom: 5px;
-  margin-right: 5px;
   text-align: center;
   display: inline-block;
+  word-wrap: break-word;
 }
 
 td.htNumeric.SeeIt-htCenter {
-  background-color: lightyellow;
+  background-color: #ffedcc;
 }
 
 td:not(.htNumeric).SeeIt-htCenter {
-  background-color: LimeGreen;
+  background-color: #ccffcc;
 }

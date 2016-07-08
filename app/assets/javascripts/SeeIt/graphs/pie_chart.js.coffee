@@ -40,7 +40,7 @@
       console.log @dataset[0]
 
       @dataset[0].data.forEach (dataColumn) ->
-        data = data.concat(dataColumn.data())
+        data = dataColumn.data()
         data.forEach (d) ->
           if d.header == undefined
             d.header = dataColumn.header
