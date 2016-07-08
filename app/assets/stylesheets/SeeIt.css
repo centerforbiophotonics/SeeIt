@@ -509,7 +509,7 @@ div.SeeIt.expanded-data-zone {
 }
 
 .SeeIt.axis path,
-.SeIt.axis line {
+.SeeIt.axis line {
   fill: none;
   stroke: #000;
   shape-rendering: crispEdges;
@@ -517,4 +517,21 @@ div.SeeIt.expanded-data-zone {
 
 .SeeIt.dot {
   stroke: #000;
+}
+
+.SeeIt.info {
+  width: 20px;
+  height: 20px;
+  margin-bottom: 5px;
+  margin-right: 5px;
+  text-align: center;
+  display: inline-block;
+}
+
+td.htNumeric.SeeIt-htCenter {
+  background-color: lightyellow;
+}
+
+td:not(.htNumeric).SeeIt-htCenter {
+  background-color: LimeGreen;
 }

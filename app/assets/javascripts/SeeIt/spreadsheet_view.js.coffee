@@ -24,6 +24,10 @@
             <span class="SeeIt title-edit-icon glyphicon glyphicon-pencil"></span>
           </div>
           <div class="SeeIt panel-body spreadsheet">
+
+            <div class= "info SeeIt" style= "background-color: lightyellow;">N</div>             
+            <div class= "info SeeIt" style= "background-color: LimeGreen;">C</div> 
+            
             <div class="SeeIt Handsontable-Container" style="position: relative; overflow: hidden; height: 100%; min-height: 100%"></div>
           </div>
         </div>
@@ -221,6 +225,9 @@
             $(TH).off('dblclick').on('dblclick', headerDblclick)
 
           $(TH).off('dblclick').on('dblclick', headerDblclick)
+
+
+        console.log privateMethods.formatModelData(), privateMethods.formatColumns()
 
       settings = {
         rowHeaders: @dataset.labels,

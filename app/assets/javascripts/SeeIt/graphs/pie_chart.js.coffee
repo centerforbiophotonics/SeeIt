@@ -18,6 +18,8 @@
             self.draw.call(self, options)
           else
             self.refresh.call(self, options)
+        else
+          self.clearGraph.call(self)
 
       @eventCallbacks['data:assigned'] = @eventCallbacks['data:created']
       @eventCallbacks['data:destroyed'] = @eventCallbacks['data:created']
@@ -47,6 +49,10 @@
 
     refresh: (options) ->
       @draw(options)
+
+    clearGraph: ->
+      @container.html('')
+      @rendered = false
 
     draw: (options) ->
       console.log @dataset[0].data
