@@ -87,6 +87,8 @@
       return obj
 
     @coerceDataset = (dataset, callback) ->
+      console.log(dataset)
+
       if !dataset.url then callback dataset
 
       error_cb = ->
@@ -129,6 +131,7 @@
           catch error
             error_cb()
         when "google spreadsheet"
+            console.log("google spreadsheet")
             googleSpreadsheet = new SeeIt.GoogleSpreadsheetManager(dataset.url, (success, collection) ->
               if success
                 collection.forEach (dataset) ->

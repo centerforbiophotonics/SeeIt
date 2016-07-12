@@ -180,7 +180,7 @@
             child_li = @
             if self.graphRoles[graphId][i].type != self.data.type && self.graphRoles[graphId][i].type != "any"
               $(child_li).find('a:first').addClass('disabled')
-        else if self.graphRoles[graphId]  
+        else if self.graphRoles[graphId]
           if self.graphRoles[graphId][0].type != self.data.type && self.graphRoles[graphId][0].type != "any"
             $(li).find('a:first').addClass('disabled')
 

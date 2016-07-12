@@ -24,6 +24,8 @@
             <span class="SeeIt title-edit-icon glyphicon glyphicon-pencil"></span>
           </div>
           <div class="SeeIt panel-body spreadsheet">
+            <div class= "info SeeIt" style= "background-color: #ffedcc;">Numeric</div>             
+            <div class= "info SeeIt" style= "background-color: #ccffcc;">Categorical</div>            
             <div class="SeeIt Handsontable-Container" style="position: relative; overflow: hidden; height: 100%; min-height: 100%"></div>
           </div>
         </div>
@@ -222,6 +224,9 @@
 
           $(TH).off('dblclick').on('dblclick', headerDblclick)
 
+
+        console.log privateMethods.formatModelData(), privateMethods.formatColumns()
+
       settings = {
         rowHeaders: @dataset.labels,
         colHeaders: @dataset.headers,
@@ -263,6 +268,22 @@
               name: "Insert row below",
               callback: (key, options) ->
                 spreadsheetView.dataset.trigger('row:create', options.end.row + 1)
+            },
+            "multiple_row_above": {
+              name: 'Insert multiple rows above',
+              callback: (key, options) ->
+                input = parseInt(prompt('Please enter number of rows to insert', 1))
+                if input != null
+                  for i in [0...input]
+                    spreadsheetView.dataset.trigger('row:create', options.end.row)
+            },
+            "multiple_row_below": {
+              name: 'Insert multiple rows below',
+              callback: (key, options) ->
+                input = parseInt(prompt('Please enter number of rows to insert', 1))
+                if input != null
+                  for i in [0...input]
+                    spreadsheetView.dataset.trigger('row:create', options.end.row + 1)
             },
             "my_remove_row": {
               name: "Remove row",

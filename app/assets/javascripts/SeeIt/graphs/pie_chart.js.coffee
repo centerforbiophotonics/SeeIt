@@ -2,7 +2,7 @@
   class PieChart extends SeeIt.Graph
 
     constructor: ->
-      super 
+      super
       @chartObject = null
       @listenerInitialized = false
       @rendered = false
@@ -54,6 +54,10 @@
     refresh: (options) ->
       @container.html("")
       @draw(options)
+
+    clearGraph: ->
+      @container.html('')
+      @rendered = false
 
     draw: (options) ->
       type = @dataset[0].data[@dataset[0].data.length-1].type
