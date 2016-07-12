@@ -8,4 +8,7 @@ class ApplicationController < ActionController::Base
 
   def init
   end
+
+  def no_data
+  end
 end

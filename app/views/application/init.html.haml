@@ -70,7 +70,7 @@
   = text_field_tag 'graphs[GRAPHINDEX][type]', 'Box Plot'
   = button_tag "Remove Graph", :type => "button", :id => "remove-graphs-GRAPHINDEX", :class => "remove-graphs"
   #graphs-GRAPHINDEX-data
-  = button_tag "Add Data", :type => "button", :id => "add-graphs-GRAPHINDEX-data", :class => "add-data"
+  = button_tag "Add Data", :type => "button", :id => "add-graphs-GRAPHINDEX-data", :class => "add-graphs-data"
 
 #graph-data-menu-template
   = label_tag 'graphs[GRAPHINDEX][data][GRAPHDATAINDEX][dataset_title]', 'Dataset:'
@@ -82,7 +82,7 @@
   = label_tag 'graphs[GRAPHINDEX][data][GRAPHDATAINDEX][role_in_graph]', 'Role in Graph:'
   = text_field_tag 'graphs[GRAPHINDEX][data][GRAPHDATAINDEX][role_in_graph]', 'default'
 
-  = button_tag "Remove Data", :type => "button", :id => "remove-graphs-GRAPHINDEX-data-GRAPHDATAINDEX", :class => "remove-data"
+  = button_tag "Remove Data", :type => "button", :id => "remove-graphs-GRAPHINDEX-data-GRAPHDATAINDEX", :class => "remove-graphs-data"
 
 :javascript
   var graphs = [];
@@ -99,8 +99,6 @@
         else if (options.ui[key] === 'true')
           options.ui[key] = true;
       }
-
-      console.log(options);
     });
 
     $("#add-graph").click(function(){
@@ -113,13 +111,12 @@
       graphs.push(0);
       $("#graphs").append($menu);
 
-      register_add_data();
+      register_add_graphs_data();
       register_remove_graph();
     });
 
-    function register_add_data(){
-      $(".add-data").off("click").on("click", function(){
-        console.log("add-data");
+    function register_add_graphs_data(){
+      $(".add-graphs-data").off("click").on("click", function(){
 
         var graphIndex = $(this).attr("id").split("-")[2];
         var graphDataIndex = graphs[parseInt(graphIndex)];
@@ -137,13 +134,12 @@
 
         $("#graphs-"+graphIndex+"-data").append($menu);
 
-        register_remove_data();
+        register_remove_graphs_data();
       });
     }
 
     function register_remove_graph(){
       $(".remove-graphs").off("click").on("click", function(){
-        console.log("remove-graph");
 
         var graphIndex = $(this).attr("id").split("-")[2];
 
@@ -165,37 +161,39 @@
         });
 
         graphs.splice(graphIndex, 1);
-        register_add_data();
+        register_add_graphs_data();
         register_remove_graph();
       });
     }
 
-    function register_remove_data(){
-      $(".remove-data").off("click").on("click", function(){
-        console.log("remove-data");
+    function register_remove_graphs_data(){
+      $(".remove-graphs-data").off("click").on("click", function(){
 
         var graphIndex = $(this).attr("id").split("-")[2];
         var dataIndex = $(this).attr("id").split("-")[4];
 
-        $("#graph-"+graphIndex).remove();
+        $("#graphs-"+graphIndex+"-data-"+dataIndex).remove();
 
-        graphs.forEach(function(d, i){
-          if (i > graphIndex){
-            var graph = $("#graph-"+i);
+        if (dataIndex < graphs[graphIndex]-1){
+          for (var i = parseInt(dataIndex)+1; i < graphs[graphIndex]; i++){
+            var graphData = $("#graphs-"+graphIndex+"-data-"+i);
 
-            var new_graph_html = graph.
-              html().
-              replace(new RegExp("graphs\\-"+i, 'g'), "graphs-"+(i-1)).
-              replace(new RegExp("graphs\\["+i, 'g'), "graphs["+(i-1)).
-              replace(new RegExp("graphs_"+i, 'g'), "graphs_"+(i-1));
+            console.log( graphData.html());
 
-            graph.html(new_graph_html);
-            graph.attr("id", "graph-"+(i-1));
+            var newHtml = graphData.html().
+               replace(new RegExp("data\\-"+i, 'g'), "data-"+(i-1)).
+               replace(new RegExp("data\\]\\["+i, 'g'), "data]["+(i-1)).
+               replace(new RegExp("data_"+i, 'g'), "data_"+(i-1));
+
+            graphData.html(newHtml);
+            graphData.attr("id", "graphs-"+graphIndex+"-data-"+(i-1));
           }
-        });
 
-        graphs.splice(graphIndex, 1);
-        register_remove_data();
+        }
+
+        graphs[graphIndex]--;
+
+        register_remove_graphs_data();
       });
     }
   });

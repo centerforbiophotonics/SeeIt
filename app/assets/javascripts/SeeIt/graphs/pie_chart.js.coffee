@@ -97,7 +97,7 @@
       [
         {
           name: "default",
-          type: "numeric",
+          type: "any",
           multiple: false
         }
       ]
