@@ -53,7 +53,6 @@
     getGraphType: ->
       @graphType.name
 
-
     getGraphFilters: ->
       return @filterState
 
@@ -82,18 +81,37 @@
             if d.name == new_data.name then datasetIdx = i
 
           if datasetIdx != -1
-            dataIdx = @dataset[datasetIdx].data.indexOf(new_data.data)
+            # delete previous data if multiple is false
+            if @graph.dataset[datasetIdx].multiple == false
+              console.log "DataSet_addData_beforeDelete", @dataset[datasetIdx].data
+              @dataset[datasetIdx].data.splice(0, 1) 
+              console.log "DataSet_addData_afterDelete", @dataset[datasetIdx].data
+              dataIdx = @dataset[datasetIdx].data.indexOf(new_data.data)
+            else
+              dataIdx = @dataset[datasetIdx].data.indexOf(new_data.data)
 
             if dataIdx == -1
-              @dataset[datasetIdx].data.push(new_data.data)
-
               this_data = {}
               this_data.data = @filter(new_data.data, new_data.name)
               this_data.name = new_data.name
 
+              # @graph contains multiple: true or false
+              console.log "@graph", @graph
+
               @filterColumn(this_data.data, new_data.data, this_data.name)
 
-              @filteredDataset[datasetIdx].data.push(this_data.data)
+              # remove footer first
+              if @graph.dataset[0].multiple == false
+                @removeDataFromFooterMultiple()
+                @dataset[datasetIdx].data.push(new_data.data)
+                @filteredDataset[datasetIdx].data.push(this_data.data)
+                @addDataToFooter(new_data)
+              else
+                @dataset[datasetIdx].data.push(new_data.data)
+                @filteredDataset[datasetIdx].data.push(this_data.data)
+                @addDataToFooter(new_data)
+
+              console.log @filteredDataset[datasetIdx].data
 
               self = @
 
@@ -164,8 +182,6 @@
                 self.updateFooterData.call(self)
               )
 
-              @addDataToFooter(new_data)
-
               if j == data.length - 1
                 if !@initialized
                   @initGraph()
@@ -189,7 +205,9 @@
 
       @listenTo data.data, 'color:changed', ->
         item.css('background-color', data.data.color)
-
+        console.log data
+      
+      # X button
       @container.find(".data-rep[data-id='#{data.data.header}'] .data-rep-remove").on 'click', ->
         self.removeData.call(self, data)
 
@@ -210,7 +228,6 @@
             tip.hide.call(tip)
             return
           , 5)
-      
 
     updateFooterData: ->
       self = @
@@ -223,6 +240,10 @@
 
     removeDataFromFooter: (data) ->
       @container.find(".data-drop-zone[data-id='#{data.name}'] .data-rep[data-id='#{data.data.header}']").remove()
+
+    # remove previous tab in data-drop-zone
+    removeDataFromFooterMultiple: ->
+      @container.find(".data-drop-zone .data-rep:first").remove()    
 
     removeData: (data) ->
       dataset_idx = @dataset.map((d) -> d.name).indexOf(data.name)
@@ -237,7 +258,6 @@
 
     initGraph: ->
       self = @
-
 
       @trigger('graphSettings:get', @graphType.name, (settings = {}) ->
         self.options = new SeeIt.GraphOptions(self.container.find('.options-button'), self.container.find('.options-wrapper'), self.graph.options(), settings.disable, settings.defaults)

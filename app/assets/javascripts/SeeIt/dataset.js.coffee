@@ -89,12 +89,12 @@
 
 			return obj
 
+		# replace typeof
 		getType: (d) ->
-			switch typeof d
-				when "number"
-					return "numeric"
-				else
-					return "categorical"
+			if isNaN(d)
+				return "categorical"
+			else
+				return "numeric"
 
 		registerListeners: ->
 			self = @
@@ -241,6 +241,8 @@
 
 				getColTypes: ->
 					for i in [1...@rawDataCols()]
+						# console.log "rawData: ", @rawData[1][i]
+						# console.log "type: ", @getType(@rawData[1][i])
 						@types.push(@getType(@rawData[1][i]))
 
 				padRows: (maxCols) ->

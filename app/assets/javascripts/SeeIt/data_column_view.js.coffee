@@ -175,13 +175,13 @@
         li = @
         graphId = $(li).find('a:first').attr('data-id')
 
-        if self.graphRoles[graphId] && self.graphRoles[graphId].length > 1
+        if self.graphRoles[graphId] && self.graphRoles[graphId].length > 1 
           $(li).find('.add_to_data_role').each (i) ->
             child_li = @
-            if self.graphRoles[graphId][i].type != self.data.type 
+            if self.graphRoles[graphId][i].type != self.data.type && self.graphRoles[graphId][i].type != "any"
               $(child_li).find('a:first').addClass('disabled')
-        else if self.graphRoles[graphId]
-          if self.graphRoles[graphId][0].type != self.data.type 
+        else if self.graphRoles[graphId]  
+          if self.graphRoles[graphId][0].type != self.data.type && self.graphRoles[graphId][0].type != "any"
             $(li).find('a:first').addClass('disabled')
 
 

@@ -18,6 +18,8 @@
             self.draw.call(self, options)
           else
             self.refresh.call(self, options)
+        else
+          @container.html("")
 
       @eventCallbacks['data:assigned'] = @eventCallbacks['data:created']
       @eventCallbacks['data:destroyed'] = @eventCallbacks['data:created']
@@ -36,9 +38,13 @@
       data = []
       console.log "formatData:"
       console.log @dataset[0]
+      
+      # clear previous data
+      if @dataset[0].data.length > 1 
+        @dataset[0].data.splice(0,1)
 
       @dataset[0].data.forEach (dataColumn) ->
-        data = data.concat(dataColumn.data())
+        data = dataColumn.data()
         data.forEach (d) ->
           if d.header == undefined
             d.header = dataColumn.header
@@ -46,84 +52,32 @@
       return data
 
     refresh: (options) ->
+      @container.html("")
       @draw(options)
 
-
-    # Aggregate
     draw: (options) ->
-      console.log @dataset[0].data 
+      type = @dataset[0].data[@dataset[0].data.length-1].type
       graph = @
       @container.html("<svg class='SeeIt graph-svg' style='width: 100%; min-height: 270px'></svg>")
 
       nv.addGraph ->
         data = graph.formatData.call(graph)
 
-      counts = []
-
-      data.forEach (d) ->
-        if !counts[d.header]
-          counts[d.header] = 0
-        counts[d.header]++
-
-      dat = []
-      Object.keys(counts).forEach (key) ->
-        dat.push
-          label: key,
-          count: counts[key]
-
-      console.log "dat"
-      console.log dat    
-
-      console.log "data"
-      console.log data
-
-      d3.select(graph.container.find('.graph-svg')[0])
-        .attr('height', '100%')
-        .datum(data)
-        .call(chart)
-
-      nv.utils.windowResize(chart.update);
-      graph.chartObject = chart
-      return chart        
-
-
-    
-
-
-
-
-    draw: (options) ->
-      console.log @dataset[0].data
-      graph = @
-      @container.html("<svg class='SeeIt graph-svg' style='width: 100%; min-height: 270px'></svg>")
-
-      nv.addGraph ->
-        data = graph.formatData.call(graph)
-
-        #select a specific row
-        if options[2].value
-          data.forEach (d) ->
-            if options[2].value == "default"
-              d.disabled = false
-            else
-              if d.label() != options[2].value
-                d.disabled = true
-              else
-                d.disabled = false
-
-        #header option
-        if !options[1].value
+        if type == "numeric"
           chart = nv.models.pieChart()
             .x( (d) -> d.label())
             .y( (d) -> d.value())
             .showLabels(options[0].value)
 
-        else if !options[2].value
+        else
           counts = []
           data.forEach (d) ->
-            if !counts[d.header]
-              counts[d.header] = 0
-            counts[d.header]++
+            if !counts[d.value()]
+              counts[d.value()] = 0
+            counts[d.value()]++
+          
+          console.log "COUNTS:"
+          console.log counts    #[Freshman: 3, Transfer: 2]
 
           dat = []
           Object.keys(counts).forEach (key) ->
@@ -131,25 +85,27 @@
               label: key,
               count: counts[key]
 
-          chart = nv.models.pieChart()
-            .x( (d) -> d.label() + "~" +d.header)
-            .y( (d) -> d.value())
-            .showLabels(options[0].value)
+          total = 0
+          dat.forEach (d) ->
+            total += d.count
 
-
-        else
           chart = nv.models.pieChart()
-            .x( (d) -> d.label() + "~" +d.header)
-            .y( (d) -> d.value())
+            .x( (d) -> d.label)
+            .y( (d) -> d.count/total * 100)
+            .valueFormat(d3.format(".0f"))
             .showLabels(options[0].value)
+          data = dat
+
+        d3.select(graph.container.find('.graph-svg')[0])
+        .attr('height', '100%')
+        .data([data])
+        .call(chart)
+
+        console.log "dat"
+        console.log dat
 
         console.log "data"
         console.log data
-
-        d3.select(graph.container.find('.graph-svg')[0])
-          .attr('height', '100%')
-          .datum(data)
-          .call(chart)
 
         nv.utils.windowResize(chart.update);
         graph.chartObject = chart
@@ -161,42 +117,18 @@
       [
         {
           name: "default",
-          type: "categorical",
+          type: "any",
           multiple: false
         }
       ]
 
-      # // new option.. agre. or indiv.
     options: ->
       self = @
       [
         {
-        	label: "Show/Hide Labels"
-        	type: "checkbox"
-        	default: true
-        },
-        {
-          label: "Show/Hide Headers"
+          label: "Show/Hide Labels"
           type: "checkbox"
-          default: false
-        },
-        {
-          label: "Specific Row"
-          type: "select"
-          values: (->
-            labels = ["default"]
-
-            self.dataset[0].data.forEach (dataColumn) ->
-              labels = labels.concat(dataColumn.data().map((d) -> d.label()))
-
-            return labels
-          )()
-          default: null
-        },
-        {
-          label: "Show/Hide Individual"
-          type: "checkbox"
-          default: false
+          default: true
         }
       ]
 
