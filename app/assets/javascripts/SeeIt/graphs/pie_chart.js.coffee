@@ -18,6 +18,8 @@
             self.draw.call(self, options)
           else
             self.refresh.call(self, options)
+        else
+          self.clearGraph.call(self)
 
       @eventCallbacks['data:assigned'] = @eventCallbacks['data:created']
       @eventCallbacks['data:destroyed'] = @eventCallbacks['data:created']
@@ -38,7 +40,7 @@
       console.log @dataset[0]
 
       @dataset[0].data.forEach (dataColumn) ->
-        data = data.concat(dataColumn.data())
+        data = dataColumn.data()
         data.forEach (d) ->
           if d.header == undefined
             d.header = dataColumn.header
@@ -47,6 +49,10 @@
 
     refresh: (options) ->
       @draw(options)
+
+    clearGraph: ->
+      @container.html('')
+      @rendered = false
 
     draw: (options) ->
       console.log @dataset[0].data

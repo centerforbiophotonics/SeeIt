@@ -220,8 +220,10 @@
         @filterType = "numeric"
         @container.find(".categorical-filter").addClass("hidden")
         @container.find(".numeric-filter").removeClass("hidden")
+        @container.find("td").css('background-color', 'LightCoral')
       else if type == "categorical"
         @filterType = "categorical"
+        @container.find("td").css('background-color', 'LimeGreen')
         @populateCategoricalSelect(dataset, idx, type, value)
 
 

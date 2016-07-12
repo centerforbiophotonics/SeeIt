@@ -149,7 +149,12 @@
 		createRow: (row) ->
 			label = @generateLabel(@labels)
 			for i in [0...@data.length]
-				@data[i].insertElement(row, label, null)
+				if @data[i].type == 'numeric'
+					@data[i].insertElement(row, label, 0)
+				else
+					@data[i].insertElement(row, label, null)
+
+			console.log @data
 
 			@labels.splice(row, 0, label)
 			@trigger('row:created', row)

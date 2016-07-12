@@ -22,7 +22,7 @@
           else
             self.refresh.call(self, options)
         else
-          @container.html("")
+          self.clearGraph.call(self)
 
       @eventCallbacks['data:assigned'] = @eventCallbacks['data:created']
       @eventCallbacks['data:destroyed'] = @eventCallbacks['data:created']
@@ -95,7 +95,7 @@
       graph = @
       @container.html("<svg class='SeeIt graph-svg' style='width: 100%; min-height: 270px'></svg>")
 
-      margin = {top: 20, right: 20, bottom: 30, left: 40}
+      margin = {top: 25, right: 20, bottom: 40, left: 55}
       width = @container.width() - margin.left - margin.right
       height = Math.max(270, @container.height()) - margin.top - margin.bottom
 
@@ -163,16 +163,17 @@
         .attr('width', (d) -> d.w * width)
         .attr('height', (d) -> d.h * height)
         .attr('stroke', 'white')
-        .attr('stroke-width', '2px')
+        .attr('stroke-width', '1px')
         .style('fill', (d,i) -> color(i))
         .on("mouseover", (d, i) ->
+              tooltip.style('opacity', 0)
               element = d3.select(@)
               element.transition().duration(200)
                 .style('opacity', 0.95)
               element.style('stroke', 'black')
               element.style('stroke-width', '0.5px')
               tooltip.transition()
-                .duration(200)
+                .duration(300)
                 .style("opacity", .9)
                 .style('visibility', 'visible')
               tooltip.html("<div>
@@ -206,48 +207,50 @@
         .style('pointer-events', 'none')
         .style('text-anchor', 'middle')
         .style('font-family', 'Times')
+        .style('opacity', 0.8)
         .attr('x', (d) -> (d.w * width) / 2)
         .attr('y', (d) -> (d.h * height) / 2)
         .text((d) -> d.independent + ', ' + d.dependent + ': ' + d3.round(d.w * d.h * 100, 1) + '%');
 
       @svg.append('g').append('text')
-        .attr('y', -10)
+        .attr('y', -15)
         .style('text-anchor', 'middle')
-        .style('font-size', '12px')
         .text('n = ' + @total_n);
 
       xAxisLabel = @dataset.filter((d) -> d.name == "Independent")[0].data[0].header
       yAxisLabel = @dataset.filter((d) -> d.name == "Dependent")[0].data[0].header
 
       @svg.append('g')
-        .style('fill', 'none')
-        .style('stroke', '#000')
-        .style('font-size',  "12px")
-        .style('font-family', 'Times')
+        .attr('class', 'axis SeeIt')
         .call(yAxis)
         .append('text')
+        .attr("class", "label")
         .attr('transform', 'rotate(-90)')
-        .attr('y', 6)
+        .attr('y', -55)
         .attr('dy', '.71em')
-        .style('text-anchor', 'end')
-        .text(yAxisLabel);
+        .attr('x', -height/2)
+        .style('text-anchor', 'middle')
+        .style('font-size', '15px')
+        .text(yAxisLabel);     
 
       @svg.append('g')
-        .attr("transform", "translate(0," + height + ")")
-        .style('fill', 'none')
-        .style('stroke', '#000')
-        .style('font-size', "12px")
-        .style('font-family', 'Times')
+        .attr('class', 'axis SeeIt')
+        .attr('transform', 'translate(0,' + height + ')')   
         .call(xAxis)
         .append("text")
-        .attr("x", width)
-        .attr("y", -6)
-        .style("text-anchor", "end")
+        .attr("class", "label")
+        .attr('x', width/2)
+        .attr('y', 35)
+        .style('text-anchor', 'middle')
+        .style('font-size', '15px')
         .text(xAxisLabel);
 
+      d3.selectAll('.tick text')
+        .style('fill', '#000')
+        .style('stroke', 'none')
+        .style('font-weight', 'bold');  
 
       @graph = [];
-
 
     destroy: ->
 
