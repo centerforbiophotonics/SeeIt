@@ -224,9 +224,6 @@
 
           $(TH).off('dblclick').on('dblclick', headerDblclick)
 
-
-        console.log privateMethods.formatModelData(), privateMethods.formatColumns()
-
       settings = {
         rowHeaders: @dataset.labels,
         colHeaders: @dataset.headers,

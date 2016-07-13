@@ -399,6 +399,7 @@
             </select>
             <button class="SeeIt add-filter-group btn btn-primary text-center"><div class='SeeIt icon-container'><span class='glyphicon glyphicon-plus'></span></div>Add filter group</button>
             <button class="SeeIt save-filters btn btn-success text-center"><div class='SeeIt icon-container'><span class='glyphicon glyphicon-ok'></span></div>Save Filters</button>
+            <button class="SeeIt save-filters-all btn btn-success text-center"><div class='SeeIt icon-container'><span class='glyphicon glyphicon-ok'></span></div>Apply Filters to All</button>
           </div>
         </div>
       """)
@@ -413,6 +414,11 @@
       @container.find(".expanded-data-container .save-filters").on 'click', (event) ->
         if self.validateFilters.call(self)
           self.saveFilters.call(self)
+
+      @container.find(".expanded-data-container .save-filters-all").on 'click', (event) ->
+        if self.validateFilters.call(self)
+          self.trigger('filter:save-all', self.filterGroups, self.id)
+
 
     validateFilters: ->
       valid = true

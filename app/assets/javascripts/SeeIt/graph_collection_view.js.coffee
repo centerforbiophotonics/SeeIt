@@ -151,6 +151,26 @@
       @listenTo newGraph, 'request:dataset', (name, callback) ->
         self.trigger 'request:dataset', name, callback
 
+      @listenTo newGraph, 'filter:save-all', (filterGroups, name) ->
+        console.log 42
+        needs_confirm = false
+        filtered_graphs = []
+        for id, graph of self.graphs
+          if graph.filterGroups.length > 0 && id != name
+            needs_confirm = true
+            filtered_graphs.push(id)
+
+        confrimed = true
+        if needs_confirm
+          confirmed = confirm("You are about to overwrite filters on #{filtered_graphs}")
+
+        if confirmed  
+          for id, graph of self.graphs
+            graph.filterGroups = []
+            for filterGroup in filterGroups
+              graph.filterGroups.push(filterGroup)
+            graph.saveFilters()
+
       newGraph.trigger('request:dataRoles', (dataRoles) ->
         self.trigger('graph:created', self.graphId, dataRoles)
       )

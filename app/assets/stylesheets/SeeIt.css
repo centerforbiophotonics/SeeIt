@@ -342,7 +342,7 @@ div.SeeIt.data-drop-zone-container, div.SeeIt.expanded-data-container {
   width: 40%;
 }
 
-.SeeIt.add-filter-group, .SeeIt.remove-filter, .SeeIt.save-filters, .SeeIt.toggle-filters {
+.SeeIt.add-filter-group, .SeeIt.remove-filter, .SeeIt.save-filters, .SeeIt.save-filters-all, .SeeIt.toggle-filters {
   margin-top: 10px;
   width: 100%;
 }
