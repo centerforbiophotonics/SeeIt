@@ -67,14 +67,12 @@
         self.selectedColumn = null
         dataset = $(@).val()
         self.container.find('.categorical-filter, .numeric-filter').addClass('hidden')
-
         self.trigger "dataset:select:#{dataset}"
 
         self.trigger 'request:columns', dataset, (columns, types) ->
           self.populateColumnSelect.call(self, columns, types, dataset)
 
       if selected_dataset then select.val(selected_dataset)
-
 
     init: ->
       self = @
@@ -102,6 +100,7 @@
               self.selectedDataset = dataset_object
 
           self.on "dataset:select:#{dataset}", ->
+            console.log "SELECTED DATASET WAS ASSIGNED", dataset_object.title
             self.selectedDataset = dataset_object
 
 
@@ -301,6 +300,53 @@
       @container.remove()
 
       @trigger 'filter:destroyed'
+
+    clone: (givenFilter) ->
+      self = @
+      #@columns = givenFilter.columns
+
+      @selectedDataset = givenFilter.selectedDataset  #NONE OF THESE ARE REAL COPIES AHHHH
+      @selectedColumn = givenFilter.selectedColumn
+      @filterData = givenFilter.getFilterData()
+      #@operator = givenFilter.operator
+      #@value = givenFilter.value
+
+
+
+      @container.find('.dataset-select').val(givenFilter.selectedDataset.title)
+      
+      self.trigger 'request:columns', givenFilter.selectedDataset.title, (columns, types) ->
+        self.populateColumnSelect.call(self, columns, types, givenFilter.selectedDataset, givenFilter.selectedColumn.header)
+        #console.log "columnSelect populated"
+        idx = columns.map((col) -> col.header).indexOf(givenFilter.selectedColumn.header)
+        type = types[idx]
+        #console.log "index of chosen column", idx, "and its type", type
+        #console.log "in comparison to the givenFilter's type of", givenFilter.filterType
+        if givenFilter.filterType == "numeric" 
+          self.filterType = "numeric"
+          self.container.find(".categorical-filter").addClass("hidden")
+          self.container.find(".numeric-filter").removeClass("hidden")
+          self.container.find("td").css('background-color', 'LightCoral')
+          #console.log "givenFilter's operator", givenFilter.filterData.operator, "and its value", givenFilter.filterData.value
+          self.container.find(".numeric-filter").val(givenFilter.filterData.operator)
+          self.operator = self.container.find(".numeric-filter").val()
+          self.container.find(".numeric-filter-value").val(givenFilter.filterData.value)
+          self.value = self.container.find(".numeric-filter-value").val()
+        else if givenFilter.filterType == "categorical"
+          self.filterType = "categorical"
+          self.container.find("td").css('background-color', 'LimeGreen')
+          self.populateCategoricalSelect(givenFilter.selectedDataset, idx, type, givenFilter.operator)
+          self.operator = self.container.find(".categorical-filter").val()
+          self.container.find(".categorical-filter-value").val(givenFilter.filterData.value)
+          self.value = self.container.find(".categorical-filter-value").val()
+
+        
+      #@container.find(".data-column-select").val(givenFilter.selectedColumn.header)
+
+      
+      
+
+
 
   Filter
 ).call(@)
