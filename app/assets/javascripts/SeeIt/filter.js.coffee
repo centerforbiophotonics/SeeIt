@@ -67,7 +67,8 @@
         self.selectedColumn = null
         dataset = $(@).val()
         self.container.find('.categorical-filter, .numeric-filter').addClass('hidden')
-        self.trigger "dataset:select:#{dataset}"
+        self.trigger 'request:dataset', dataset, (dataset_object) ->
+          self.trigger "dataset:select:#{dataset_object.ID}"
 
         self.trigger 'request:columns', dataset, (columns, types) ->
           self.populateColumnSelect.call(self, columns, types, dataset)
@@ -80,12 +81,15 @@
       @datasets.forEach (dataset) ->
         old_title = dataset
         this_dataset = null
+        ID = 0
 
         self.trigger 'request:dataset', dataset, (dataset_object) ->
           if this_dataset
             this_dataset.off 'dataset:title:changed'
 
           this_dataset = dataset_object
+          ID = this_dataset.ID
+
 
           this_dataset.on 'dataset:title:changed', ->
             select = self.container.find(".dataset-select").val() == old_title
@@ -93,13 +97,13 @@
 
             if select then self.container.find(".dataset-select").val(this_dataset.title)
 
-            old_title = this_dataset.title
+            #old_title = this_dataset.title
 
-            self.off "dataset:select:#{old_title}"
-            self.on "dataset:select:#{this_dataset.title}", ->
-              self.selectedDataset = dataset_object
+            #self.off "dataset:select:#{old_title}"
+            #self.on "dataset:select:#{this_dataset.title}", ->
+            #  self.selectedDataset = dataset_object
 
-          self.on "dataset:select:#{dataset}", ->
+          self.on "dataset:select:#{ID}", ->
             console.log "SELECTED DATASET WAS ASSIGNED", dataset_object.title
             self.selectedDataset = dataset_object
 
@@ -121,6 +125,7 @@
     getFilterData: ->
       {
         dataset_title: @filterData.dataset.title,
+        dataset_ID: @filterData.dataset.ID
         column_header: @filterData.column.header,
         comparison: @filterData.operator,
         value: @filterData.value

@@ -8,7 +8,7 @@
 		@Validators = {}
 		_.extend(@Validators, SeeIt.Modules.Validators)
 
-		constructor: (@app, data, @title = "New Dataset", @isLabeled = false, @editable = true) ->
+		constructor: (@app, data, @title = "New Dataset", @isLabeled = false, @editable = true, @ID) ->
 			if !data
 				data = {
 					labels: ["1", "2", "3", "4", "5"],
@@ -50,6 +50,7 @@
 			extend(@, ConverterFactory(@rawFormat))
 			@loadData(data)
 			@registerListeners()
+			console.log @title, "has ID number of", @ID
 
 		getByHeader: (header) ->
 			idx = @headers.indexOf(header)
