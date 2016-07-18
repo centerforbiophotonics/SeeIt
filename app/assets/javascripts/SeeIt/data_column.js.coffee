@@ -57,6 +57,7 @@
         return data[idx].value
 
       @setType = (type, callback) ->
+        console.log 'setType'
         if type == "numeric"
           for i in [0...data.length]
             if isNaN(Number(data[i].value))
@@ -68,6 +69,8 @@
           data[i].value = if @type == "numeric" then Number(data[i].value) else data[i].value + ''
 
         if callback then callback(true, "Data type changed to #{type}")
+
+
 
         @trigger('type:changed', type)
 
@@ -150,18 +153,22 @@
           header = dataset[0][column] + ''
           data = []
 
+
           for i in [1...dataset.length]
             data.push({label: dataset[i][0], value: dataset[i][column]})
 
+          
           return new DataColumn(app, header, data, title, type, color, editable)
         ).apply(@, arguments)
       else
         return ((app, data, column, title, type, color, editable) ->
           dataColumn = []
 
+
           for i in [0...data.columns[column].data.length]
             dataColumn.push({label: data.labels[i], value: data.columns[column].data[i]})
 
+          
           return new DataColumn(app, data.columns[column].header, dataColumn, title, type, color, editable)
         ).apply(@,arguments)
 

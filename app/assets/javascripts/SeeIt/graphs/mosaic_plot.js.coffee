@@ -259,12 +259,12 @@
         {
           name: "Independent",
           type: "categorical",
-          multiple: false
+          multiple: true
         },
         {
           name: "Dependent",
           type: "categorical",
-          multiple: false
+          multiple: true
         }
       ]
 

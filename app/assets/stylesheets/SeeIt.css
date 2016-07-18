@@ -536,3 +536,9 @@ td.htNumeric.SeeIt-htCenter {
 td:not(.htNumeric).SeeIt-htCenter {
   background-color: #ccffcc;
 }
+
+.btn.active {
+  color: white;
+  background-color: #428bca;
+  transition: all 0.3s ease-in-out;
+}
