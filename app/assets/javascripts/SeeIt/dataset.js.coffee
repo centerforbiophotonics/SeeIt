@@ -50,7 +50,6 @@
 			extend(@, ConverterFactory(@rawFormat))
 			@loadData(data)
 			@registerListeners()
-			console.log @title, "has ID number of", @ID
 
 		getByHeader: (header) ->
 			idx = @headers.indexOf(header)

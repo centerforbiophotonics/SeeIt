@@ -7,6 +7,7 @@ Rails.application.routes.draw do
 
   get "init" => "application#init"
   get "no_data" => "application#no_data"
+  get "json_string" => "application#json_string"
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 

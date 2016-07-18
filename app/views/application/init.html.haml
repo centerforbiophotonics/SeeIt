@@ -62,8 +62,11 @@
         = button_tag "Run SeeIt With This Configuration", :type => "button", :id => "run"
 
 #data-menu-template
-  = label_tag '', 'Data Type:'
-  = text_field_tag '', 'Box Plot'
+  = label_tag 'data[DATAINDEX][type]', 'Data Type:'
+  = select_tag 'data[DATAINDEX][type]', options_for_select([['csv', 'csv'],['json', 'json'],['google spreadsheet', 'google spreadsheet']])
+  = label_tag 'data[DATAINDEX][url]', 'URL'
+  = text_field_tag 'data[DATAINDEX][url]', '' 
+  = button_tag "Remove Data", :type => "button", :id => "remove-data-DATAINDEX", :class => "remove-data"
 
 #graph-menu-template
   = label_tag 'graphs[GRAPHINDEX][type]', 'Graph Type:'
@@ -89,7 +92,7 @@
   var data = [];
 
   $(function(){
-    $("#display").click(function(){
+    $("#show_init_code").click(function(){
       var options = $('#seeit-init-wizard form').serializeObject();
 
       //Replace string value for checkboxes with boolean value
@@ -99,7 +102,22 @@
         else if (options.ui[key] === 'true')
           options.ui[key] = true;
       }
+      console.log(options);
     });
+
+    $("#add-data").click(function(){
+      var index = data.length;
+      var $menu = $("<div>", {id: "data-"+index});
+      var raw = $("#data-menu-template").html().replace(new RegExp('DATAINDEX', 'g'), index);
+
+      $menu.append(raw);
+      data.push(0);
+      $("#data").append($menu);
+
+      register_remove_data();
+    });
+
+
 
     $("#add-graph").click(function(){
       var index = graphs.length;
@@ -135,6 +153,33 @@
         $("#graphs-"+graphIndex+"-data").append($menu);
 
         register_remove_graphs_data();
+      });
+    }
+
+    function register_remove_data(){
+      $(".remove-data").off("click").on("click", function(){
+
+        var dataIndex = $(this).attr("id").split("-")[2];
+
+        $("#data-"+dataIndex).remove();
+
+        data.forEach(function(d, i){
+          if(i > dataIndex){
+            var data = $("#data-"+i)
+
+            var new_data_html = data.
+              html().
+              replace(new RegExp("data\\-"+i, 'g'), "data-"+(i-1)).
+              replace(new RegExp("data\\["+i, 'g'), "data["+(i-1)).
+              replace(new RegExp("data_"+i, 'g'), "data_"+(i-1));
+
+            data.html(new_data_html);
+            data.attr("id", "data-"+(i-1));
+          }
+        });
+
+        data.splice(dataIndex, 1);
+        register_remove_data();
       });
     }
 

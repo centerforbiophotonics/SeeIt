@@ -67,6 +67,8 @@
 
       for i in [0...data.length]
         DataCollection.coerceDataset(data[i], (dataset) ->
+          if typeof(dataset) == "string"
+            dataset = JSON.parse(dataset)
           if dataset then self.addDataset.call(self, dataset)
         )
 
