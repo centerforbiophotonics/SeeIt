@@ -8,7 +8,7 @@
 		@Validators = {}
 		_.extend(@Validators, SeeIt.Modules.Validators)
 
-		constructor: (@app, data, @title = "New Dataset", @isLabeled = false, @editable = true) ->
+		constructor: (@app, data, @title = "New Dataset", @isLabeled = false, @editable = true, @ID) ->
 			if !data
 				data = {
 					labels: ["1", "2", "3", "4", "5"],
@@ -50,6 +50,7 @@
 			extend(@, ConverterFactory(@rawFormat))
 			@loadData(data)
 			@registerListeners()
+			console.log @title, "has ID number of", @ID
 
 		getByHeader: (header) ->
 			idx = @headers.indexOf(header)
@@ -89,12 +90,12 @@
 
 			return obj
 
+		# replace typeof
 		getType: (d) ->
-			switch typeof d
-				when "number"
-					return "numeric"
-				else
-					return "categorical"
+			if isNaN(d)
+				return "categorical"
+			else
+				return "numeric"
 
 		registerListeners: ->
 			self = @
@@ -250,6 +251,8 @@
 
 				getColTypes: ->
 					for i in [1...@rawDataCols()]
+						# console.log "rawData: ", @rawData[1][i]
+						# console.log "type: ", @getType(@rawData[1][i])
 						@types.push(@getType(@rawData[1][i]))
 
 				padRows: (maxCols) ->

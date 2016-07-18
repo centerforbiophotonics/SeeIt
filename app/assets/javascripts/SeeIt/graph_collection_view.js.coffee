@@ -32,6 +32,7 @@
       graphContainer.listenTo(@app, 'graph:addData', (graphData) ->
         if graphContainer.graphs[graphData.graph]
           graphContainer.graphs[graphData.graph].addData(graphData.data)
+          console.log "graph_data:", graphData
       )
 
       graphContainer.listenTo(@app, 'graph:filter', (graphData) ->
@@ -150,6 +151,50 @@
 
       @listenTo newGraph, 'request:dataset', (name, callback) ->
         self.trigger 'request:dataset', name, callback
+
+      @listenTo newGraph, 'filter:save-all', (filterGroups, name) ->
+        console.log 42
+        needs_confirm = false
+        filtered_graphs = []
+        origin_graph_requirements = ""
+
+        for id, graph of self.graphs
+          if graph.filterGroups.length > 0 && id != name
+            needs_confirm = true
+            filtered_graphs.push(id)
+          if id == name
+            graph.saveFilters()
+            console.log id, "is the origin graph and its saved filterGroups going into the rest are", graph.filterGroups
+            origin_graph_requirements = graph.operator
+
+        confirmed = true
+        if needs_confirm
+          confirmed = confirm("You are about to overwrite filters on #{filtered_graphs}")
+
+        if confirmed  
+          for id, graph of self.graphs
+            if id != name
+              for filterGroup in graph.filterGroups
+                filterGroup.removeFilterGroup()
+              graph.filterGroups = []
+              for filterGroup, i in filterGroups
+                #graph.filterGroups.push(filterGroup)
+              
+                graph.addFilterGroup()
+                if filterGroup.filters.length > 1
+                  for j in [1...filterGroup.filters.length]
+                    self.trigger 'request:dataset_names', (datasets) ->
+                      graph.filterGroups[i].addFilter(datasets)
+
+                graph.container.find(".filter-group-requirements-select").val(origin_graph_requirements)
+                graph.filterGroups[i].clone(filterGroup)
+
+          for id, graph of self.graphs
+            if id != name
+              console.log id, "filterGroups before saving", graph.filterGroups
+              graph.saveFilters()
+
+            
 
       newGraph.trigger('request:dataRoles', (dataRoles) ->
         self.trigger('graph:created', self.graphId, dataRoles)

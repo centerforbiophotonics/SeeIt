@@ -3,10 +3,12 @@
     _.extend(@prototype, Backbone.Events)
 
     constructor: (@app, data, @editable) ->
+      @nextDatasetID = 1
       @datasets = []
       @initialized = false
       @initDatasets(data)
       @initListeners()
+
 
     initListeners: ->
       self = @
@@ -71,7 +73,8 @@
       @initialized = true
 
     addDataset: (data) ->
-      dataset = new SeeIt.Dataset(@app, data.dataset, data.title, data.isLabeled, @editable)
+      dataset = new SeeIt.Dataset(@app, data.dataset, data.title, data.isLabeled, @editable, @nextDatasetID)
+      @nextDatasetID++
      	@datasets.push(dataset)
 
       if @initialized then @trigger('dataset:created', dataset)
@@ -87,6 +90,8 @@
       return obj
 
     @coerceDataset = (dataset, callback) ->
+      console.log(dataset)
+
       if !dataset.url then callback dataset
 
       error_cb = ->
@@ -129,6 +134,7 @@
           catch error
             error_cb()
         when "google spreadsheet"
+            console.log("google spreadsheet")
             googleSpreadsheet = new SeeIt.GoogleSpreadsheetManager(dataset.url, (success, collection) ->
               if success
                 collection.forEach (dataset) ->
