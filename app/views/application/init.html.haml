@@ -63,9 +63,12 @@
 
 #data-menu-template
   = label_tag 'data[DATAINDEX][type]', 'Data Type:'
-  = select_tag 'data[DATAINDEX][type]', options_for_select([['csv', 'csv'],['json', 'json'],['google spreadsheet', 'google spreadsheet']])
-  = label_tag 'data[DATAINDEX][url]', 'URL'
+  = select_tag 'data[DATAINDEX][type]', options_for_select([['CSV Endpoint', 'csv'],['JSON Endpoint', 'json'],['Google Spreadsheet', 'google spreadsheet'],['JSON File', 'json file'],['CSV File', 'csv file']])
+  = label_tag 'data[DATAINDEX][url]', 'URL', :id => "url-label-DATAINDEX"
   = text_field_tag 'data[DATAINDEX][url]', '' 
+  %input{:type => "file", :id => "upload-file-DATAINDEX", :class => "upload-file hidden"}
+  = label_tag 'data[DATAINDEX][jsonString]', 'HIDDENtext', :class => "hidden"
+  = text_field_tag 'data[DATAINDEX][jsonString]', ''
   = button_tag "Remove Data", :type => "button", :id => "remove-data-DATAINDEX", :class => "remove-data"
 
 #graph-menu-template
@@ -102,10 +105,22 @@
         else if (options.ui[key] === 'true')
           options.ui[key] = true;
       }
+
+      for (var i in options.data){
+
+        if ((options.data[i].type=="csv file")||(options.data[i].type=="json file")){
+          delete options.data[i].type
+          delete options.data[i].url
+        }
+        else{
+          delete options.data[i].jsonString
+        }
+      }
       console.log(options);
     });
 
     $("#add-data").click(function(){
+      
       var index = data.length;
       var $menu = $("<div>", {id: "data-"+index});
       var raw = $("#data-menu-template").html().replace(new RegExp('DATAINDEX', 'g'), index);
@@ -113,8 +128,63 @@
       $menu.append(raw);
       data.push(0);
       $("#data").append($menu);
+      $("#data_"+index+"_jsonString").hide();
 
       register_remove_data();
+
+      $("#data_"+index+"_type").on("change", function(){
+        $("#data_"+index+"_url").show()
+        $("#url-label-"+index).show()
+        $("#upload-file-"+index).addClass("hidden")
+        if (($(this).val() == "json file")||($(this).val() == "csv file")){
+          $("#data_"+index+"_url").hide()
+          $("#url-label-"+index).hide()
+          $("#upload-file-"+index).removeClass("hidden")
+          console.log("#upload-file-"+index)
+        }
+      })
+
+      $("#upload-file-"+index).on("change", function(){
+        var filereader;
+        var myData;
+        var file = this.files[0];
+        var filename = this.files[0].name.split('.')[0];
+        var filetype = $("#data_"+index+"_type").val();
+
+        if(window.File && window.FileReader && window.FileList && window.Blob) {
+
+          filereader = new window.FileReader();
+
+          if(filetype == "csv file"){
+            filereader.onload = function(){
+              txtRes = filereader.result;
+              myData = Papa.parse(txtRes, {skipEmptyLines: true}).data;
+              dataset = [{"isLabeled": "true", "title": filename, "dataset": myData}];
+              console.log (dataset)
+              $("#data_"+index+"_jsonString").val(JSON.stringify(dataset))
+              console.log($("#data_"+index+"_jsonString").val())
+            }
+          }
+
+          else if(filetype == "json file"){
+            filereader.onload = function(){
+              console.log("json reading")
+              txtRes = filereader.result;
+              console.log(txtRes)
+              myData = JSON.parse(txtRes);
+              if (!$.isArray(data)){
+                myData = [data]
+              }
+              console.log(myData)
+              $("#data_"+index+"_jsonString").val(JSON.stringify(myData))
+              console.log($("#data_"+index+"jsonString").val())
+            }
+          }
+          console.log("onloads setup")
+          filereader.readAsText(file);
+
+        }       
+      })
     });
 
 
