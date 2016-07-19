@@ -30,9 +30,9 @@
       )
 
       graphContainer.listenTo(@app, 'graph:addData', (graphData) ->
+        console.log "graph_container: ", graphContainer
         if graphContainer.graphs[graphData.graph]
           graphContainer.graphs[graphData.graph].addData(graphData.data)
-          console.log "graph_data:", graphData
       )
 
       graphContainer.listenTo(@app, 'graph:filter', (graphData) ->

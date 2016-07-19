@@ -207,6 +207,8 @@
         item.css('background-color', data.data.color)
         console.log data
       
+
+
       # X button
       @container.find(".data-rep[data-id='#{data.data.header}'] .data-rep-remove").on 'click', ->
         self.removeData.call(self, data)
@@ -364,12 +366,12 @@
               #{if @graph_editable then '<button class="SeeIt remove btn btn-default" title="Remove Graph"><span class="glyphicon glyphicon-remove"></span></button>' else ''}
             </div>
             <div class="SeeIt graph-title">
-              <div class="SeeIt graph-title-content">#{@id}</div>
+              <div class="SeeIt graph-title-content" id="graph-name">#{@id}</div>
               <span class="SeeIt graph-title-edit-icon glyphicon glyphicon-pencil" title='Edit Title'></span>
             </div>
           </div>
           <div class="SeeIt graph-panel-content panel-collapse collapse in">
-            <div class="SeeIt panel-body" style='min-height: 300px'>
+            <div class="SeeIt panel-body target" style='min-height: 300px'>
               <div class="SeeIt options-wrapper hidden col-md-3"></div>
               <div class="SeeIt graph-wrapper"></div>
             </div>

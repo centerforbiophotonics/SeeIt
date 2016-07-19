@@ -159,6 +159,17 @@
 			@labels.splice(row, 0, label)
 			@trigger('row:created', row)
 
+		dragHandler: (event) ->
+	      # dataTransfer.setData(format, data)
+	        console.log "IN_DRAG"
+	        event.dataTransfer.setData("text/plain", event.target.id)
+
+		dropHandler: (event) ->
+	        data = event.dataTransfer.getData("text")
+	        event.preventDefault();
+	        event.target.appendChild(document.getElementById(data))
+	        event.dataTransfer.clearData()
+
 		createColumn: (col) ->
 			self = @
 
@@ -168,6 +179,7 @@
 
 			for i in [0...@labels.length]
 				dataColumn.push({label: @labels[i], value: null})
+
 
 			column = new SeeIt.DataColumn(@app, header, dataColumn, @title, undefined, @editable)
 			@data.splice(col, 0, column)
