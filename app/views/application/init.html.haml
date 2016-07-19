@@ -117,6 +117,7 @@
         }
       }
       console.log(options);
+      console.log(JSON.stringify(options))
     });
 
     $("#add-data").click(function(){
@@ -140,7 +141,6 @@
           $("#data_"+index+"_url").hide()
           $("#url-label-"+index).hide()
           $("#upload-file-"+index).removeClass("hidden")
-          console.log("#upload-file-"+index)
         }
       })
 
@@ -159,28 +159,21 @@
             filereader.onload = function(){
               txtRes = filereader.result;
               myData = Papa.parse(txtRes, {skipEmptyLines: true}).data;
-              dataset = [{"isLabeled": "true", "title": filename, "dataset": myData}];
-              console.log (dataset)
+              dataset = {"isLabeled": "true", "title": filename, "dataset": myData};
               $("#data_"+index+"_jsonString").val(JSON.stringify(dataset))
-              console.log($("#data_"+index+"_jsonString").val())
             }
           }
 
           else if(filetype == "json file"){
             filereader.onload = function(){
-              console.log("json reading")
               txtRes = filereader.result;
-              console.log(txtRes)
               myData = JSON.parse(txtRes);
               if (!$.isArray(data)){
                 myData = [data]
               }
-              console.log(myData)
               $("#data_"+index+"_jsonString").val(JSON.stringify(myData))
-              console.log($("#data_"+index+"jsonString").val())
             }
           }
-          console.log("onloads setup")
           filereader.readAsText(file);
 
         }       
