@@ -155,7 +155,7 @@
 				else
 					@data[i].insertElement(row, label, null)
 
-			console.log @data
+			console.log @data + " @data"
 
 			@labels.splice(row, 0, label)
 			@trigger('row:created', row)

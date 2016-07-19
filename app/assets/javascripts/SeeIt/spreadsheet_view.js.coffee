@@ -54,9 +54,9 @@
 
       #Update dataset
       @dataset = dataset
-      privateMembers.dataset = @dataset
+      privateMembers.dataset = @dataset 
 
-      #Subscribe to new dataset events
+      #Subscribe to new dataset
       @subscribeToDataset()
 
       @updateTitle()
@@ -421,34 +421,14 @@
             return false
         contextMenu: if !spreadsheetView.dataset.editable then null else {
           items: {
-            "my_row_above": {
-              name: "Insert row above",
-              callback: (key, options) ->
-                spreadsheetView.dataset.trigger('row:create', options.end.row)
-            },
-            "my_row_below": {
-              name: "Insert row below",
-              callback: (key, options) ->
-                spreadsheetView.dataset.trigger('row:create', options.end.row + 1)
-            },
             "multiple_row": {
-              name: 'Insert multiple rows',
+              name: 'Insert row',
               callback: (key, options) ->
                 spreadsheetView.display_row_menu(key, options)                
             },
             "hsep1": "---------",
-            "my_col_left": {
-              name: "Insert column on the left",
-              callback: (key, options) ->
-                spreadsheetView.dataset.trigger('dataColumn:create', options.end.col)
-            },
-            "my_col_right": {
-              name: "Insert column on the right",
-              callback: (key, options) ->
-                spreadsheetView.dataset.trigger('dataColumn:create', options.end.col + 1)
-            },
             "multiple_col": {
-              name: "Insert multiple columns",
+              name: "Insert column",
               callback: (key, options) ->
                 spreadsheetView.display_column_menu(key, options)
             },
@@ -466,7 +446,7 @@
                       tip.hide.call(tip)
                       return
                     , 5)
-                  , 100)                  
+                  , 100)           
             },
             "my_remove_col": {
               name: "Remove column",
@@ -481,7 +461,7 @@
                       tip.hide.call(tip)
                       return
                     , 5)
-                  , 100)  
+                  , 100)
             },
             "hsep3": "---------",
             "change_col_type": {
