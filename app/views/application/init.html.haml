@@ -93,10 +93,11 @@
 :javascript
   var graphs = [];
   var data = [];
+  var options;
 
   $(function(){
     $("#show_init_code").click(function(){
-      var options = $('#seeit-init-wizard form').serializeObject();
+      options = $('#seeit-init-wizard form').serializeObject();
 
       //Replace string value for checkboxes with boolean value
       for (var key in options.ui){
@@ -117,8 +118,40 @@
         }
       }
       console.log(options);
-      console.log(JSON.stringify(options))
     });
+
+    $("#run").click(function(){
+
+      options = $('#seeit-init-wizard form').serializeObject();
+
+      //Replace string value for checkboxes with boolean value
+      for (var key in options.ui){
+        if (options.ui[key] === 'false')
+          options.ui[key] = false;
+        else if (options.ui[key] === 'true')
+          options.ui[key] = true;
+      }
+
+      for (var i in options.data){
+
+        if ((options.data[i].type=="csv file")||(options.data[i].type=="json file")){
+          delete options.data[i].type
+          delete options.data[i].url
+        }
+        else{
+          delete options.data[i].jsonString
+        }
+      }
+
+      $("body").append("<div id='newSeeIt'></div>")
+      var $newContainer = $("#newSeeIt")
+      options.container = $newContainer
+      var app = null;
+      $(function() {
+        app = SeeIt.new(options)
+      })
+
+    })
 
     $("#add-data").click(function(){
       
