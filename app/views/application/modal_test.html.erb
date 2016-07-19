@@ -1,0 +1,75 @@
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal" data-title="new_column">Create new columns</button>
+    <!-- Modal HTML -->
+    <div id="myModal" class="modal fade">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title">New columns</h4>
+                </div>
+                <div class="modal-header">
+                    <div><label>Position:</label></div>
+                    <div class="btn-group" data-toggle="buttons">
+                        <label class="btn active">
+                            <input type="radio" value="left" name="pos_options" id="numeric_radio" autocomplete="off" checked> Left
+                        </label>
+                        <label class="btn">
+                            <input type="radio" value="right" name="pos_options" id="categorical_radio" autocomplete="off"> Right
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-header">
+                    <form role="form">
+                        <div><label>Type:</label></div>
+                    	<div class="btn-group" data-toggle="buttons">
+                    		<label class="btn active">
+								<input type="radio" value="numeric" name="options" id="numeric_radio" autocomplete="off" checked> Numeric
+							</label>
+							<label class="btn">
+								<input type="radio" value="categorical" name="options" id="categorical_radio" autocomplete="off"> Categorical
+							</label>
+                    	</div>
+                    </form>
+                </div>
+                <div class="modal-header">
+                    <form role="form">
+                        <div class="form-group">
+                            <label for="number_label" class="control-label">Numer of columns:</label>
+                            <input type="text" class="form-control" id="number_field">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="button" id="done_button" class="btn btn-primary">Done</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script type="text/javascript">
+
+	$(document).ready(function() {
+    	$('label').click(function() {
+	        $('label').removeClass('selectedBackground');
+	        $(this).addClass('selectedBackground');
+    	});
+	});
+
+	$('#myModal').on('shown.bs.modal', function(){
+		$('#number_field').val(1)
+    	$('#number_field').focus();
+	});
+
+	$('#myModal').on('hidden.bs.modal', function(){
+		$('#number_field').val(1)
+        $(this).remove()
+	});
+	
+	$("#done_button").on("click", function(event){
+		var num = parseInt($('#number_field').val());
+		console.log("creating " + num + " " + $("input[name=options]:checked").val() + " columns on the " + $("input[name=pos_options]:checked").val());
+		$('#myModal').modal('hide');
+	});
+
+</script>
