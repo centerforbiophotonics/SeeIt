@@ -15,25 +15,25 @@
     %form{:action => "#"}
       %h2 General UI Options
       .field
-        = label_tag 'ui[editiable]', 'Editable:'
-        = hidden_field_tag 'ui[editiable]', 'false'
-        = check_box_tag 'ui[editiable]', 'true'
+        = label_tag 'ui[editable]', 'Editable:'
+        = hidden_field_tag 'ui[editable]', 'false'
+        = check_box_tag 'ui[editable]', 'true'
       .field
         = label_tag 'ui[spreadsheet]', 'Spreadsheet:'
         = hidden_field_tag 'ui[spreadsheet]', 'false'
         = check_box_tag 'ui[spreadsheet]', 'true'
       .field
-        = label_tag 'ui[data_selector]', 'Data Selection Menu:'
-        = hidden_field_tag 'ui[data_selector]', 'false'
-        = check_box_tag 'ui[data_selector]', 'true'
+        = label_tag 'ui[dataMenu]', 'Data Selection Menu:'
+        = hidden_field_tag 'ui[dataMenu]', 'false'
+        = check_box_tag 'ui[dataMenu]', 'true'
       .field
-        = label_tag 'ui[options_bar]', 'Top Option Bar:'
-        = hidden_field_tag 'ui[options_bar]', 'false'
-        = check_box_tag 'ui[options_bar]', 'true'
+        = label_tag 'ui[toolbar]', 'Top Option Bar:'
+        = hidden_field_tag 'ui[toolbar]', 'false'
+        = check_box_tag 'ui[toolbar]', 'true'
       .field
-        = label_tag 'ui[graph_add_remove]', 'Graph Add/Remove:'
-        = hidden_field_tag 'ui[graph_add_remove]', 'false'
-        = check_box_tag 'ui[graph_add_remove]', 'true'
+        = label_tag 'ui[graph_editable]', 'Graph Add/Remove:'
+        = hidden_field_tag 'ui[graph_editable]', 'false'
+        = check_box_tag 'ui[graph_editable]', 'true'
       .field
         = label_tag 'ui[dataset_add_remove]', 'Dataset Add/Remove:'
         = hidden_field_tag 'ui[dataset_add_remove]', 'false'
@@ -73,29 +73,35 @@
 
 #graph-menu-template
   = label_tag 'graphs[GRAPHINDEX][type]', 'Graph Type:'
-  = text_field_tag 'graphs[GRAPHINDEX][type]', 'Box Plot'
+  = select_tag 'graphs[GRAPHINDEX][type]'
   = button_tag "Remove Graph", :type => "button", :id => "remove-graphs-GRAPHINDEX", :class => "remove-graphs"
   #graphs-GRAPHINDEX-data
   = button_tag "Add Data", :type => "button", :id => "add-graphs-GRAPHINDEX-data", :class => "add-graphs-data"
 
 #graph-data-menu-template
   = label_tag 'graphs[GRAPHINDEX][data][GRAPHDATAINDEX][dataset_title]', 'Dataset:'
-  = text_field_tag 'graphs[GRAPHINDEX][data][GRAPHDATAINDEX][dataset_title]', 'Dataset 2'
+  = select_tag 'graphs[GRAPHINDEX][data][GRAPHDATAINDEX][dataset_title]'
 
-  = label_tag 'graphs[GRAPHINDEX][data][GRAPHDATAINDEX][column_header]', 'Column:'
-  = text_field_tag 'graphs[GRAPHINDEX][data][GRAPHDATAINDEX][column_header]', 'Kia'
+  = label_tag 'graphs[GRAPHINDEX][data][GRAPHDATAINDEX][column_header]', 'Column:', :id => "graphs_GRAPHINDEX_data_GRAPHDATAINDEX_column_label"
+  = select_tag 'graphs[GRAPHINDEX][data][GRAPHDATAINDEX][column_header]'
 
-  = label_tag 'graphs[GRAPHINDEX][data][GRAPHDATAINDEX][role_in_graph]', 'Role in Graph:'
-  = text_field_tag 'graphs[GRAPHINDEX][data][GRAPHDATAINDEX][role_in_graph]', 'default'
+  = label_tag 'graphs[GRAPHINDEX][data][GRAPHDATAINDEX][role_in_graph]', 'Role in Graph:', :id => "graphs_GRAPHINDEX_data_GRAPHDATAINDEX_role_label"
+  = select_tag 'graphs[GRAPHINDEX][data][GRAPHDATAINDEX][role_in_graph]'
 
   = button_tag "Remove Data", :type => "button", :id => "remove-graphs-GRAPHINDEX-data-GRAPHDATAINDEX", :class => "remove-graphs-data"
 
 :javascript
   var graphs = [];
   var data = [];
+  var datasets = [];
   var options;
 
   $(function(){
+    $("#show_link").click(function(){
+      var link = $.param(options)
+      console.log(link)
+    })
+
     $("#show_init_code").click(function(){
       options = $('#seeit-init-wizard form').serializeObject();
 
@@ -117,7 +123,9 @@
           delete options.data[i].jsonString
         }
       }
-      console.log(options);
+      var runScript = "SeeIt.new(\n"+JSON.stringify(options, null, '  ')+")";
+      console.log(runScript);
+      confirm(runScript);
     });
 
     $("#run").click(function(){
@@ -193,6 +201,7 @@
               txtRes = filereader.result;
               myData = Papa.parse(txtRes, {skipEmptyLines: true}).data;
               dataset = {"isLabeled": "true", "title": filename, "dataset": myData};
+              datasets.push(dataset)
               $("#data_"+index+"_jsonString").val(JSON.stringify(dataset))
             }
           }
@@ -201,9 +210,7 @@
             filereader.onload = function(){
               txtRes = filereader.result;
               myData = JSON.parse(txtRes);
-              if (!$.isArray(data)){
-                myData = [data]
-              }
+              datasets.push(myData)
               $("#data_"+index+"_jsonString").val(JSON.stringify(myData))
             }
           }
@@ -224,6 +231,8 @@
       $menu.append(raw);
       graphs.push(0);
       $("#graphs").append($menu);
+      for (var key in SeeIt.GraphNames)
+        $("#graphs_"+index+"_type").append("<option>"+SeeIt.GraphNames[key]+"</option>");
 
       register_add_graphs_data();
       register_remove_graph();
@@ -242,11 +251,60 @@
           replace(new RegExp('GRAPHINDEX', 'g'), graphIndex).
           replace(new RegExp('GRAPHDATAINDEX', 'g'), graphDataIndex);
 
-        $menu.append(raw);
+        $menu.append(raw);        
 
         graphs[parseInt(graphIndex)]++;
 
         $("#graphs-"+graphIndex+"-data").append($menu);
+
+        for (var i in datasets)
+          $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_dataset_title").append("<option>"+datasets[i].title+"</option>");
+
+        $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_dataset_title").prop('selectedIndex', -1);        
+
+        $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_column_header").hide()
+        $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_column_label").hide()
+        $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_role_in_graph").hide()
+        $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_role_label").hide()
+
+        $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_dataset_title").on("change", function(){
+          var selectedDataset;
+          $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_column_header").show()
+          $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_column_label").show()
+          $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_role_in_graph").show()
+          $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_role_label").show()
+          $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_column_header").html("")
+
+          for (var i in datasets) {
+            if (datasets[i].title == $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_dataset_title").val())
+              selectedDataset = datasets[i].dataset
+              if ($("#data_"+i+"_type").val() == "csv file"){
+                for (var j in selectedDataset[0]){
+                  if (j != 0){
+                    $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_column_header").append("<option>"+selectedDataset[0][j]+"</option>")
+                  }
+                }
+              }
+          }
+
+          for (var i in selectedDataset.columns) {
+            $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_column_header").append("<option>"+selectedDataset.columns[i].header+"</option>")
+          }
+
+          var selectedGraph = $("#graphs_"+graphIndex+"_type").val()
+          for (var key in SeeIt.GraphNames){
+            if (selectedGraph == SeeIt.GraphNames[key]){
+              selectedGraph = key
+            }
+          }
+          var graphFormat = SeeIt.Graphs[selectedGraph].prototype.dataFormat()
+          for (var i in graphFormat) {
+            $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_role_in_graph").append("<option>"+graphFormat[i].name+"</option>")
+          }
+
+
+
+        })
 
         register_remove_graphs_data();
       });
@@ -318,8 +376,6 @@
         if (dataIndex < graphs[graphIndex]-1){
           for (var i = parseInt(dataIndex)+1; i < graphs[graphIndex]; i++){
             var graphData = $("#graphs-"+graphIndex+"-data-"+i);
-
-            console.log( graphData.html());
 
             var newHtml = graphData.html().
                replace(new RegExp("data\\-"+i, 'g'), "data-"+(i-1)).

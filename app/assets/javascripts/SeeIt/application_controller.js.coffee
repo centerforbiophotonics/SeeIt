@@ -26,13 +26,14 @@
 
       #Initialize UI options
       @ui = {
-        editable:       if ui.editable != undefined then ui.editable else true,
-        spreadsheet:    if ui.spreadsheet != undefined then ui.spreadsheet else true,
-        dataMenu:       if ui.dataMenu != undefined then ui.dataMenu else true,
-        toolbar:        if ui.toolbar != undefined then ui.toolbar else true,
-        graph_editable: if ui.graph_editable != undefined then ui.graph_editable else true
+        editable:           if ui.editable != undefined then ui.editable else true,
+        spreadsheet:        if ui.spreadsheet != undefined then ui.spreadsheet else true,
+        dataMenu:           if ui.dataMenu != undefined then ui.dataMenu else true,
+        toolbar:            if ui.toolbar != undefined then ui.toolbar else true,
+        graph_editable:     if ui.graph_editable != undefined then ui.graph_editable else true,
+        dataset_add_remove: if ui.dataset_add_remove != undefined then ui.dataset_add_remove else true
       }
-
+      
       graph_init_data = if params.graphs then params.graphs else []
 
       @graph_settings = if params.graph_settings then params.graph_settings else []

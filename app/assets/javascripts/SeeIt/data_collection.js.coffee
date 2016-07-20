@@ -92,7 +92,6 @@
       return obj
 
     @coerceDataset = (dataset, callback) ->
-      console.log(dataset)
 
       if !dataset.url then callback dataset
 

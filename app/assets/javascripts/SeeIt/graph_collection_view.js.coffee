@@ -32,7 +32,6 @@
       graphContainer.listenTo(@app, 'graph:addData', (graphData) ->
         if graphContainer.graphs[graphData.graph]
           graphContainer.graphs[graphData.graph].addData(graphData.data)
-          console.log "graph_data:", graphData
       )
 
       graphContainer.listenTo(@app, 'graph:filter', (graphData) ->
@@ -153,7 +152,6 @@
         self.trigger 'request:dataset', name, callback
 
       @listenTo newGraph, 'filter:save-all', (filterGroups, name) ->
-        console.log 42
         needs_confirm = false
         filtered_graphs = []
         origin_graph_requirements = ""
