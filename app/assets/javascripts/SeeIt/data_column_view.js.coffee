@@ -175,9 +175,6 @@
       @on 'dataColumns:show', ->
         self.alignGroupHeight.call(self)
 
-      @on 'dataColumns:dragstart', ->
-        self.drag.call(self) 
-
       $(window).on 'resize', ->
         self.alignGroupHeight.call(self)
 

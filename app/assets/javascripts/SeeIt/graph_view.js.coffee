@@ -425,7 +425,6 @@
         </div>
       """)
 
-
       @container.find(".toggle-filters").on 'click', (event) ->
         self.toggleFilters.call(self, @)
 
@@ -435,6 +434,26 @@
       @container.find(".expanded-data-container .save-filters").on 'click', (event) ->
         if self.validateFilters.call(self)
           self.saveFilters.call(self)
+
+      console.log "initDataContainers"
+
+      console.log "@container", @container.find('.target')
+
+      dragOverListener = (event) ->
+        event.preventDefault()
+
+      dragEnterListener = (event) ->
+        event.preventDefault()
+        console.log "enter"      
+
+      dropListener = (event)->
+        event.preventDefault()
+        console.log "drop"
+        console.log $("div").find(".graph-title-content").text()
+               
+      @container.find('.target').off('drop').on('drop', dropListener)
+      @container.find('.target').off('dragenter').on('dragenter', dragEnterListener)
+      @container.find('.target').off('dragover').on('dragover', dragOverListener)
 
     validateFilters: ->
       valid = true
@@ -460,7 +479,6 @@
         dataset.data.forEach (dataColumn, i) ->
           parentColumn = self.dataset[datasetIdx].data[i]
           self.filterColumn.call(self, dataColumn, parentColumn)
-
 
     filterColumn: (dataColumn, parentColumn) ->
       self = @

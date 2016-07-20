@@ -37,7 +37,6 @@
 
       @listenTo @dataset, 'dataset:title:changed', ->
         self.updateTitle.call(self)
-      # @drag()
 
     initLayout: ->
       @container.html("""
@@ -58,8 +57,6 @@
 
       @initDataColumnViews()
       @registerEvents()
-      # @drag()
-
 
     destroy: ->
       @container.remove()
@@ -103,44 +100,6 @@
       )
 
       #columnView.populateGraphSelectBox();
-
-
-    # drag:->
-    #   $('.source').on 'dragstart', (event) ->
-    #     console.log "START DRAG"
-    #     # Return which DOM element triggered the event
-    #     # Sets the drag operation's drag data to the specified data and type
-    #     # Access native properties of the javascript listener
-    #     console.log event.originalEvent.dataTransfer.setData("text", event.target.id) 
-    #     # event.originalEvent.dataTransfer.setData("text", event.target.id) 
-
-    #   $('.target').on 'dragover', (event) ->
-    #     event.preventDefault()
-
-    #   $('.target').on 'dragenter', (event) ->
-    #     event.preventDefault()
-    #     # if event.originalEvent.relatedTarget.nodeType == 3
-    #     #   return
-    #     # if event.target == event.relatedTarget
-    #     #   return
-    #     # elements = elements.add(event.target)
-    #     # if elements.length == 1
-    #     console.log $("div").find("#graph-name").text()
-    #     console.log "enter"
-
-
-    #   # once drop, get the graph-id
-    #   # pass graph id into selectGraph = (event)
-    #   $('.target').on 'drop', (event) ->
-    #     console.log "drop"
-    #     event.preventDefault()
-    #     # self.selectGraph()
-    #     # callFunc = new addGraphOption($("div").find("#graph-name").text(), 1)
-
-    #     # dat = event.originalEvent.dataTransfer.getData("text")
-    #     # console.log "DAT: ", dat
-    #     # event.target.appendChild(document.getElementById(dat).cloneNode(true))
-    #     # event.originalEvent.dataTransfer.clearData()
 
     registerEvents: ->
       self = @
