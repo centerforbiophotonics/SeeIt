@@ -173,6 +173,11 @@
       """)
 
       $('#myModal').modal('show')
+
+      $(document).off("keypress").on("keypress", ":input:not(textarea)", (event) ->
+        if event.keyCode == 13
+          $('#done_button').click()
+      );
       
       $('label').click( () ->
         $('label').removeClass('selectedBackground')
@@ -183,7 +188,7 @@
       $('#myModal').on('shown.bs.modal', () ->
         $('#number_field').val(1)
         $('#number_field').focus()
-        spreadsheetView.hot.unlisten()
+        spreadsheetView.hot.unlisten() 
       );
 
       $('#myModal').on('hidden.bs.modal', () ->
@@ -191,7 +196,7 @@
         $(this).remove()
       );
       
-      $("#done_button").on("click", (event) ->
+      $("#done_button").on("click", () ->
         input = parseInt($('#number_field').val());    
 
         if input != null
@@ -261,6 +266,11 @@
 
       $('#myModal').modal('show')
 
+      $(document).off("keypress").on("keypress", ":input:not(textarea)", (event) ->
+        if event.keyCode == 13
+          $('#done_button').click()
+      );
+
       $('label').click( () ->
         $('label').removeClass('selectedBackground')
         $(this).addClass('selectedBackground')
@@ -279,7 +289,7 @@
         $(this).remove()
       );
       
-      $("#done_button").on("click", (event) ->
+      $("#done_button").on("click", () ->
         input = parseInt($('#number_field').val());
         type = $("input[name=options]:checked").val();
         console.log("creating " + input + " " + $("input[name=options]:checked").val() + " columns on the " + $("input[name=pos_options]:checked").val());
