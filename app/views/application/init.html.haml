@@ -90,6 +90,19 @@
 
   = button_tag "Remove Data", :type => "button", :id => "remove-graphs-GRAPHINDEX-data-GRAPHDATAINDEX", :class => "remove-graphs-data"
 
+#myModal.modal.fade{:role => "dialog"}
+  .modal-dialog
+    / Modal content
+    .modal-content
+      .modal-header
+        %button.close{"data-dismiss" => "modal", :type => "button"} ×
+        %h4.modal-title Your Javascript Initialization Code
+      .modal-body
+        %p Some text in the modal.
+      .modal-footer
+        %button.btn.btn-default{"data-dismiss" => "modal", :type => "button"} Close
+
+
 :javascript
   var graphs = [];
   var data = [];
@@ -98,8 +111,31 @@
 
   $(function(){
     $("#show_link").click(function(){
+      options = $('#seeit-init-wizard form').serializeObject();
+
+      //Replace string value for checkboxes with boolean value
+      for (var key in options.ui){
+        if (options.ui[key] === 'false')
+          options.ui[key] = false;
+        else if (options.ui[key] === 'true')
+          options.ui[key] = true;
+      }
+
+      for (var i in options.data){
+
+        if ((options.data[i].type=="csv file")||(options.data[i].type=="json file")){
+          delete options.data[i].type
+          delete options.data[i].url
+        }
+        else{
+          delete options.data[i].jsonString
+        }
+      }
+
       var link = $.param(options)
       console.log(link)
+      var jsobject = decodeURI(link)
+      console.log(jsobject)
     })
 
     $("#show_init_code").click(function(){
@@ -124,8 +160,8 @@
         }
       }
       var runScript = "SeeIt.new(\n"+JSON.stringify(options, null, '  ')+")";
-      console.log(runScript);
-      confirm(runScript);
+      $('.modal-body').html("<pre>"+runScript+"</pre>")
+      $('#myModal').modal()                      
     });
 
     $("#run").click(function(){
