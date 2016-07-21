@@ -15,6 +15,7 @@
       @splitscreenClass = 'col-md-9'
       @hot = null
       @initLayout()
+      @spreadsheetContextMenuView = new SeeIt.SpreadsheetContextMenuView(@)
 
     initLayout: ->
       @container.html("""
@@ -22,6 +23,11 @@
           <div class="SeeIt panel-heading">
             <span class='title'>#{if @dataset && @dataset.data.length then @dataset.title else ""}</span>
             <span class="SeeIt title-edit-icon glyphicon glyphicon-pencil"></span>
+              <div class="btn-group SeeIt graph-buttons" role="group" style="float: right">
+                <button class="SeeIt export btn btn-default" title='Export Spreadsheet'><span class="glyphicon glyphicon glyphicon-save"></span></button>
+                <button class="SeeIt maximize btn btn-default" title='Maximize Spreadsheet'><span class="glyphicon glyphicon-resize-full"></span></button>
+                <button class="SeeIt remove btn btn-default" title="Remove Spreadsheet"><span class="glyphicon glyphicon-remove"></span></button>
+              </div>
           </div>
           <div class="SeeIt panel-body spreadsheet">
             <div class= "info SeeIt" style= "background-color: #ffedcc;">Numeric</div>             
@@ -31,10 +37,26 @@
         </div>
       """)
 
-
       @initHandlers()
       @resetTable()
       @toggleVisible()
+
+
+    parseRow: (infoArray, index, csvContent) ->
+      self = @
+
+      sizeData = _.size(self.hot.getData());
+      if (index < sizeData - 1) 
+        dataString = "";
+        _.each(infoArray, (col, i) ->
+          dataString += _.contains(col, ",") ? "\"" + col + "\"" : col;
+          dataString += i < _.size(infoArray) - 1 ? "," : "";
+        )
+
+        csvContent += index < sizeData - 2 ? dataString + "\n" : dataString;
+      
+      return csvContent;
+  
 
     toggleFullscreen: ->
       if @isFullscreen 
@@ -131,180 +153,19 @@
 
       @container.find('.title-edit-icon').off('click', @handlers.editTitle).on('click', @handlers.editTitle)
 
-    display_row_menu: (key, options) ->
+      @container.find('.export').off('click').on('click', (e) ->
+        console.log self.dataset
+        # window.open('data:application/vnd.ms-excel,' + @dataset);
+        e.preventDefault();
+      )
 
-      spreadsheetView = @
-      input = 1
+      @container.find('.maximize').off('click').on('click', () -> 
+        console.log 'maximize'
+      )
 
-      @container.find('.SeeIt .spreadsheet').append("""
-        <div id="myModal" class="modal fade">
-            <div class="modal-dialog modal-sm">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                        <h4 class="modal-title">New rows</h4>
-                    </div>
-                    <div class="modal-header">
-                        <div><label>Position:</label></div>
-                        <div class="btn-group" data-toggle="buttons">
-                            <label class="btn active">
-                                <input type="radio" value="below" name="pos_options" id="numeric_radio" autocomplete="off" checked> below
-                            </label>
-                            <label class="btn">
-                                <input type="radio" value="above" name="pos_options" id="categorical_radio" autocomplete="off"> above
-                            </label>
-                        </div>
-                    </div>
-                    <div class="modal-header">
-                        <form role="form">
-                            <div class="form-group">
-                                <label for="number_label" class="control-label">Numer of columns:</label>
-                                <input type="text" class="form-control" id="number_field">
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                        <button type="button" id="done_button" class="btn btn-primary">Done</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-      """)
-
-      $('#myModal').modal('show')
-
-      $(document).off("keypress").on("keypress", ":input:not(textarea)", (event) ->
-        if event.keyCode == 13
-          $('#done_button').click()
-      );
-      
-      $('label').click( () ->
-        $('label').removeClass('selectedBackground')
-        $(this).addClass('selectedBackground')
-        $('#number_field').focus()
-      );    
-
-      $('#myModal').on('shown.bs.modal', () ->
-        $('#number_field').val(1)
-        $('#number_field').focus()
-        spreadsheetView.hot.unlisten() 
-      );
-
-      $('#myModal').on('hidden.bs.modal', () ->
-        $('#number_field').val(1)
-        $(this).remove()
-      );
-      
-      $("#done_button").on("click", () ->
-        input = parseInt($('#number_field').val());    
-
-        if input != null
-          if $("input[name=pos_options]:checked").val() == 'above'
-            for i in [0...input]
-              spreadsheetView.dataset.trigger('row:create', options.end.row)
-          else
-            for i in [0...input]
-              spreadsheetView.dataset.trigger('row:create', options.end.row + 1)
-
-        $('#myModal').modal('hide')
-      );
-      
-    display_column_menu: (key, options) ->
-
-      spreadsheetView = @
-      input = 1
-
-      @container.find('.SeeIt .spreadsheet').append("""
-        <div id="myModal" class="modal fade">
-          <div class="modal-dialog modal-sm">
-              <div class="modal-content">
-                  <div class="modal-header">
-                      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                      <h4 class="modal-title">New columns</h4>
-                  </div>
-                  <div class="modal-header">
-                      <div><label>Position:</label></div>
-                      <div class="btn-group" data-toggle="buttons">
-                          <label class="btn active">
-                              <input type="radio" value="left" name="pos_options" id="numeric_radio" autocomplete="off" checked> Left
-                          </label>
-                          <label class="btn">
-                              <input type="radio" value="right" name="pos_options" id="categorical_radio" autocomplete="off"> Right
-                          </label>
-                      </div>
-                  </div>
-                  <div class="modal-header">
-                      <form role="form">
-                          <div><label>Type:</label></div>
-                        <div class="btn-group" data-toggle="buttons">
-                          <label class="btn active">
-                  <input type="radio" value="numeric" name="options" id="numeric_radio" autocomplete="off" checked> Numeric
-                </label>
-                <label class="btn">
-                  <input type="radio" value="categorical" name="options" id="categorical_radio" autocomplete="off"> Categorical
-                </label>
-                        </div>
-                      </form>
-                  </div>
-                  <div class="modal-header">
-                      <form role="form">
-                          <div class="form-group">
-                              <label for="number_label" class="control-label">Numer of columns:</label>
-                              <input type="text" class="form-control" id="number_field">
-                          </div>
-                      </form>
-                  </div>
-                  <div class="modal-footer">
-                      <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                      <button type="button" id="done_button" class="btn btn-primary">Done</button>
-                      </div>
-                  </div>
-              </div>
-          </div>
-      """)
-
-      $('#myModal').modal('show')
-
-      $(document).off("keypress").on("keypress", ":input:not(textarea)", (event) ->
-        if event.keyCode == 13
-          $('#done_button').click()
-      );
-
-      $('label').click( () ->
-        $('label').removeClass('selectedBackground')
-        $(this).addClass('selectedBackground')
-        $('#number_field').focus()
-      );    
-
-      $('#myModal').on('shown.bs.modal', () ->  
-
-        $('#number_field').val(1)
-        $('#number_field').focus()
-        spreadsheetView.hot.unlisten()
-      );
-
-      $('#myModal').on('hidden.bs.modal', () ->
-        $('#number_field').val(1)
-        $(this).remove()
-      );
-      
-      $("#done_button").on("click", () ->
-        input = parseInt($('#number_field').val());
-        type = $("input[name=options]:checked").val();
-        console.log("creating " + input + " " + $("input[name=options]:checked").val() + " columns on the " + $("input[name=pos_options]:checked").val());
-
-        if input != null
-          if $("input[name=pos_options]:checked").val() == 'left'
-            for i in [0...input]
-              spreadsheetView.dataset.trigger('dataColumn:create', options.end.col, type)
-          else
-            for i in [0...input]
-              spreadsheetView.dataset.trigger('dataColumn:create', options.end.col + 1, type)
-
-        $('#myModal').modal('hide');
-      );    
-
+      @container.find('.remove').off('click').on('click', () -> 
+        $("button:contains('#{self.dataset.title}')").siblings('.show-in-spreadsheet').trigger('click')
+      )
 
     validateUniqueness: (val, data, ignore) ->
       for i in [0...data.length]
@@ -432,19 +293,18 @@
         contextMenu: if !spreadsheetView.dataset.editable then null else {
           items: {
             "multiple_row": {
-              name: 'Insert row',
+              name: "<i class='glyphicon glyphicon-plus'></i> Insert row",
               callback: (key, options) ->
-                spreadsheetView.display_row_menu(key, options)                
+                spreadsheetView.spreadsheetContextMenuView.display_row_menu(key, options)                
             },
-            "hsep1": "---------",
             "multiple_col": {
-              name: "Insert column",
+              name: "<i class='glyphicon glyphicon-plus'></i> Insert column",
               callback: (key, options) ->
-                spreadsheetView.display_column_menu(key, options)
+                spreadsheetView.spreadsheetContextMenuView.display_column_menu(key, options)
             },
             "hsep2": "---------",
             "my_remove_row": {
-              name: "Remove row",
+              name: "<i class='glyphicon glyphicon-minus'></i> Remove row",
               callback: (key, options) ->
                 if spreadsheetView.hot.countRows.call(spreadsheetView.hot) > 1
                   spreadsheetView.dataset.trigger('row:destroy', options.end.row)
@@ -459,7 +319,7 @@
                   , 100)           
             },
             "my_remove_col": {
-              name: "Remove column",
+              name: "<i class='glyphicon glyphicon-minus'></i> Remove column",
               callback: (key, options) ->
                 if spreadsheetView.hot.countCols.call(spreadsheetView.hot) > 1
                   spreadsheetView.dataset.trigger('dataColumn:destroy', options.end.col)
@@ -481,7 +341,7 @@
                 items: [
                   {
                     key: "change_col_type:numeric"
-                    name: "Numeric",
+                    name: "<i class='glyphicon glyphicon-triangle-right'></i> Numeric",
                     callback: (key, options) ->
                       spreadsheetView.dataset.trigger('dataColumn:type:change', options.end.col, "numeric", (success, msg) ->
                         spreadsheetView.displayTypeChangeMsg(options.end.col, success, msg)
@@ -489,7 +349,7 @@
                   },
                   {
                     key: "change_col_type:categorical",
-                    name: "Categorical",
+                    name: "<i class='glyphicon glyphicon-triangle-right'></i> Categorical",
                     callback: (key, options) ->
                       spreadsheetView.dataset.trigger('dataColumn:type:change', options.end.col, "categorical", (success, msg) ->
                         spreadsheetView.displayTypeChangeMsg(options.end.col, success, msg)
