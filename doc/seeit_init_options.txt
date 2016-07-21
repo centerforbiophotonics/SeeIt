@@ -3,7 +3,7 @@ SeeIt.new({
 
   read_url: boolean -- default false. This will tell SeeIt to parse the URL params on the page for init options. The amount of data that can be loaded in this way is limited so data sources should be specified by URL.,
   data: [ single element array or where each element can be:
-    * javascript object like the following
+    * javascript variable like the following
       
         {  
           title: string,  //unique for each instance of Seeit
@@ -31,10 +31,9 @@ SeeIt.new({
         type: string with the value "csv", "json", or "google"
     }
 
-    * javascript object like the following
-    {
-        json_string: JSON formatted string representing any of the other objects
-    }
+    * url string for:
+        - google spreadsheet (will use AJAX with JSONP as current SeeIt version does)
+        - any other URL which returns a json string (if the URL is in the same domain it will make an AJAX call if it’s another domain it will try JSONP)
 
     * native javascript file object (so you can create a form with a file upload and pass it right to SeeIt
   ],  -- default is [] or null
@@ -45,8 +44,7 @@ SeeIt.new({
     data_selector(left side menu): boolean,
     options_bar: boolean,
     graph_add_remove: boolean,
-    dataset_add_remove: boolean,
-    filters: boolean
+    dataset_add_remove: boolean
   },
 
   graph_settings: [

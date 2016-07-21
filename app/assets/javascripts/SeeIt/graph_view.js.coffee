@@ -83,9 +83,7 @@
           if datasetIdx != -1
             # delete previous data if multiple is false
             if @graph.dataset[datasetIdx].multiple == false
-              console.log "DataSet_addData_beforeDelete", @dataset[datasetIdx].data
               @dataset[datasetIdx].data.splice(0, 1) 
-              console.log "DataSet_addData_afterDelete", @dataset[datasetIdx].data
               dataIdx = @dataset[datasetIdx].data.indexOf(new_data.data)
             else
               dataIdx = @dataset[datasetIdx].data.indexOf(new_data.data)
@@ -96,7 +94,6 @@
               this_data.name = new_data.name
 
               # @graph contains multiple: true or false
-              console.log "@graph", @graph
 
               @filterColumn(this_data.data, new_data.data, this_data.name)
 
@@ -111,7 +108,6 @@
                 @filteredDataset[datasetIdx].data.push(this_data.data)
                 @addDataToFooter(new_data)
 
-              console.log @filteredDataset[datasetIdx].data
 
               self = @
 
@@ -205,7 +201,6 @@
 
       @listenTo data.data, 'color:changed', ->
         item.css('background-color', data.data.color)
-        console.log data
       
       # X button
       @container.find(".data-rep[data-id='#{data.data.header}'] .data-rep-remove").on 'click', ->
@@ -419,6 +414,7 @@
             </select>
             <button class="SeeIt add-filter-group btn btn-primary text-center"><div class='SeeIt icon-container'><span class='glyphicon glyphicon-plus'></span></div>Add filter group</button>
             <button class="SeeIt save-filters btn btn-success text-center"><div class='SeeIt icon-container'><span class='glyphicon glyphicon-ok'></span></div>Save Filters</button>
+            <button class="SeeIt save-filters-all btn btn-success text-center"><div class='SeeIt icon-container'><span class='glyphicon glyphicon-ok'></span></div>Apply Filters to All</button>
           </div>
         </div>
       """)
@@ -433,6 +429,11 @@
       @container.find(".expanded-data-container .save-filters").on 'click', (event) ->
         if self.validateFilters.call(self)
           self.saveFilters.call(self)
+
+      @container.find(".expanded-data-container .save-filters-all").on 'click', (event) ->
+        if self.validateFilters.call(self)
+          self.trigger('filter:save-all', self.filterGroups, self.id)
+
 
     validateFilters: ->
       valid = true

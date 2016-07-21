@@ -282,6 +282,10 @@
     initDatasetViewCollection: ->
       @newDatasetMaker()
 
+      if !@app.ui.dataset_add_remove
+        $('.new-dataset').addClass("hidden")
+        $('.new-dataset-form').addClass("hidden")
+
       for i in [0...@data.datasets.length]
         @addDatasetView(@data.datasets[i])
 

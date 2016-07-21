@@ -342,7 +342,7 @@ div.SeeIt.data-drop-zone-container, div.SeeIt.expanded-data-container {
   width: 40%;
 }
 
-.SeeIt.add-filter-group, .SeeIt.remove-filter, .SeeIt.save-filters, .SeeIt.toggle-filters {
+.SeeIt.add-filter-group, .SeeIt.remove-filter, .SeeIt.save-filters, .SeeIt.save-filters-all, .SeeIt.toggle-filters {
   margin-top: 10px;
   width: 100%;
 }
@@ -535,4 +535,10 @@ td.htNumeric.SeeIt-htCenter {
 
 td:not(.htNumeric).SeeIt-htCenter {
   background-color: #ccffcc;
+}
+
+.btn.active {
+  color: white;
+  background-color: #428bca;
+  transition: all 0.3s ease-in-out;
 }

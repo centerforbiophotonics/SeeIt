@@ -83,8 +83,6 @@
                 dependent: dependent_variable
               }
 
-      console.log @graph
-
     refresh: (options) ->
       @container.html("")
       @draw(options)
@@ -127,8 +125,6 @@
           if a.dependent > b.dependent
             return 1
           return 0
-
-      console.log segments
 
       columns = @svg.selectAll('.column')
         .data(segments).enter().append('g')
@@ -259,12 +255,12 @@
         {
           name: "Independent",
           type: "categorical",
-          multiple: false
+          multiple: true
         },
         {
           name: "Dependent",
           type: "categorical",
-          multiple: false
+          multiple: true
         }
       ]
 

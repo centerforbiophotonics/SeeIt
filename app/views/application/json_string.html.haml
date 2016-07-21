@@ -1,0 +1,13 @@
+:javascript
+  var app = null;
+
+  $(function() {
+    app = SeeIt.new({
+      data: [
+         {
+         	jsonString:'{"title":"JSON String Test","dataset":{"labels":["A","B","C","D","E"],"columns":[{"header":"predictor","type":"categorical","data":["Male","Female","Male","Female","Male"]},{"header":"response","type":"categorical","data":["true","false","true","true","false"]}]}}'
+         }
+      ]
+
+    });
+  });

@@ -8,7 +8,7 @@
 		@Validators = {}
 		_.extend(@Validators, SeeIt.Modules.Validators)
 
-		constructor: (@app, data, @title = "New Dataset", @isLabeled = false, @editable = true) ->
+		constructor: (@app, data, @title = "New Dataset", @isLabeled = false, @editable = true, @ID) ->
 			if !data
 				data = {
 					labels: ["1", "2", "3", "4", "5"],
@@ -115,8 +115,8 @@
 			@on 'dataColumn:destroy', (col) ->
 				self.destroyColumn.call(self, col)
 
-			@on 'dataColumn:create', (col) ->
-				self.createColumn.call(self, col)
+			@on 'dataColumn:create', (col, type) ->
+				self.createColumn.call(self, col, type)
 
 			@on 'row:destroy', (row) ->
 				self.destroyRow.call(self, row)
@@ -154,12 +154,12 @@
 				else
 					@data[i].insertElement(row, label, null)
 
-			console.log @data
+			console.log @data + " @data"
 
 			@labels.splice(row, 0, label)
 			@trigger('row:created', row)
 
-		createColumn: (col) ->
+		createColumn: (col, type) ->
 			self = @
 
 			header = @generateLabel(@headers)
@@ -167,9 +167,13 @@
 			dataColumn = []
 
 			for i in [0...@labels.length]
-				dataColumn.push({label: @labels[i], value: null})
+				if type == 'numeric'
+					dataColumn.push({label: @labels[i], value: 0})
+				else
+					dataColumn.push({label: @labels[i], value: null})
+			
+			column = new SeeIt.DataColumn(@app, header, dataColumn, @title, type, @editable)
 
-			column = new SeeIt.DataColumn(@app, header, dataColumn, @title, undefined, @editable)
 			@data.splice(col, 0, column)
 			@listenTo column, 'data:changed', (source, idx) ->
 				console.log 'data:changed triggered in dataset'
