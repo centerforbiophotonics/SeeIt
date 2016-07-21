@@ -32,7 +32,6 @@
       graphContainer.listenTo(@app, 'graph:addData', (graphData) ->
         if graphContainer.graphs[graphData.graph]
           graphContainer.graphs[graphData.graph].addData(graphData.data)
-          console.log "graph_data:", graphData
       )
 
       graphContainer.listenTo(@app, 'graph:filter', (graphData) ->
@@ -153,7 +152,6 @@
         self.trigger 'request:dataset', name, callback
 
       @listenTo newGraph, 'filter:save-all', (filterGroups, name) ->
-        console.log 42
         needs_confirm = false
         filtered_graphs = []
         origin_graph_requirements = ""
@@ -164,7 +162,7 @@
             filtered_graphs.push(id)
           if id == name
             graph.saveFilters()
-            console.log id, "is the origin graph and its saved filterGroups going into the rest are", graph.filterGroups
+            #console.log id, "is the origin graph and its saved filterGroups going into the rest are", graph.filterGroups
             origin_graph_requirements = graph.operator
 
         confirmed = true
@@ -191,7 +189,7 @@
 
           for id, graph of self.graphs
             if id != name
-              console.log id, "filterGroups before saving", graph.filterGroups
+              #console.log id, "filterGroups before saving", graph.filterGroups
               graph.saveFilters()
 
             

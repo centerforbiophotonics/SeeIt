@@ -67,6 +67,8 @@
 
       for i in [0...data.length]
         DataCollection.coerceDataset(data[i], (dataset) ->
+          if dataset.jsonString
+            dataset = JSON.parse(dataset.jsonString)
           if dataset then self.addDataset.call(self, dataset)
         )
 
@@ -90,7 +92,6 @@
       return obj
 
     @coerceDataset = (dataset, callback) ->
-      console.log(dataset)
 
       if !dataset.url then callback dataset
 
