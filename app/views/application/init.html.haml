@@ -64,9 +64,9 @@
 #data-menu-template
   = label_tag 'data[DATAINDEX][type]', 'Data Type:'
   = select_tag 'data[DATAINDEX][type]', options_for_select([['CSV Endpoint', 'csv'],['JSON Endpoint', 'json'],['Google Spreadsheet', 'google spreadsheet'],['JSON File', 'json file'],['CSV File', 'csv file']])
-  = label_tag 'data[DATAINDEX][url]', 'URL', :id => "url-label-DATAINDEX"
+  = label_tag 'data[DATAINDEX][url]', 'URL', :id => "url-data-DATAINDEX"
   = text_field_tag 'data[DATAINDEX][url]', '' 
-  %input{:type => "file", :id => "upload-file-DATAINDEX", :class => "upload-file hidden"}
+  %input{:type => "file", :id => "upload-data-DATAINDEX", :class => "upload-data hidden"}
   = label_tag 'data[DATAINDEX][jsonString]', 'HIDDENtext', :class => "hidden"
   = text_field_tag 'data[DATAINDEX][jsonString]', ''
   = button_tag "Remove Data", :type => "button", :id => "remove-data-DATAINDEX", :class => "remove-data"
@@ -108,6 +108,17 @@
   var data = [];
   var datasets = [];
   var options;
+  var removeOldSets = function(datasets, removeIndex){
+    var i = 0;
+    while(i < datasets.length){
+      if (datasets[i].dataIndex == removeIndex){
+        datasets.splice(i, 1)
+      }
+      else{
+        i++
+      }
+    }  
+  }
 
   $(function(){
     $("#show_link").click(function(){
@@ -197,6 +208,7 @@
 
     })
 
+
     $("#add-data").click(function(){
       
       var index = data.length;
@@ -212,21 +224,78 @@
 
       $("#data_"+index+"_type").on("change", function(){
         $("#data_"+index+"_url").show()
-        $("#url-label-"+index).show()
-        $("#upload-file-"+index).addClass("hidden")
+        $("#url-data-"+index).show()
+        $("#upload-data-"+index).addClass("hidden")
         if (($(this).val() == "json file")||($(this).val() == "csv file")){
           $("#data_"+index+"_url").hide()
-          $("#url-label-"+index).hide()
-          $("#upload-file-"+index).removeClass("hidden")
+          $("#url-data-"+index).hide()
+          $("#upload-data-"+index).removeClass("hidden")
+        }
+        if (datasets.length){
+          removeOldSets(datasets, index)
         }
       })
 
-      $("#upload-file-"+index).on("change", function(){
+      $("#data_"+index+"_url").blur(function(){
+        var url = $("#data_"+index+"_url").val()
+        var type = $("#data_"+index+"_type").val()
+        if (datasets.length){
+          removeOldSets(datasets, index)
+        }
+        callback = function(dataset){
+          dataset.dataIndex = index
+          datasets.push(dataset)
+        }
+        error_cb = function(){
+          console.log("There was an error")
+        }
+        switch (type) {
+          case 'csv':
+            csv_manager = new SeeIt.CSVManager()
+            csv_manager.downloadFromServer(url,function(data){
+              csv_data = SeeIt.CSVManager.parseCSV(data.data)
+
+              new_data = {
+                isLabeled: true,
+                title: data.name,
+                dataset: csv_data
+              }
+
+              callback(new_data)
+            }, error_cb)
+            break;
+
+          case 'json':
+            json_manager = new SeeIt.JsonManager()
+
+            json_manager.downloadFromServer(url, callback, error_cb)
+            break;
+
+          case 'google spreadsheet':
+            googleSpreadsheet = new SeeIt.GoogleSpreadsheetManager(url, function(success, collection){
+              if (success){
+                collection.forEach(function(dataset){
+                  callback(dataset)
+                })
+              }
+              else{
+                error_cb
+              }
+            })
+            googleSpreadsheet.getData()
+            break;
+        }
+      })
+
+      $("#upload-data-"+index).on("change", function(){
         var filereader;
         var myData;
         var file = this.files[0];
         var filename = this.files[0].name.split('.')[0];
         var filetype = $("#data_"+index+"_type").val();
+        if (datasets.length){
+          removeOldSets(datasets, index)
+        }
 
         if(window.File && window.FileReader && window.FileList && window.Blob) {
 
@@ -236,7 +305,7 @@
             filereader.onload = function(){
               txtRes = filereader.result;
               myData = Papa.parse(txtRes, {skipEmptyLines: true}).data;
-              dataset = {"isLabeled": "true", "title": filename, "dataset": myData};
+              dataset = {"isLabeled": "true", "title": filename, "dataset": myData, "dataIndex": index};
               datasets.push(dataset)
               $("#data_"+index+"_jsonString").val(JSON.stringify(dataset))
             }
@@ -246,6 +315,7 @@
             filereader.onload = function(){
               txtRes = filereader.result;
               myData = JSON.parse(txtRes);
+              myData.dataIndex = index
               datasets.push(myData)
               $("#data_"+index+"_jsonString").val(JSON.stringify(myData))
             }
@@ -312,15 +382,17 @@
           $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_column_header").html("")
 
           for (var i in datasets) {
-            if (datasets[i].title == $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_dataset_title").val())
+            if (datasets[i].title == $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_dataset_title").val()){
               selectedDataset = datasets[i].dataset
-              if ($("#data_"+i+"_type").val() == "csv file"){
+
+              if (($("#data_"+datasets[i].dataIndex+"_type").val() == "csv file")||($("#data_"+datasets[i].dataIndex+"_type").val() == "csv")||($("#data_"+datasets[i].dataIndex+"_type").val() == "json")){
                 for (var j in selectedDataset[0]){
                   if (j != 0){
                     $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_column_header").append("<option>"+selectedDataset[0][j]+"</option>")
                   }
                 }
               }
+            }
           }
 
           for (var i in selectedDataset.columns) {
@@ -350,12 +422,19 @@
       $(".remove-data").off("click").on("click", function(){
 
         var dataIndex = $(this).attr("id").split("-")[2];
-
+        removeOldSets(datasets, dataIndex)
+        for (var i in datasets){
+          if (datasets[i].dataIndex > dataIndex)
+            datasets[i].dataIndex--
+        }
         $("#data-"+dataIndex).remove();
 
         data.forEach(function(d, i){
           if(i > dataIndex){
             var data = $("#data-"+i)
+            var type = $("#data_"+i+"_type").val()
+            var url = $("#data_"+i+"_url").val()
+            var jsonString = $("#data_"+i+"_jsonString").val()
 
             var new_data_html = data.
               html().
@@ -364,6 +443,9 @@
               replace(new RegExp("data_"+i, 'g'), "data_"+(i-1));
 
             data.html(new_data_html);
+            $("#data_"+(i-1)+"_type").val(type)
+            $("#data_"+(i-1)+"_url").val(url)
+            $("#data_"+(i-1)+"_jsonString").val(jsonString)
             data.attr("id", "data-"+(i-1));
           }
         });
