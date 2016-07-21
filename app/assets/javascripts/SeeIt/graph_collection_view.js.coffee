@@ -2,7 +2,8 @@
   class GraphCollectionView
     _.extend(@prototype, Backbone.Events)
 
-    constructor: (@app, @container, @graphs_editable) ->
+    constructor: (@app, @container, @graphs_editable, @data) ->
+      @graphView = []
       @graphs = {}
       @graphId = "Graph 1"
       @handlers = {}
@@ -30,8 +31,9 @@
       )
 
       graphContainer.listenTo(@app, 'graph:addData', (graphData) ->
-        console.log "graph_container: ", graphContainer
+        # console.log "graph_collection_view graph_container: ", graphData
         if graphContainer.graphs[graphData.graph]
+          # console.log "graph_collection_view graphData: ", graphData
           graphContainer.graphs[graphData.graph].addData(graphData.data)
       )
 
@@ -131,7 +133,7 @@
         </li>
       """)
 
-      newGraph = new SeeIt.GraphView(@app, @graphId, @container.find(".graph.list-group-item:last"), @handlers.removeGraph, graphType, @graphs_editable)
+      newGraph = new SeeIt.GraphView(@app, @graphId, @container.find(".graph.list-group-item:last"), @handlers.removeGraph, graphType, @graphs_editable, @data)
       @graphs[@graphId] = newGraph
 
       @listenTo newGraph, 'graph:id:change', (oldId, newId, cb) ->
@@ -154,6 +156,11 @@
 
       newGraph.trigger('request:dataRoles', (dataRoles) ->
         self.trigger('graph:created', self.graphId, dataRoles)
+      )
+      
+      # listen for trigger in graph_view
+      @listenTo(newGraph, 'graph:addData', (dataGraph) ->
+        self.trigger('graph:addData', dataGraph)
       )
 
 

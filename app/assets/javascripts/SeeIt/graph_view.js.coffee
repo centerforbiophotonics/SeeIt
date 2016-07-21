@@ -2,7 +2,7 @@
   class GraphView
     _.extend(@prototype, Backbone.Events)
 
-    constructor: (@app, @id, @container, @destroyCallback, @graphType, @graph_editable) ->
+    constructor: (@app, @id, @container, @destroyCallback, @graphType, @graph_editable, @data) ->
       self = @
       @maximized = false
       @filterGroups = []
@@ -71,6 +71,8 @@
       ])
 
     addData: (data) ->
+      console.log "addData function in graph_view"
+      console.log "data ", data
       for j in [0...data.length]
         new_data = data[j]
 
@@ -371,7 +373,7 @@
             </div>
           </div>
           <div class="SeeIt graph-panel-content panel-collapse collapse in">
-            <div class="SeeIt panel-body target" style='min-height: 300px'>
+            <div class="SeeIt panel-body" style='min-height: 300px'>
               <div class="SeeIt options-wrapper hidden col-md-3"></div>
               <div class="SeeIt graph-wrapper"></div>
             </div>
@@ -391,6 +393,20 @@
       @container.find(".collapse-footer").on('click', @handlers.collapseFooter)
 
 
+    # data not being returned
+    dataSetName: (buttonName, setOfData) ->
+      self = @
+      # console.log "setOfData: ", setOfData.data
+      # value = {}
+      match = null
+      setOfData.data.forEach (i) ->
+        # console.log "eachDataSet: ", i.header, buttonName
+        if i.header == buttonName
+          console.log "SUCCESSSSSSSSSSSSSSSSSSSSS", i
+          match = i
+          
+      return match
+
     initDataContainers: ->
       self = @
       dataFormat = @graph.dataFormat()
@@ -401,7 +417,7 @@
         self.container.find('.footer-row').append("""
           <div class='SeeIt data-drop-zone-container col-lg-#{cols}'>
             <h3 class='SeeIt role-name text-center'>#{if dataFormat.length > 1 then role.name else "Data"}</h3>
-            <div class='SeeIt data-drop-zone' data-id="#{role.name}">
+            <div id="#{self.id}" class='SeeIt data-drop-zone' data-id="#{role.name}">
             </div>
           </div>
         """)
@@ -437,23 +453,35 @@
 
       console.log "initDataContainers"
 
-      console.log "@container", @container.find('.target')
+      console.log "@container", @container.find('.data-drop-zone')
 
       dragOverListener = (event) ->
         event.preventDefault()
 
       dragEnterListener = (event) ->
         event.preventDefault()
-        console.log "enter"      
+        event.target.style.background = '#FFAFAF'
+        # console.log "enter"      
 
-      dropListener = (event)->
+      dragLeaveListener = (event) ->
         event.preventDefault()
+        event.target.style.background = ''
+
+      dropListener = (event) ->
+        event.preventDefault()
+        event.target.style.background = ''
         console.log "drop"
-        console.log $("div").find(".graph-title-content").text()
+        console.log "return data: ", self.dataSetName(event.originalEvent.dataTransfer.getData("text"), self.data.datasets[0]) # doesn't return anything
+        # console.log "self.data, ", self.data.datasets[0].data.header
+        # console.log "source data: ", event.originalEvent.dataTransfer.getData("text")
+        # console.log $('div').find().index()
+        self.trigger('graph:addData', {graph: $(this).attr('id'), data:[{name: 'default', data: self.dataSetName(event.originalEvent.dataTransfer.getData("text"), self.data.datasets[0])}]})
                
-      @container.find('.target').off('drop').on('drop', dropListener)
-      @container.find('.target').off('dragenter').on('dragenter', dragEnterListener)
-      @container.find('.target').off('dragover').on('dragover', dragOverListener)
+      @container.find('.data-drop-zone').off('drop').on('drop', dropListener)
+      @container.find('.data-drop-zone').off('dragenter').on('dragenter', dragEnterListener)
+      @container.find('.data-drop-zone').off('dragover').on('dragover', dragOverListener)
+      @container.find('.data-drop-zone').off('dragleave').on('dragleave', dragLeaveListener)
+
 
     validateFilters: ->
       valid = true

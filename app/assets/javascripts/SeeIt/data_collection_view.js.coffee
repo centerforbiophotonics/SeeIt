@@ -304,7 +304,7 @@
     # Access native properties of the javascript listener
     dragListener:->
       $('.source').on 'dragstart', (event) ->
-        console.log "START DRAG"
+        console.log "drag start", event.target.id
         event.originalEvent.dataTransfer.setData("text", event.target.id) 
 
     toggleVisible: ->

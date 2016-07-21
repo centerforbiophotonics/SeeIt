@@ -14,7 +14,7 @@
           <div class="SeeIt data-column-panel-body panel-body">
             <div class="SeeIt btn-group" role="group" style="width: 100%">
               <div role="group" title='Add to graph' class="data-column-button SeeIt btn-group SeeIt dropdown-container" style='width: 25%'></div>
-              <button draggable="true" type="button" class="data-column-button SeeIt btn btn-default data source" style='width: 50%'>#{@data.header}</button>
+              <button id="#{@data.header}"draggable="true" type="button" class="data-column-button SeeIt btn btn-default data source" style='width: 50%'>#{@data.header}</button>
               <button type="button" title='Change Color' class="color-picker data-column-button SeeIt btn btn-default" style="background-color: #{@data.color}; width: 25%">
               </button>
             </div>
@@ -85,16 +85,13 @@
 
     addGraphOption: (graphId, dataRoles) ->
       self = @
-      # self.trigger('dragdrop:newGraph')
-      console.log "addGraphOption, graphId, ", graphId, dataRoles
       @graphRoles[graphId] = dataRoles
 
       if dataRoles.length == 1
         @container.find('.SeeIt.dropdown-menu.main-graph-dropdown').append("<li class='add_to_graph graph_li' style='box-shadow: none'><a href='#' class='dropdown_child' data-id='#{graphId}'>#{graphId}</a></li>")
 
         selectGraph = (event) ->
-          console.log "event", event
-          console.log "select graph from dataset"
+          console.log "selectGraph: ", $(@).find('.dropdown_child').attr('data-id') 
           #data: {name: "default", data: self.data} is a temporary placeholder. I need to pass the data-role info to this view
           if $(@).find('.disabled').length == 0
             self.trigger('graph:addData', {graph: $(@).find('.dropdown_child').attr('data-id'), data: [{name: dataRoles[0].name, data: self.data}]})
