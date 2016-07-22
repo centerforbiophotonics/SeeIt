@@ -2,7 +2,7 @@
   class DataColumn
     _.extend(@prototype, Backbone.Events)
     
-    constructor: (@app, @header, data, @datasetTitle, @type, @color, editable = true) ->
+    constructor: (@app, @header, data, @datasetTitle, @type, @color, editable = true, @dataSet) ->
       if !@color then @color = SeeIt.Utils.getRandomColor()
 
       dataArray = []
@@ -142,6 +142,11 @@
     setHeader: (header) ->
       @header = header
       @trigger('header:changed')
+
+    @registerListeners: ->
+      @listenTo @dataSet, 'palette:change', (paletteType) -> 
+        console.log("bottom")
+
 
     @new: ->
       # Being created from array of arrays

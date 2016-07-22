@@ -8,7 +8,7 @@
 		@Validators = {}
 		_.extend(@Validators, SeeIt.Modules.Validators)
 
-		constructor: (@app, data, @title = "New Dataset", @isLabeled = false, @editable = true) ->
+		constructor: (@app, data, @title = "New Dataset", @isLabeled = false, @editable = true, @dataCollection) ->
 			if !data
 				data = {
 					labels: ["1", "2", "3", "4", "5"],
@@ -138,6 +138,10 @@
 			@on 'request:values:unique', (colIdx, callback) ->
 				callback self.data[colIdx].uniqueData()
 
+			@listenTo @dataCollection, 'palette:change', (paletteType) -> 
+        		self.trigger('palette:change', paletteType)
+
+
 		generateLabel: (labels) ->
 			i = 1
 
@@ -169,7 +173,7 @@
 			for i in [0...@labels.length]
 				dataColumn.push({label: @labels[i], value: null})
 
-			column = new SeeIt.DataColumn(@app, header, dataColumn, @title, undefined, @editable)
+			column = new SeeIt.DataColumn(@app, header, dataColumn, @title, undefined, @editable, @)
 			@data.splice(col, 0, column)
 			@listenTo column, 'data:changed', (source, idx) ->
 				console.log 'data:changed triggered in dataset'
@@ -258,7 +262,6 @@
 				fillWithUndefined: (arr,count) ->
 					for i in [0...count]
 						arr.push(undefined)
-
 					arr
 
 				initData: ->

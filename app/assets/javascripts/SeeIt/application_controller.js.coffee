@@ -24,6 +24,29 @@
       #TODO: Add more validation of data
       data = if params.data != undefined then params.data else []
 
+      
+      
+      color = d3.scale.linear().domain([-1, 0, 1]).range(["red", "white", "green"])
+      color2 = d3.scale.linear().domain([0,1]).range("white", "black")
+      colorRed = []
+      colorGreen = []
+      blackAndWhite = [];
+      blackAndWhite.push((color2(num/100))) for num in [0..100]
+      colorRed.push(color(-num/100) ) for num in [0..100]
+      colorGreen.push(color(num/100) ) for num in [0..100]
+
+      redPalette = new SeeIt.ColorPalette('Red', colorRed)
+      greenPalette = new SeeIt.ColorPalette('Green', colorGreen)
+      blackPalette = new SeeIt.ColorPalette("Black and White", blackAndWhite)
+      @paletteTypes = [];
+      @paletteTypes.push({name: blackPalette.name, class: blackPalette })
+      @paletteTypes.push({name: redPalette.name, class: redPalette })
+      @paletteTypes.push({name: greenPalette.name, class: greenPalette })  
+
+
+
+
+
       #Initialize UI options
       @ui = {
         editable:       if ui.editable != undefined then ui.editable else true,
@@ -70,7 +93,8 @@
         toolbar_params = [
           {class: "addGraph", title: "Add graph", handler: @handlers.addGraph, icon: "<span class='glyphicon glyphicon-plus'></span>", type: "dropdown", options: @graphTypes},
           {class: "downloadJSON", title: "Download JSON", handler: @handlers.downloadJson, type: "button"},
-          {class: "downloadInitOptions", title: "Save SeeIt", handler: @handlers.saveInitJson, type: "button"}
+          {class: "downloadInitOptions", title: "Save SeeIt", handler: @handlers.saveInitJson, type: "button"},
+          {class: "changePalette", title: "Color Palette", handler: @handlers.changePalette, icon: "<span class='glyphicon glyphicon-flag'></span>", type: "dropdown", options: @paletteTypes}
         ]
 
         if @ui.dataMenu then toolbar_params.unshift {class: "toggleData", title: "Show/Hide Data", handler: @handlers.toggleDataVisible, type: "button"}
@@ -120,10 +144,10 @@
 
     loadGraphs: ->
       @graphTypes = []
-
       for name, graph of SeeIt.Graphs
         @graphTypes.push({name: SeeIt.GraphNames[name], class: graph})
-
+    
+    
     ###*
       # Sets active dataset in spreadsheet to the given dataset
       # @param {Object} dataset - DatasetModel instance
@@ -146,14 +170,16 @@
           graphName = $(@).attr('data-id')
           graphType = app.graphTypes.filter((g) -> g.name == graphName)[0]
 
-
           app.trigger('graph:create', graphType)
           # app.graphCollectionView.addGraph()
           # #DEMO PATCH
           # app.dataCollectionView.datasetViewCollection.forEach (datasetView) ->
           #   datasetView.dataColumnViews.forEach (dataView) ->
           #     dataView.init.call(dataView)
-
+        changePalette: ->
+          paletteName = $(@).attr('data-id')
+          paletteType = app.paletteTypes.filter((g) -> g.name == paletteName ) [0]
+          app.trigger('palette:change', paletteType)
         saveCSVData: (event) ->
           event.stopPropagation()
 

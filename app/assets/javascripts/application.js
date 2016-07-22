@@ -52,4 +52,5 @@
 //= require SeeIt/graph_view
 //= require SeeIt/graph_collection_view
 //= require SeeIt/application_view
+//= require SeeIt/color_palette
 //= require SeeIt/application_controller

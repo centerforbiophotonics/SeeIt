@@ -2,6 +2,7 @@
 @SeeIt.Modules = {}
 @SeeIt.Graphs = {}
 @SeeIt.GraphNames = {}
+@SeeIt.ColorPalette ={}
 appContext = @
 
 @SeeIt.new = (container) ->

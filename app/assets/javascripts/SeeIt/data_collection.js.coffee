@@ -48,6 +48,9 @@
       @listenTo @app, 'request:dataset', (name, callback) ->
         found_dataset = self.datasets.filter((d) -> d.title == name)
 
+      @listenTo @app, 'palette:change', (paletteType) -> 
+        self.trigger('palette:change', paletteType)
+
         if found_dataset.length
           found_dataset = found_dataset[0]
           callback found_dataset
@@ -71,7 +74,7 @@
       @initialized = true
 
     addDataset: (data) ->
-      dataset = new SeeIt.Dataset(@app, data.dataset, data.title, data.isLabeled, @editable)
+      dataset = new SeeIt.Dataset(@app, data.dataset, data.title, data.isLabeled, @editable, @)
      	@datasets.push(dataset)
 
       if @initialized then @trigger('dataset:created', dataset)
