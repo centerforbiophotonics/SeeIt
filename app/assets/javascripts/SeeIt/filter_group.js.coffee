@@ -153,8 +153,7 @@
 
       for filter, i in givenFilterGroup.filters
         self.filters[i].clone(filter)
-      @filterData = givenFilterGroup.getFilters()          #NOT PROPERLY COPIED
-      #@filterOperator = givenFilterGroup.filterOperator  #NOT PROPERLY COPIED
+      @filterData = givenFilterGroup.getFilters()    
       @container.find(".filter-group-type").val(givenFilterGroup.filterData[0])
 
 

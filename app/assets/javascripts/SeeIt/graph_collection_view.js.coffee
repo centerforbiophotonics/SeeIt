@@ -163,7 +163,6 @@
             filtered_graphs.push(id)
           if id == name
             graph.saveFilters()
-            #console.log id, "is the origin graph and its saved filterGroups going into the rest are", graph.filterGroups
             origin_graph_requirements = graph.operator
 
         confirmed = true
@@ -177,7 +176,6 @@
                 filterGroup.removeFilterGroup()
               graph.filterGroups = []
               for filterGroup, i in filterGroups
-                #graph.filterGroups.push(filterGroup)
               
                 graph.addFilterGroup()
                 if filterGroup.filters.length > 1
@@ -190,7 +188,6 @@
 
           for id, graph of self.graphs
             if id != name
-              #console.log id, "filterGroups before saving", graph.filterGroups
               graph.saveFilters()
 
             
