@@ -209,8 +209,6 @@
         item.css('background-color', data.data.color)
         console.log data
       
-
-
       # X button
       @container.find(".data-rep[data-id='#{data.data.header}'] .data-rep-remove").on 'click', ->
         self.removeData.call(self, data)
@@ -394,17 +392,12 @@
 
 
     # data not being returned
-    dataSetName: (buttonName, setOfData) ->
-      self = @
-      # console.log "setOfData: ", setOfData.data
-      # value = {}
+    findDataSet: (buttonName, setOfData) ->
       match = null
       setOfData.data.forEach (i) ->
-        # console.log "eachDataSet: ", i.header, buttonName
         if i.header == buttonName
-          console.log "SUCCESSSSSSSSSSSSSSSSSSSSS", i
           match = i
-          
+
       return match
 
     initDataContainers: ->
@@ -460,22 +453,21 @@
 
       dragEnterListener = (event) ->
         event.preventDefault()
-        event.target.style.background = '#FFAFAF'
-        # console.log "enter"      
+        event.target.style.background = '#BAEA65'      
 
       dragLeaveListener = (event) ->
         event.preventDefault()
-        event.target.style.background = ''
+        event.target.style.background = '#FFAFAF'
 
       dropListener = (event) ->
         event.preventDefault()
-        event.target.style.background = ''
+        $(".data-drop-zone").css("background-color", '')
         console.log "drop"
-        console.log "return data: ", self.dataSetName(event.originalEvent.dataTransfer.getData("text"), self.data.datasets[0]) # doesn't return anything
+        console.log "return data: ", self.findDataSet(event.originalEvent.dataTransfer.getData("text"), self.data.datasets[0])
         # console.log "self.data, ", self.data.datasets[0].data.header
         # console.log "source data: ", event.originalEvent.dataTransfer.getData("text")
         # console.log $('div').find().index()
-        self.trigger('graph:addData', {graph: $(this).attr('id'), data:[{name: 'default', data: self.dataSetName(event.originalEvent.dataTransfer.getData("text"), self.data.datasets[0])}]})
+        self.trigger('graph:addData', {graph: $(this).attr('id'), data:[{name: 'default', data: self.findDataSet(event.originalEvent.dataTransfer.getData("text"), self.data.datasets[0])}]})
                
       @container.find('.data-drop-zone').off('drop').on('drop', dropListener)
       @container.find('.data-drop-zone').off('dragenter').on('dragenter', dragEnterListener)

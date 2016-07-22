@@ -31,9 +31,7 @@
       )
 
       graphContainer.listenTo(@app, 'graph:addData', (graphData) ->
-        # console.log "graph_collection_view graph_container: ", graphData
         if graphContainer.graphs[graphData.graph]
-          # console.log "graph_collection_view graphData: ", graphData
           graphContainer.graphs[graphData.graph].addData(graphData.data)
       )
 

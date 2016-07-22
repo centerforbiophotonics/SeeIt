@@ -306,6 +306,7 @@
       $('.source').on 'dragstart', (event) ->
         console.log "drag start", event.target.id
         event.originalEvent.dataTransfer.setData("text", event.target.id) 
+        $(".data-drop-zone").css("background-color", "#FFAFAF")
 
     toggleVisible: ->
       @container.toggle()

@@ -79,7 +79,6 @@
       delete @graphRoles[oldId]
 
     removeGraphOption: (graphId) ->
-      console.log "REMOOVVVVV"
       @container.find("li a[data-id='#{graphId}']").remove()
       delete @graphRoles[graphId]
 
@@ -135,7 +134,6 @@
 
     selectGraph: ->
       self = @
-      # console.log "event", event
       console.log "select graph from dataset"
       #data: {name: "default", data: self.data} is a temporary placeholder. I need to pass the data-role info to this view
       if $(@).find('.disabled').length == 0
