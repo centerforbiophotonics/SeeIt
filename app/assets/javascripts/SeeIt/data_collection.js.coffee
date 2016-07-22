@@ -92,10 +92,6 @@
       return obj
 
     @coerceDataset = (dataset, callback) ->
-<<<<<<< HEAD
-=======
-
->>>>>>> dev
       if !dataset.url then callback dataset
 
       error_cb = ->

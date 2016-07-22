@@ -71,6 +71,19 @@
         self.trigger('graphs:requestIDs', cb)
       )
 
+    initHandlers: ->
+      self = @
+      self.handlers = {
+        dragListener: (event) ->
+          event.originalEvent.dataTransfer.setData("text", event.target.id) 
+          event.originalEvent.dataTransfer.setData("datasetName", $(this).attr('name'))
+          $(".data-drop-zone").css("background-color", "#FFAFAF")
+
+        dragEndListener: (event) ->
+          event.preventDefault()
+          $(".data-drop-zone").css("background-color", "")
+      }
+
     newDatasetMaker: ->
       @container.find('.dataset-list').append("""
         <div class='SeeIt dataset-container new-dataset'>
@@ -291,7 +304,9 @@
     addDatasetView: (data) ->
       @container.find('.dataset-list .new-dataset').before("<div class='SeeIt dataset-container'></div>")
       datasetView = new SeeIt.DatasetView(@app, @container.find(".SeeIt.dataset-container:not(.new-dataset)").last(), data)
-      @dragListener()
+      @initHandlers()
+      @container.find('.source').off('dragstart').on('dragstart', @handlers.dragListener)
+      @container.find('.source').off('dragend').on('dragend', @handlers.dragEndListener)
       @initDatasetListeners(datasetView)
       datasetView.trigger('populate:dropdowns')
       @datasetViewCollection.push(datasetView)
@@ -302,14 +317,6 @@
       )
 
       return datasetView
-
-    # Return which DOM element triggered the event
-    # Sets the drag operation's drag data to the specified data and type
-    # Access native properties of the javascript listener
-    dragListener:->
-      $('.source').on 'dragstart', (event) ->
-        event.originalEvent.dataTransfer.setData("text", event.target.id) 
-        $(".data-drop-zone").css("background-color", "#FFAFAF")
 
     toggleVisible: ->
       @container.toggle()

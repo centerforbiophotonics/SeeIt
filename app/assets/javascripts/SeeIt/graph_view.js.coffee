@@ -268,7 +268,6 @@
           self.graph.trigger('options:update', self.options.getValues())
       )
 
-
     updateFilters: (filterData) ->
       @filterGroups.forEach (group) ->
         group.removeFilterGroup()
@@ -283,11 +282,13 @@
 
         @saveFilters()
 
-    findDataSet: (buttonName, setOfData) ->
+    findDataSet: (datasetName, buttonName, setOfData) ->
       match = null
-      setOfData.data.forEach (i) ->
-        if i.header == buttonName
-          match = i
+      setOfData.datasets.forEach (value, index) ->
+        if value.title == datasetName
+          value.data.forEach (i) ->
+            if i.header == buttonName
+              match = i
 
       return match
 
@@ -298,7 +299,6 @@
         cb(graph.graph.dataFormat())
 
       @on 'size:change', ->
-        # graph.setGraphHeight.call(graph)
         if graph.initialized then graph.graph.trigger('size:change', graph.options.getValues())
 
       @on 'filter', (filterData) ->
@@ -357,15 +357,19 @@
           event.preventDefault()
           event.target.style.background = '#FFAFAF'
 
+        dragEndListener: (event) ->
+          event.preventDefault()
+          console.log "HELLOOO"
+          event.target.style.background = ''
+
         dropListener: (event) ->
           event.preventDefault()
+          console.log "hello"
           $(".data-drop-zone").css("background-color", '')
-          graph.trigger('graph:addData', {graph: $(this).attr('id'), data:[{name: 'default', data: graph.findDataSet(event.originalEvent.dataTransfer.getData("text"), graph.data.datasets[0])}]})
-            
+          dataSetName = event.originalEvent.dataTransfer.getData("datasetName")
+          btnName = event.originalEvent.dataTransfer.getData("text")
+          graph.trigger('graph:addData', {graph: $(this).attr('id'), data:[{name: $(this).attr('data-id'), data: graph.findDataSet(dataSetName, btnName, graph.data)}]})
       }
-
-      # $(window).on 'resize', ->
-      #   graph.setGraphHeight.call(graph)
 
     initLayout: ->
       @container.html("""
@@ -452,11 +456,11 @@
       @container.find('.data-drop-zone').off('dragenter').on('dragenter', @handlers.dragEnterListener)
       @container.find('.data-drop-zone').off('dragover').on('dragover', @handlers.dragOverListener)
       @container.find('.data-drop-zone').off('dragleave').on('dragleave', @handlers.dragLeaveListener)
+      @container.find('.data-drop-zone').off('dragend').on('dragend', @handlers.dragEndListener)
 
       @container.find(".expanded-data-container .save-filters-all").on 'click', (event) ->
         if self.validateFilters.call(self)
           self.trigger('filter:save-all', self.filterGroups, self.id)
-
 
     validateFilters: ->
       valid = true
@@ -562,19 +566,6 @@
       if @graph then @graph.destroy()
       @container.remove()
 
-    # setGraphHeight: ->
-    #   @container.find('.graph-wrapper').height(
-    #     if @maximized
-    #       (
-    #         @container.find('.graph-panel').innerHeight() -
-    #         @container.find('.panel-heading').outerHeight() -
-    #         @container.find('.panel-footer').outerHeight() -
-    #         30
-    #       )
-    #     else
-    #       300
-    #   )
-
     maximize: ->
       if @collapsed
         @container.find(".collapse-btn").trigger('click')
@@ -582,8 +573,6 @@
       @container.toggleClass('maximized')
       @container.find('.maximize .glyphicon').toggleClass('glyphicon-resize-full glyphicon-resize-small')
       @maximized = !@maximized
-
-      # @setGraphHeight()
 
       @graph.trigger('size:change', @options.getValues())
       @options.trigger('graph:maximize', @maximize)
