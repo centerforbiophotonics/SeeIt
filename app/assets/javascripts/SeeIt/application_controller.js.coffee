@@ -204,11 +204,6 @@
       app = @
       data = @model.addDataset(dataset)
 
-      # @listenTo(app.dataCollectionView, 'graphs:requestIDs', (cb) ->
-      #   app.trigger('graphs:requestIDs', cb)
-      # )
-      # @dataCollectionView.addDatasetView(data)
-
     ###*
       # Initialize Backbone event listeners in which controller listens to members
     ###
@@ -285,7 +280,7 @@
       @listenTo app.graphCollectionView, 'request:values:unique', (dataset, colIdx, cb) ->
         app.trigger 'request:values:unique', dataset, colIdx, cb
 
-      @listenTo app.graphCollectionView, 'request:dataset', (name, callback) ->
+        @listenTo app.graphCollectionView, 'request:dataset', (name, callback) ->
         app.trigger 'request:dataset', name, callback
 
     ###*

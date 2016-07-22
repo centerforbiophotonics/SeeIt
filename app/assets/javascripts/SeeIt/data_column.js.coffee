@@ -69,10 +69,7 @@
 
         if callback then callback(true, "Data type changed to #{type}")
 
-
-
         @trigger('type:changed', type)
-
 
       @compact = ->
         if @staleData then setDataArray()
@@ -140,7 +137,6 @@
     getHeader: ->
       return @header
 
-
     setHeader: (header) ->
       @header = header
       @trigger('header:changed')
@@ -152,7 +148,6 @@
           header = dataset[0][column] + ''
           data = []
 
-
           for i in [1...dataset.length]
             data.push({label: dataset[i][0], value: dataset[i][column]})
 
@@ -162,13 +157,11 @@
         return ((app, data, column, title, type, color, editable) ->
           dataColumn = []
 
-
           for i in [0...data.columns[column].data.length]
             dataColumn.push({label: data.labels[i], value: data.columns[column].data[i]})
 
           return new DataColumn(app, data.columns[column].header, dataColumn, title, type, color, editable)
         ).apply(@,arguments)
-
 
   DataColumn
 ).call(@)
