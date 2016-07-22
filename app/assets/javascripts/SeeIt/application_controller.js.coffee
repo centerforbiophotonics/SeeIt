@@ -147,13 +147,7 @@
           graphName = $(@).attr('data-id')
           graphType = app.graphTypes.filter((g) -> g.name == graphName)[0]
 
-
           app.trigger('graph:create', graphType)
-          # app.graphCollectionView.addGraph()
-          # #DEMO PATCH
-          # app.dataCollectionView.datasetViewCollection.forEach (datasetView) ->
-          #   datasetView.dataColumnViews.forEach (dataView) ->
-          #     dataView.init.call(dataView)
 
         saveCSVData: (event) ->
           event.stopPropagation()
@@ -253,10 +247,6 @@
 
       @listenTo(app.model, 'dataset:created', (dataset) ->
         app.trigger('dataset:created', dataset)
-
-        # if !app.spreadsheetVisible then app.toggleSpreadsheetVisible.call(app)
-
-        # app.trigger('spreadsheet:load', dataset)
       )
 
       @listenTo(app.graphCollectionView, 'graph:created', (graphId, dataRoles) ->

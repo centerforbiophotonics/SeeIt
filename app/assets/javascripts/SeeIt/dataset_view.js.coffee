@@ -77,7 +77,7 @@
     addData: (dataColumn) ->
 
       @container.find(".data-list").append("<li class='SeeIt list-group-item data-container'></li>")
-      columnView = new SeeIt.DataColumnView(@app, @container.find(".data-container").last(), dataColumn)
+      columnView = new SeeIt.DataColumnView(@app, @container.find(".data-container").last(), dataColumn, @dataset)
       @dataColumnViews.push(columnView)
 
       self = @
@@ -96,8 +96,6 @@
       @listenTo(columnView, 'graphs:requestIDs', (cb) ->
         self.trigger('graphs:requestIDs', cb)
       )
-
-      #columnView.populateGraphSelectBox();
 
     registerEvents: ->
       self = @
