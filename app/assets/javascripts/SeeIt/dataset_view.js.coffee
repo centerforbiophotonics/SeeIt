@@ -78,8 +78,6 @@
 
       @container.find(".data-list").append("<li class='SeeIt list-group-item data-container'></li>")
       columnView = new SeeIt.DataColumnView(@app, @container.find(".data-container").last(), dataColumn)
-      # addData will get called 4 times
-      console.log "addData"
       @dataColumnViews.push(columnView)
 
       self = @

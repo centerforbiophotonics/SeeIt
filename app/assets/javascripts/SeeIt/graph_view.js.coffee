@@ -71,8 +71,6 @@
       ])
 
     addData: (data) ->
-      console.log "addData function in graph_view"
-      console.log "data ", data
       for j in [0...data.length]
         new_data = data[j]
 
@@ -85,9 +83,7 @@
           if datasetIdx != -1
             # delete previous data if multiple is false
             if @graph.dataset[datasetIdx].multiple == false
-              console.log "DataSet_addData_beforeDelete", @dataset[datasetIdx].data
               @dataset[datasetIdx].data.splice(0, 1) 
-              console.log "DataSet_addData_afterDelete", @dataset[datasetIdx].data
               dataIdx = @dataset[datasetIdx].data.indexOf(new_data.data)
             else
               dataIdx = @dataset[datasetIdx].data.indexOf(new_data.data)
@@ -96,9 +92,6 @@
               this_data = {}
               this_data.data = @filter(new_data.data, new_data.name)
               this_data.name = new_data.name
-
-              # @graph contains multiple: true or false
-              console.log "@graph", @graph
 
               @filterColumn(this_data.data, new_data.data, this_data.name)
 
@@ -112,8 +105,6 @@
                 @dataset[datasetIdx].data.push(new_data.data)
                 @filteredDataset[datasetIdx].data.push(this_data.data)
                 @addDataToFooter(new_data)
-
-              console.log @filteredDataset[datasetIdx].data
 
               self = @
 
@@ -207,7 +198,6 @@
 
       @listenTo data.data, 'color:changed', ->
         item.css('background-color', data.data.color)
-        console.log data
       
       # X button
       @container.find(".data-rep[data-id='#{data.data.header}'] .data-rep-remove").on 'click', ->
@@ -293,6 +283,14 @@
 
         @saveFilters()
 
+    findDataSet: (buttonName, setOfData) ->
+      match = null
+      setOfData.data.forEach (i) ->
+        if i.header == buttonName
+          match = i
+
+      return match
+
     initHandlers: ->
       graph = @
 
@@ -348,6 +346,21 @@
           if event.keyCode == 13
             graph.container.find(".graph-title-edit-icon").trigger('click')
 
+        dragOverListener: (event) ->
+          event.preventDefault()
+
+        dragEnterListener: (event) ->
+          event.preventDefault()
+          event.target.style.background = '#BAEA65'      
+
+        dragLeaveListener: (event) ->
+          event.preventDefault()
+          event.target.style.background = '#FFAFAF'
+
+        dropListener: (event) ->
+          event.preventDefault()
+          $(".data-drop-zone").css("background-color", '')
+          graph.trigger('graph:addData', {graph: $(this).attr('id'), data:[{name: 'default', data: graph.findDataSet(event.originalEvent.dataTransfer.getData("text"), graph.data.datasets[0])}]})
             
       }
 
@@ -389,16 +402,6 @@
       @container.find(".collapse-btn").on('click', @handlers.collapse)
       @container.find(".graph-title-edit-icon").on('click', @handlers.editTitle)
       @container.find(".collapse-footer").on('click', @handlers.collapseFooter)
-
-
-    # data not being returned
-    findDataSet: (buttonName, setOfData) ->
-      match = null
-      setOfData.data.forEach (i) ->
-        if i.header == buttonName
-          match = i
-
-      return match
 
     initDataContainers: ->
       self = @
@@ -443,37 +446,11 @@
       @container.find(".expanded-data-container .save-filters").on 'click', (event) ->
         if self.validateFilters.call(self)
           self.saveFilters.call(self)
-
-      console.log "initDataContainers"
-
-      console.log "@container", @container.find('.data-drop-zone')
-
-      dragOverListener = (event) ->
-        event.preventDefault()
-
-      dragEnterListener = (event) ->
-        event.preventDefault()
-        event.target.style.background = '#BAEA65'      
-
-      dragLeaveListener = (event) ->
-        event.preventDefault()
-        event.target.style.background = '#FFAFAF'
-
-      dropListener = (event) ->
-        event.preventDefault()
-        $(".data-drop-zone").css("background-color", '')
-        console.log "drop"
-        console.log "return data: ", self.findDataSet(event.originalEvent.dataTransfer.getData("text"), self.data.datasets[0])
-        # console.log "self.data, ", self.data.datasets[0].data.header
-        # console.log "source data: ", event.originalEvent.dataTransfer.getData("text")
-        # console.log $('div').find().index()
-        self.trigger('graph:addData', {graph: $(this).attr('id'), data:[{name: 'default', data: self.findDataSet(event.originalEvent.dataTransfer.getData("text"), self.data.datasets[0])}]})
                
-      @container.find('.data-drop-zone').off('drop').on('drop', dropListener)
-      @container.find('.data-drop-zone').off('dragenter').on('dragenter', dragEnterListener)
-      @container.find('.data-drop-zone').off('dragover').on('dragover', dragOverListener)
-      @container.find('.data-drop-zone').off('dragleave').on('dragleave', dragLeaveListener)
-
+      @container.find('.data-drop-zone').off('drop').on('drop', @handlers.dropListener)
+      @container.find('.data-drop-zone').off('dragenter').on('dragenter', @handlers.dragEnterListener)
+      @container.find('.data-drop-zone').off('dragover').on('dragover', @handlers.dragOverListener)
+      @container.find('.data-drop-zone').off('dragleave').on('dragleave', @handlers.dragLeaveListener)
 
     validateFilters: ->
       valid = true

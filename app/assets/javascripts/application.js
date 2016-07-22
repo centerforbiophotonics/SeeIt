@@ -53,7 +53,4 @@
 //= require SeeIt/graph_collection_view
 //= require SeeIt/application_view
 //= require SeeIt/application_controller
-//= require jquery-ui.js
-//= require jquery-ui.min.js
-//= require dragula.js
-//= require dragula.min.js
+//= require SeeIt/jquery_extensions.js
