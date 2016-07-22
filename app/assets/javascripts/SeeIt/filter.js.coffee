@@ -97,14 +97,7 @@
 
             if select then self.container.find(".dataset-select").val(this_dataset.title)
 
-            #old_title = this_dataset.title
-
-            #self.off "dataset:select:#{old_title}"
-            #self.on "dataset:select:#{this_dataset.title}", ->
-            #  self.selectedDataset = dataset_object
-
           self.on "dataset:select:#{ID}", ->
-            console.log "SELECTED DATASET WAS ASSIGNED", dataset_object.title
             self.selectedDataset = dataset_object
 
 
@@ -308,13 +301,10 @@
 
     clone: (givenFilter) ->
       self = @
-      #@columns = givenFilter.columns
 
-      @selectedDataset = givenFilter.selectedDataset  #NONE OF THESE ARE REAL COPIES AHHHH
+      @selectedDataset = givenFilter.selectedDataset
       @selectedColumn = givenFilter.selectedColumn
       @filterData = givenFilter.getFilterData()
-      #@operator = givenFilter.operator
-      #@value = givenFilter.value
 
 
 
@@ -322,17 +312,13 @@
       
       self.trigger 'request:columns', givenFilter.selectedDataset.title, (columns, types) ->
         self.populateColumnSelect.call(self, columns, types, givenFilter.selectedDataset, givenFilter.selectedColumn.header)
-        #console.log "columnSelect populated"
         idx = columns.map((col) -> col.header).indexOf(givenFilter.selectedColumn.header)
         type = types[idx]
-        #console.log "index of chosen column", idx, "and its type", type
-        #console.log "in comparison to the givenFilter's type of", givenFilter.filterType
         if givenFilter.filterType == "numeric" 
           self.filterType = "numeric"
           self.container.find(".categorical-filter").addClass("hidden")
           self.container.find(".numeric-filter").removeClass("hidden")
           self.container.find("td").css('background-color', 'LightCoral')
-          #console.log "givenFilter's operator", givenFilter.filterData.operator, "and its value", givenFilter.filterData.value
           self.container.find(".numeric-filter").val(givenFilter.filterData.operator)
           self.operator = self.container.find(".numeric-filter").val()
           self.container.find(".numeric-filter-value").val(givenFilter.filterData.value)
@@ -344,14 +330,6 @@
           self.operator = self.container.find(".categorical-filter").val()
           self.container.find(".categorical-filter-value").val(givenFilter.filterData.value)
           self.value = self.container.find(".categorical-filter-value").val()
-
-        
-      #@container.find(".data-column-select").val(givenFilter.selectedColumn.header)
-
-      
-      
-
-
 
   Filter
 ).call(@)

@@ -31,11 +31,15 @@ SeeIt.new({
         type: string with the value "csv", "json", or "google"
     }
 
-    * url string for:
-        - google spreadsheet (will use AJAX with JSONP as current SeeIt version does)
-        - any other URL which returns a json string (if the URL is in the same domain it will make an AJAX call if it’s another domain it will try JSONP)
+    * javascript object like the following
 
-    * native javascript file object (so you can create a form with a file upload and pass it right to SeeIt
+        {
+          type: string  //can be 'csv', 'json', or 'google spreadsheet'
+          url: string   //a url that can be used to retrieve any of the above types of data (if the URL is in the same domain it will make an AJAX call if it’s another domain it will try JSONP)
+        }
+
+    * native javascript file object (so you can create a form with a file upload and pass it right to SeeIt)
+
   ],  -- default is [] or null
 
   ui: { all booleans default to true

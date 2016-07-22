@@ -51,7 +51,7 @@
       nv.utils.windowResize(@chartObject.update);
 
     draw: (options) ->
-      graph = @
+      self = @
       @container.html("<svg class='SeeIt graph-svg' style='width: 100%; min-height: 270px'></svg>")
           
       nv.addGraph ->
@@ -59,15 +59,15 @@
             .x((d) -> d.label() )
             .y((d) -> d.value() )
         
-        data = graph.formatData.call(graph)
+        data = self.formatData.call(self)
 
-        d3.select(graph.container.find('.graph-svg')[0])
+        d3.select(self.container.find('.graph-svg')[0])
             .attr('height', '100%')
             .datum(data)
             .call(chart);
 
         nv.utils.windowResize(chart.update)
-        graph.chartObject = chart
+        self.chartObject = chart
         return chart
       
     destroy: ->

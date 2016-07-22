@@ -143,7 +143,7 @@
         .attr("transform", "translate(" + @style.margin.left + "," + @style.margin.top + ")")
 
     drawGraph: (options) ->
-      graph = @
+      self = @
 
       @initSvg()
 
@@ -170,10 +170,10 @@
         .attr("class", "dot SeeIt")
         .attr("r", R)
         .attr("cx", (d) ->
-          return graph.x(d.data.value())
+          return self.x(d.data.value())
         )
         .attr("cy", (d) ->
-          return graph.y(d.y + 8)
+          return self.y(d.y + 8)
         )
         .style("fill", (d) ->
           return d.color()
@@ -182,7 +182,7 @@
       @drawStats(options)
 
     draw: (options = []) ->
-      graph = @
+      self = @
 
       radiusIdx = options.map((option) -> option.label).indexOf("Dot Radius")
 
@@ -204,7 +204,7 @@
           self.drawStatistic.call(self, label.split(' ')[1])
 
     drawStatistic: (stat) ->
-      graph = @
+      self = @
 
       switch stat
         when 'Mean'
@@ -221,10 +221,10 @@
             .attr("width", 16)
             .attr("height", 16)
             .attr("x", (d) ->
-              return graph.x(mean)
+              return self.x(mean)
             )
             .attr("y", (d) ->
-              return graph.y(-4*4 + 2)
+              return self.y(-4*4 + 2)
             )
             .style("fill", 'red')
             .style("opacity", 0.8)
@@ -246,9 +246,9 @@
             .attr("class", "median SeeIt")
             .attr("r", 2*4)
             .attr("cx", (d) ->
-              graph.x(d)
+              self.x(d)
             )
-            .attr("cy", graph.y(-6*4 + 2))
+            .attr("cy", self.y(-6*4 + 2))
             .style("fill", "blue")
             .style("opacity", 0.8)
 
@@ -286,7 +286,7 @@
             .enter().append("polyline")
             .attr("class", "mode SeeIt")
             .attr('points', (d) ->
-              "#{graph.x(d) - 2*4},#{graph.y(-8*4 + 2)} #{graph.x(d) + 4*R},#{graph.y(-8*4 + 2)} #{graph.x(d)},#{graph.y(-4*4 + 2)}"
+              "#{self.x(d) - 2*4},#{self.y(-8*4 + 2)} #{self.x(d) + 4*R},#{self.y(-8*4 + 2)} #{self.x(d)},#{self.y(-4*4 + 2)}"
             )
             .style("fill", 'green')
             .style("opacity", 0.8)

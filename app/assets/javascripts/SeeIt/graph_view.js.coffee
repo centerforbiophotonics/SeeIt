@@ -287,54 +287,54 @@
         @saveFilters()
 
     initHandlers: ->
-      graph = @
+      self = @
 
       @on 'request:dataRoles', (cb) ->
-        cb(graph.graph.dataFormat())
+        cb(self.graph.dataFormat())
 
       @on 'size:change', ->
         # graph.setGraphHeight.call(graph)
-        if graph.initialized then graph.graph.trigger('size:change', graph.options.getValues())
+        if self.initialized then self.graph.trigger('size:change', self.options.getValues())
 
       @on 'filter', (filterData) ->
-        graph.updateFilters.call(graph)
+        self.updateFilters.call(self)
 
-      graph.handlers = {
+      self.handlers = {
         removeGraph: ->
-          graph.destroy.call(graph)
-          graph.destroyCallback(graph.id.toString())
+          self.destroy.call(self)
+          self.destroyCallback(self.id.toString())
 
         maximize: ->
-          graph.maximize.call(graph)
+          self.maximize.call(self)
 
         collapse: ->
-          graph.collapse.call(graph)
+          self.collapse.call(self)
 
         collapseFooter: ->
-          graph.collapseFooter.call(graph)
+          self.collapseFooter.call(self)
 
         editTitle: ->
-          if !graph.editing
-            graph.container.find(".graph-title-content").html("<input id='graph-title-input' type='text' value='#{graph.id}'>")
-            graph.container.find('#graph-title-input').off('keyup', graph.handlers.graphTitleInputKeyup).on('keyup', graph.handlers.graphTitleInputKeyup)
-            graph.editing = true
+          if !self.editing
+            self.container.find(".graph-title-content").html("<input id='graph-title-input' type='text' value='#{graph.id}'>")
+            self.container.find('#graph-title-input').off('keyup', self.handlers.graphTitleInputKeyup).on('keyup', self.handlers.graphTitleInputKeyup)
+            self.editing = true
           else
-            oldId = graph.id
-            newId = graph.container.find("#graph-title-input").val()
-            graph.trigger('graph:id:change', oldId, newId, (success) ->
+            oldId = self.id
+            newId = self.container.find("#graph-title-input").val()
+            self.trigger('graph:id:change', oldId, newId, (success) ->
               if success
-                graph.id = value
-                graph.container.find(".graph-title-content").html(newId)
+                self.id = value
+                self.container.find(".graph-title-content").html(newId)
               else
-                graph.container.find(".graph-title-content").html(oldId)
+                self.container.find(".graph-title-content").html(oldId)
                 msg = "Graph title must be unique"
-                tip = new Opentip(graph.container.find('.graph-title-content'), msg, {style: "alert", target: graph.container.find('.graph-title-content'), showOn: "creation"})
+                tip = new Opentip(self.container.find('.graph-title-content'), msg, {style: "alert", target: self.container.find('.graph-title-content'), showOn: "creation"})
                 tip.setTimeout(->
                   tip.hide.call(tip)
                   return
                 , 5)
 
-              graph.editing = false
+              self.editing = false
             )
 
         graphTitleInputKeyup: (event) ->
@@ -539,19 +539,6 @@
     destroy: ->
       if @graph then @graph.destroy()
       @container.remove()
-
-    # setGraphHeight: ->
-    #   @container.find('.graph-wrapper').height(
-    #     if @maximized
-    #       (
-    #         @container.find('.graph-panel').innerHeight() -
-    #         @container.find('.panel-heading').outerHeight() -
-    #         @container.find('.panel-footer').outerHeight() -
-    #         30
-    #       )
-    #     else
-    #       300
-    #   )
 
     maximize: ->
       if @collapsed

@@ -61,11 +61,11 @@
 
     draw: (options) ->
       type = @dataset[0].data[@dataset[0].data.length-1].type
-      graph = @
+      self = @
       @container.html("<svg class='SeeIt graph-svg' style='width: 100%; min-height: 270px'></svg>")
 
       nv.addGraph ->
-        data = graph.formatData.call(graph)
+        data = self.formatData.call(self)
 
         if type == "numeric"
           chart = nv.models.pieChart()
@@ -100,7 +100,7 @@
             .showLabels(options[0].value)
           data = dat
 
-        d3.select(graph.container.find('.graph-svg')[0])
+        d3.select(self.container.find('.graph-svg')[0])
         .attr('height', '100%')
         .data([data])
         .call(chart)
@@ -112,7 +112,7 @@
         console.log data
 
         nv.utils.windowResize(chart.update);
-        graph.chartObject = chart
+        self.chartObject = chart
         return chart
 
     destroy: ->

@@ -16,37 +16,37 @@
       @container.html("<ul class='SeeIt graph-list list-group'></ul>")
 
     initHandlers: ->
-      graphContainer = @
+      self = @
 
-      graphContainer.handlers = {
+      self.handlers = {
         removeGraph: (graphId) ->
-          delete graphContainer.graphs[graphId]
-          graphContainer.trigger('graph:destroyed', graphId)
+          delete self.graphs[graphId]
+          self.trigger('graph:destroyed', graphId)
       }
 
-      graphContainer.listenTo(@app, 'data:changed', (origin) ->
+      self.listenTo(@app, 'data:changed', (origin) ->
         # for graphId, graph of graphContainer.graphs
         #   graph.updateGraph.call(graph)
       )
 
-      graphContainer.listenTo(@app, 'graph:addData', (graphData) ->
-        if graphContainer.graphs[graphData.graph]
-          graphContainer.graphs[graphData.graph].addData(graphData.data)
+      self.listenTo(@app, 'graph:addData', (graphData) ->
+        if self.graphs[graphData.graph]
+          self.graphs[graphData.graph].addData(graphData.data)
       )
 
-      graphContainer.listenTo(@app, 'graph:filter', (graphData) ->
-        if graphContainer.graphs[graphData.graph]
-          graphContainer.graphs[graphData.graph].updateFilters(graphData.filters)
+      self.listenTo(@app, 'graph:filter', (graphData) ->
+        if self.graphs[graphData.graph]
+          self.graphs[graphData.graph].updateFilters(graphData.filters)
       )
 
       @listenTo(@app, 'graph:create', (graphType) ->
-        graphContainer.addGraph.call(graphContainer, graphType)
+        self.addGraph.call(self, graphType)
       )
 
       @listenTo(@app, 'graphs:requestIDs', (cb) ->
         graphData = []
 
-        for graphId, graph of graphContainer.graphs
+        for graphId, graph of self.graphs
           graph.trigger('request:dataRoles', (dataRoles) ->
             graphData.push {id: graphId, dataRoles: dataRoles}
           )
@@ -55,14 +55,14 @@
       )
 
       @listenTo(@app, 'height:toggle', ->
-        graphContainer.container.toggleClass("spreadsheet-visible")
+        self.container.toggleClass("spreadsheet-visible")
         
-        for graphId, graph of graphContainer.graphs
+        for graphId, graph of self.graphs
           graph.trigger('size:change')
       )
 
       @listenTo(@app, 'width:toggle', ->
-        for graphId, graph of graphContainer.graphs
+        for graphId, graph of self.graphs
           graph.trigger('size:change')
       )
 
@@ -162,7 +162,6 @@
             filtered_graphs.push(id)
           if id == name
             graph.saveFilters()
-            #console.log id, "is the origin graph and its saved filterGroups going into the rest are", graph.filterGroups
             origin_graph_requirements = graph.operator
 
         confirmed = true
@@ -176,7 +175,6 @@
                 filterGroup.removeFilterGroup()
               graph.filterGroups = []
               for filterGroup, i in filterGroups
-                #graph.filterGroups.push(filterGroup)
               
                 graph.addFilterGroup()
                 if filterGroup.filters.length > 1
@@ -189,7 +187,6 @@
 
           for id, graph of self.graphs
             if id != name
-              #console.log id, "filterGroups before saving", graph.filterGroups
               graph.saveFilters()
 
             
