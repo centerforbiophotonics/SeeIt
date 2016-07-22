@@ -24,7 +24,11 @@ SeeIt.new({
           isLabeled: boolean
         } 
 
-    * json string representing the same as the previous option
+    * javascript object like the following
+
+        {
+          jsonString: string //a JSON string representing the same as the previous option
+        }
 
     * url string for:
         - google spreadsheet (will use AJAX with JSONP as current SeeIt version does)

@@ -69,6 +69,8 @@
 
         if callback then callback(true, "Data type changed to #{type}")
 
+
+
         @trigger('type:changed', type)
 
 
@@ -150,6 +152,7 @@
           header = dataset[0][column] + ''
           data = []
 
+
           for i in [1...dataset.length]
             data.push({label: dataset[i][0], value: dataset[i][column]})
 
@@ -158,6 +161,7 @@
       else
         return ((app, data, column, title, type, color, editable) ->
           dataColumn = []
+
 
           for i in [0...data.columns[column].data.length]
             dataColumn.push({label: data.labels[i], value: data.columns[column].data[i]})

@@ -53,4 +53,6 @@
 //= require SeeIt/graph_collection_view
 //= require SeeIt/application_view
 //= require SeeIt/application_controller
+//= require SeeIt/spreadsheet_contextmenu_view
+//= require SeeIt/application_controller
 //= require SeeIt/jquery_extensions.js

@@ -148,5 +148,15 @@
 
       if !@filters.length then @removeFilterGroup()
 
+    clone: (givenFilterGroup) ->   #To be used by a newly instantiated filterGroup and make itself a clone of the given filterGroup
+      self = @
+
+      for filter, i in givenFilterGroup.filters
+        self.filters[i].clone(filter)
+      @filterData = givenFilterGroup.getFilters()          #NOT PROPERLY COPIED
+      #@filterOperator = givenFilterGroup.filterOperator  #NOT PROPERLY COPIED
+      @container.find(".filter-group-type").val(givenFilterGroup.filterData[0])
+
+
   FilterGroup
 ).call(@)

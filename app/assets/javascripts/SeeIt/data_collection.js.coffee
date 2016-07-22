@@ -3,10 +3,12 @@
     _.extend(@prototype, Backbone.Events)
 
     constructor: (@app, data, @editable) ->
+      @nextDatasetID = 1
       @datasets = []
       @initialized = false
       @initDatasets(data)
       @initListeners()
+
 
     initListeners: ->
       self = @
@@ -65,13 +67,16 @@
 
       for i in [0...data.length]
         DataCollection.coerceDataset(data[i], (dataset) ->
+          if dataset.jsonString
+            dataset = JSON.parse(dataset.jsonString)
           if dataset then self.addDataset.call(self, dataset)
         )
 
       @initialized = true
 
     addDataset: (data) ->
-      dataset = new SeeIt.Dataset(@app, data.dataset, data.title, data.isLabeled, @editable)
+      dataset = new SeeIt.Dataset(@app, data.dataset, data.title, data.isLabeled, @editable, @nextDatasetID)
+      @nextDatasetID++
      	@datasets.push(dataset)
 
       if @initialized then @trigger('dataset:created', dataset)
@@ -87,6 +92,10 @@
       return obj
 
     @coerceDataset = (dataset, callback) ->
+<<<<<<< HEAD
+=======
+
+>>>>>>> dev
       if !dataset.url then callback dataset
 
       error_cb = ->

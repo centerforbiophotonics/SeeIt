@@ -15,6 +15,7 @@
       @splitscreenClass = 'col-md-9'
       @hot = null
       @initLayout()
+      @spreadsheetContextMenuView = new SeeIt.SpreadsheetContextMenuView(@)
 
     initLayout: ->
       @container.html("""
@@ -22,6 +23,11 @@
           <div class="SeeIt panel-heading">
             <span class='title'>#{if @dataset && @dataset.data.length then @dataset.title else ""}</span>
             <span class="SeeIt title-edit-icon glyphicon glyphicon-pencil"></span>
+              <div class="btn-group SeeIt graph-buttons" role="group" style="float: right">
+                <button class="SeeIt export btn btn-default" title='Export Spreadsheet'><span class="glyphicon glyphicon glyphicon-save"></span></button>
+                <button class="SeeIt maximize btn btn-default" title='Maximize Spreadsheet'><span class="glyphicon glyphicon-resize-full"></span></button>
+                <button class="SeeIt remove btn btn-default" title="Remove Spreadsheet"><span class="glyphicon glyphicon-remove"></span></button>
+              </div>
           </div>
           <div class="SeeIt panel-body spreadsheet">
             <div class= "info SeeIt" style= "background-color: #ffedcc;">Numeric</div>             
@@ -31,10 +37,26 @@
         </div>
       """)
 
-
       @initHandlers()
       @resetTable()
       @toggleVisible()
+
+
+    parseRow: (infoArray, index, csvContent) ->
+      self = @
+
+      sizeData = _.size(self.hot.getData());
+      if (index < sizeData - 1) 
+        dataString = "";
+        _.each(infoArray, (col, i) ->
+          dataString += _.contains(col, ",") ? "\"" + col + "\"" : col;
+          dataString += i < _.size(infoArray) - 1 ? "," : "";
+        )
+
+        csvContent += index < sizeData - 2 ? dataString + "\n" : dataString;
+      
+      return csvContent;
+  
 
     toggleFullscreen: ->
       if @isFullscreen 
@@ -54,9 +76,9 @@
 
       #Update dataset
       @dataset = dataset
-      privateMembers.dataset = @dataset
+      privateMembers.dataset = @dataset 
 
-      #Subscribe to new dataset events
+      #Subscribe to new dataset
       @subscribeToDataset()
 
       @updateTitle()
@@ -130,6 +152,20 @@
       $(window).on 'resize', @handlers.resize
 
       @container.find('.title-edit-icon').off('click', @handlers.editTitle).on('click', @handlers.editTitle)
+
+      @container.find('.export').off('click').on('click', (e) ->
+        console.log self.dataset
+        # window.open('data:application/vnd.ms-excel,' + @dataset);
+        e.preventDefault();
+      )
+
+      @container.find('.maximize').off('click').on('click', () -> 
+        console.log 'maximize'
+      )
+
+      @container.find('.remove').off('click').on('click', () -> 
+        $("button:contains('#{self.dataset.title}')").siblings('.show-in-spreadsheet').trigger('click')
+      )
 
     validateUniqueness: (val, data, ignore) ->
       for i in [0...data.length]
@@ -224,9 +260,6 @@
 
           $(TH).off('dblclick').on('dblclick', headerDblclick)
 
-
-        console.log privateMethods.formatModelData(), privateMethods.formatColumns()
-
       settings = {
         rowHeaders: @dataset.labels,
         colHeaders: @dataset.headers,
@@ -259,34 +292,19 @@
             return false
         contextMenu: if !spreadsheetView.dataset.editable then null else {
           items: {
-            "my_row_above": {
-              name: "Insert row above",
+            "multiple_row": {
+              name: "<i class='glyphicon glyphicon-plus'></i> Insert row",
               callback: (key, options) ->
-                spreadsheetView.dataset.trigger('row:create', options.end.row)
+                spreadsheetView.spreadsheetContextMenuView.display_row_menu(key, options)                
             },
-            "my_row_below": {
-              name: "Insert row below",
+            "multiple_col": {
+              name: "<i class='glyphicon glyphicon-plus'></i> Insert column",
               callback: (key, options) ->
-                spreadsheetView.dataset.trigger('row:create', options.end.row + 1)
+                spreadsheetView.spreadsheetContextMenuView.display_column_menu(key, options)
             },
-            "multiple_row_above": {
-              name: 'Insert multiple rows above',
-              callback: (key, options) ->
-                input = parseInt(prompt('Please enter number of rows to insert', 1))
-                if input != null
-                  for i in [0...input]
-                    spreadsheetView.dataset.trigger('row:create', options.end.row)
-            },
-            "multiple_row_below": {
-              name: 'Insert multiple rows below',
-              callback: (key, options) ->
-                input = parseInt(prompt('Please enter number of rows to insert', 1))
-                if input != null
-                  for i in [0...input]
-                    spreadsheetView.dataset.trigger('row:create', options.end.row + 1)
-            },
+            "hsep2": "---------",
             "my_remove_row": {
-              name: "Remove row",
+              name: "<i class='glyphicon glyphicon-minus'></i> Remove row",
               callback: (key, options) ->
                 if spreadsheetView.hot.countRows.call(spreadsheetView.hot) > 1
                   spreadsheetView.dataset.trigger('row:destroy', options.end.row)
@@ -298,10 +316,10 @@
                       tip.hide.call(tip)
                       return
                     , 5)
-                  , 100)                  
+                  , 100)           
             },
             "my_remove_col": {
-              name: "Remove column",
+              name: "<i class='glyphicon glyphicon-minus'></i> Remove column",
               callback: (key, options) ->
                 if spreadsheetView.hot.countCols.call(spreadsheetView.hot) > 1
                   spreadsheetView.dataset.trigger('dataColumn:destroy', options.end.col)
@@ -313,18 +331,9 @@
                       tip.hide.call(tip)
                       return
                     , 5)
-                  , 100)  
+                  , 100)
             },
-            "my_col_left": {
-              name: "Insert column on the left",
-              callback: (key, options) ->
-                spreadsheetView.dataset.trigger('dataColumn:create', options.end.col)
-            },
-            "my_col_right": {
-              name: "Insert column on the right",
-              callback: (key, options) ->
-                spreadsheetView.dataset.trigger('dataColumn:create', options.end.col + 1)
-            },
+            "hsep3": "---------",
             "change_col_type": {
               key: "change_col_type",
               name: "Change data type",
@@ -332,7 +341,7 @@
                 items: [
                   {
                     key: "change_col_type:numeric"
-                    name: "Numeric",
+                    name: "<i class='glyphicon glyphicon-triangle-right'></i> Numeric",
                     callback: (key, options) ->
                       spreadsheetView.dataset.trigger('dataColumn:type:change', options.end.col, "numeric", (success, msg) ->
                         spreadsheetView.displayTypeChangeMsg(options.end.col, success, msg)
@@ -340,7 +349,7 @@
                   },
                   {
                     key: "change_col_type:categorical",
-                    name: "Categorical",
+                    name: "<i class='glyphicon glyphicon-triangle-right'></i> Categorical",
                     callback: (key, options) ->
                       spreadsheetView.dataset.trigger('dataColumn:type:change', options.end.col, "categorical", (success, msg) ->
                         spreadsheetView.displayTypeChangeMsg(options.end.col, success, msg)
@@ -353,6 +362,8 @@
         },
         afterChange: (changes, source) ->
           spreadsheetView.trigger('data:changed', spreadsheetView)
+        afterSelection: (rowstart, colstart, rowend, colend) ->
+          currentselection = [rowstart, colstart, rowend, colend]
       }
 
       if @hot 
@@ -423,6 +434,8 @@
     property: (colIdx) ->
       return (row, value) ->
         return row.attr(colIdx, value)
+
+    
   }
 
   SpreadsheetView

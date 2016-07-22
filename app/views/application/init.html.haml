@@ -15,25 +15,25 @@
     %form{:action => "#"}
       %h2 General UI Options
       .field
-        = label_tag 'ui[editiable]', 'Editable:'
-        = hidden_field_tag 'ui[editiable]', 'false'
-        = check_box_tag 'ui[editiable]', 'true'
+        = label_tag 'ui[editable]', 'Editable:'
+        = hidden_field_tag 'ui[editable]', 'false'
+        = check_box_tag 'ui[editable]', 'true'
       .field
         = label_tag 'ui[spreadsheet]', 'Spreadsheet:'
         = hidden_field_tag 'ui[spreadsheet]', 'false'
         = check_box_tag 'ui[spreadsheet]', 'true'
       .field
-        = label_tag 'ui[data_selector]', 'Data Selection Menu:'
-        = hidden_field_tag 'ui[data_selector]', 'false'
-        = check_box_tag 'ui[data_selector]', 'true'
+        = label_tag 'ui[dataMenu]', 'Data Selection Menu:'
+        = hidden_field_tag 'ui[dataMenu]', 'false'
+        = check_box_tag 'ui[dataMenu]', 'true'
       .field
-        = label_tag 'ui[options_bar]', 'Top Option Bar:'
-        = hidden_field_tag 'ui[options_bar]', 'false'
-        = check_box_tag 'ui[options_bar]', 'true'
+        = label_tag 'ui[toolbar]', 'Top Option Bar:'
+        = hidden_field_tag 'ui[toolbar]', 'false'
+        = check_box_tag 'ui[toolbar]', 'true'
       .field
-        = label_tag 'ui[graph_add_remove]', 'Graph Add/Remove:'
-        = hidden_field_tag 'ui[graph_add_remove]', 'false'
-        = check_box_tag 'ui[graph_add_remove]', 'true'
+        = label_tag 'ui[graph_editable]', 'Graph Add/Remove:'
+        = hidden_field_tag 'ui[graph_editable]', 'false'
+        = check_box_tag 'ui[graph_editable]', 'true'
       .field
         = label_tag 'ui[dataset_add_remove]', 'Dataset Add/Remove:'
         = hidden_field_tag 'ui[dataset_add_remove]', 'false'
@@ -62,35 +62,67 @@
         = button_tag "Run SeeIt With This Configuration", :type => "button", :id => "run"
 
 #data-menu-template
-  = label_tag '', 'Data Type:'
-  = text_field_tag '', 'Box Plot'
+  = label_tag 'data[DATAINDEX][type]', 'Data Type:'
+  = select_tag 'data[DATAINDEX][type]', options_for_select([['CSV Endpoint', 'csv'],['JSON Endpoint', 'json'],['Google Spreadsheet', 'google spreadsheet'],['JSON File', 'json file'],['CSV File', 'csv file']])
+  = label_tag 'data[DATAINDEX][url]', 'URL', :id => "url-data-DATAINDEX"
+  = text_field_tag 'data[DATAINDEX][url]', '' 
+  %input{:type => "file", :id => "upload-data-DATAINDEX", :class => "upload-data hidden"}
+  = label_tag 'data[DATAINDEX][jsonString]', 'HIDDENtext', :class => "hidden"
+  = text_field_tag 'data[DATAINDEX][jsonString]', ''
+  = button_tag "Remove Data", :type => "button", :id => "remove-data-DATAINDEX", :class => "remove-data"
 
 #graph-menu-template
   = label_tag 'graphs[GRAPHINDEX][type]', 'Graph Type:'
-  = text_field_tag 'graphs[GRAPHINDEX][type]', 'Box Plot'
+  = select_tag 'graphs[GRAPHINDEX][type]'
   = button_tag "Remove Graph", :type => "button", :id => "remove-graphs-GRAPHINDEX", :class => "remove-graphs"
   #graphs-GRAPHINDEX-data
   = button_tag "Add Data", :type => "button", :id => "add-graphs-GRAPHINDEX-data", :class => "add-graphs-data"
 
 #graph-data-menu-template
   = label_tag 'graphs[GRAPHINDEX][data][GRAPHDATAINDEX][dataset_title]', 'Dataset:'
-  = text_field_tag 'graphs[GRAPHINDEX][data][GRAPHDATAINDEX][dataset_title]', 'Dataset 2'
+  = select_tag 'graphs[GRAPHINDEX][data][GRAPHDATAINDEX][dataset_title]'
 
-  = label_tag 'graphs[GRAPHINDEX][data][GRAPHDATAINDEX][column_header]', 'Column:'
-  = text_field_tag 'graphs[GRAPHINDEX][data][GRAPHDATAINDEX][column_header]', 'Kia'
+  = label_tag 'graphs[GRAPHINDEX][data][GRAPHDATAINDEX][column_header]', 'Column:', :id => "graphs_GRAPHINDEX_data_GRAPHDATAINDEX_column_label"
+  = select_tag 'graphs[GRAPHINDEX][data][GRAPHDATAINDEX][column_header]'
 
-  = label_tag 'graphs[GRAPHINDEX][data][GRAPHDATAINDEX][role_in_graph]', 'Role in Graph:'
-  = text_field_tag 'graphs[GRAPHINDEX][data][GRAPHDATAINDEX][role_in_graph]', 'default'
+  = label_tag 'graphs[GRAPHINDEX][data][GRAPHDATAINDEX][role_in_graph]', 'Role in Graph:', :id => "graphs_GRAPHINDEX_data_GRAPHDATAINDEX_role_label"
+  = select_tag 'graphs[GRAPHINDEX][data][GRAPHDATAINDEX][role_in_graph]'
 
   = button_tag "Remove Data", :type => "button", :id => "remove-graphs-GRAPHINDEX-data-GRAPHDATAINDEX", :class => "remove-graphs-data"
+
+#myModal.modal.fade{:role => "dialog"}
+  .modal-dialog
+    / Modal content
+    .modal-content
+      .modal-header
+        %button.close{"data-dismiss" => "modal", :type => "button"} ×
+        %h4.modal-title Your Javascript Initialization Code
+      .modal-body
+        %p Some text in the modal.
+      .modal-footer
+        %button.btn.btn-default{"data-dismiss" => "modal", :type => "button"} Close
+
 
 :javascript
   var graphs = [];
   var data = [];
+  var datasets = [];
+  var options;
+  var removeOldSets = function(datasets, removeIndex){
+    var i = 0;
+    while(i < datasets.length){
+      if (datasets[i].dataIndex == removeIndex){
+        datasets.splice(i, 1)
+      }
+      else{
+        i++
+      }
+    }  
+  }
 
   $(function(){
-    $("#display").click(function(){
-      var options = $('#seeit-init-wizard form').serializeObject();
+    $("#show_link").click(function(){
+      options = $('#seeit-init-wizard form').serializeObject();
 
       //Replace string value for checkboxes with boolean value
       for (var key in options.ui){
@@ -99,7 +131,202 @@
         else if (options.ui[key] === 'true')
           options.ui[key] = true;
       }
+
+      for (var i in options.data){
+
+        if ((options.data[i].type=="csv file")||(options.data[i].type=="json file")){
+          delete options.data[i].type
+          delete options.data[i].url
+        }
+        else{
+          delete options.data[i].jsonString
+        }
+      }
+
+      var link = $.param(options)
+      console.log(link)
+      var jsobject = decodeURI(link)
+      console.log(jsobject)
+    })
+
+    $("#show_init_code").click(function(){
+      options = $('#seeit-init-wizard form').serializeObject();
+
+      //Replace string value for checkboxes with boolean value
+      for (var key in options.ui){
+        if (options.ui[key] === 'false')
+          options.ui[key] = false;
+        else if (options.ui[key] === 'true')
+          options.ui[key] = true;
+      }
+
+      for (var i in options.data){
+
+        if ((options.data[i].type=="csv file")||(options.data[i].type=="json file")){
+          delete options.data[i].type
+          delete options.data[i].url
+        }
+        else{
+          delete options.data[i].jsonString
+        }
+      }
+      var runScript = "SeeIt.new(\n"+JSON.stringify(options, null, '  ')+")";
+      $('.modal-body').html("<pre>"+runScript+"</pre>")
+      $('#myModal').modal()                      
     });
+
+    $("#run").click(function(){
+
+      options = $('#seeit-init-wizard form').serializeObject();
+
+      //Replace string value for checkboxes with boolean value
+      for (var key in options.ui){
+        if (options.ui[key] === 'false')
+          options.ui[key] = false;
+        else if (options.ui[key] === 'true')
+          options.ui[key] = true;
+      }
+
+      for (var i in options.data){
+
+        if ((options.data[i].type=="csv file")||(options.data[i].type=="json file")){
+          delete options.data[i].type
+          delete options.data[i].url
+        }
+        else{
+          delete options.data[i].jsonString
+        }
+      }
+
+      $("body").append("<div id='newSeeIt'></div>")
+      var $newContainer = $("#newSeeIt")
+      options.container = $newContainer
+      var app = null;
+      $(function() {
+        app = SeeIt.new(options)
+      })
+
+    })
+
+
+    $("#add-data").click(function(){
+      
+      var index = data.length;
+      var $menu = $("<div>", {id: "data-"+index});
+      var raw = $("#data-menu-template").html().replace(new RegExp('DATAINDEX', 'g'), index);
+
+      $menu.append(raw);
+      data.push(0);
+      $("#data").append($menu);
+      $("#data_"+index+"_jsonString").hide();
+
+      register_remove_data();
+
+      $("#data_"+index+"_type").on("change", function(){
+        $("#data_"+index+"_url").show()
+        $("#url-data-"+index).show()
+        $("#upload-data-"+index).addClass("hidden")
+        if (($(this).val() == "json file")||($(this).val() == "csv file")){
+          $("#data_"+index+"_url").hide()
+          $("#url-data-"+index).hide()
+          $("#upload-data-"+index).removeClass("hidden")
+        }
+        if (datasets.length){
+          removeOldSets(datasets, index)
+        }
+      })
+
+      $("#data_"+index+"_url").blur(function(){
+        var url = $("#data_"+index+"_url").val()
+        var type = $("#data_"+index+"_type").val()
+        if (datasets.length){
+          removeOldSets(datasets, index)
+        }
+        callback = function(dataset){
+          dataset.dataIndex = index
+          datasets.push(dataset)
+        }
+        error_cb = function(){
+          console.log("There was an error")
+        }
+        switch (type) {
+          case 'csv':
+            csv_manager = new SeeIt.CSVManager()
+            csv_manager.downloadFromServer(url,function(data){
+              csv_data = SeeIt.CSVManager.parseCSV(data.data)
+
+              new_data = {
+                isLabeled: true,
+                title: data.name,
+                dataset: csv_data
+              }
+
+              callback(new_data)
+            }, error_cb)
+            break;
+
+          case 'json':
+            json_manager = new SeeIt.JsonManager()
+
+            json_manager.downloadFromServer(url, callback, error_cb)
+            break;
+
+          case 'google spreadsheet':
+            googleSpreadsheet = new SeeIt.GoogleSpreadsheetManager(url, function(success, collection){
+              if (success){
+                collection.forEach(function(dataset){
+                  callback(dataset)
+                })
+              }
+              else{
+                error_cb
+              }
+            })
+            googleSpreadsheet.getData()
+            break;
+        }
+      })
+
+      $("#upload-data-"+index).on("change", function(){
+        var filereader;
+        var myData;
+        var file = this.files[0];
+        var filename = this.files[0].name.split('.')[0];
+        var filetype = $("#data_"+index+"_type").val();
+        if (datasets.length){
+          removeOldSets(datasets, index)
+        }
+
+        if(window.File && window.FileReader && window.FileList && window.Blob) {
+
+          filereader = new window.FileReader();
+
+          if(filetype == "csv file"){
+            filereader.onload = function(){
+              txtRes = filereader.result;
+              myData = Papa.parse(txtRes, {skipEmptyLines: true}).data;
+              dataset = {"isLabeled": "true", "title": filename, "dataset": myData, "dataIndex": index};
+              datasets.push(dataset)
+              $("#data_"+index+"_jsonString").val(JSON.stringify(dataset))
+            }
+          }
+
+          else if(filetype == "json file"){
+            filereader.onload = function(){
+              txtRes = filereader.result;
+              myData = JSON.parse(txtRes);
+              myData.dataIndex = index
+              datasets.push(myData)
+              $("#data_"+index+"_jsonString").val(JSON.stringify(myData))
+            }
+          }
+          filereader.readAsText(file);
+
+        }       
+      })
+    });
+
+
 
     $("#add-graph").click(function(){
       var index = graphs.length;
@@ -110,6 +337,8 @@
       $menu.append(raw);
       graphs.push(0);
       $("#graphs").append($menu);
+      for (var key in SeeIt.GraphNames)
+        $("#graphs_"+index+"_type").append("<option>"+SeeIt.GraphNames[key]+"</option>");
 
       register_add_graphs_data();
       register_remove_graph();
@@ -128,13 +357,101 @@
           replace(new RegExp('GRAPHINDEX', 'g'), graphIndex).
           replace(new RegExp('GRAPHDATAINDEX', 'g'), graphDataIndex);
 
-        $menu.append(raw);
+        $menu.append(raw);        
 
         graphs[parseInt(graphIndex)]++;
 
         $("#graphs-"+graphIndex+"-data").append($menu);
 
+        for (var i in datasets)
+          $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_dataset_title").append("<option>"+datasets[i].title+"</option>");
+
+        $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_dataset_title").prop('selectedIndex', -1);        
+
+        $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_column_header").hide()
+        $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_column_label").hide()
+        $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_role_in_graph").hide()
+        $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_role_label").hide()
+
+        $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_dataset_title").on("change", function(){
+          var selectedDataset;
+          $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_column_header").show()
+          $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_column_label").show()
+          $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_role_in_graph").show()
+          $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_role_label").show()
+          $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_column_header").html("")
+
+          for (var i in datasets) {
+            if (datasets[i].title == $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_dataset_title").val()){
+              selectedDataset = datasets[i].dataset
+
+              if (($("#data_"+datasets[i].dataIndex+"_type").val() == "csv file")||($("#data_"+datasets[i].dataIndex+"_type").val() == "csv")||($("#data_"+datasets[i].dataIndex+"_type").val() == "json")){
+                for (var j in selectedDataset[0]){
+                  if (j != 0){
+                    $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_column_header").append("<option>"+selectedDataset[0][j]+"</option>")
+                  }
+                }
+              }
+            }
+          }
+
+          for (var i in selectedDataset.columns) {
+            $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_column_header").append("<option>"+selectedDataset.columns[i].header+"</option>")
+          }
+
+          var selectedGraph = $("#graphs_"+graphIndex+"_type").val()
+          for (var key in SeeIt.GraphNames){
+            if (selectedGraph == SeeIt.GraphNames[key]){
+              selectedGraph = key
+            }
+          }
+          var graphFormat = SeeIt.Graphs[selectedGraph].prototype.dataFormat()
+          for (var i in graphFormat) {
+            $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_role_in_graph").append("<option>"+graphFormat[i].name+"</option>")
+          }
+
+
+
+        })
+
         register_remove_graphs_data();
+      });
+    }
+
+    function register_remove_data(){
+      $(".remove-data").off("click").on("click", function(){
+
+        var dataIndex = $(this).attr("id").split("-")[2];
+        removeOldSets(datasets, dataIndex)
+        for (var i in datasets){
+          if (datasets[i].dataIndex > dataIndex)
+            datasets[i].dataIndex--
+        }
+        $("#data-"+dataIndex).remove();
+
+        data.forEach(function(d, i){
+          if(i > dataIndex){
+            var data = $("#data-"+i)
+            var type = $("#data_"+i+"_type").val()
+            var url = $("#data_"+i+"_url").val()
+            var jsonString = $("#data_"+i+"_jsonString").val()
+
+            var new_data_html = data.
+              html().
+              replace(new RegExp("data\\-"+i, 'g'), "data-"+(i-1)).
+              replace(new RegExp("data\\["+i, 'g'), "data["+(i-1)).
+              replace(new RegExp("data_"+i, 'g'), "data_"+(i-1));
+
+            data.html(new_data_html);
+            $("#data_"+(i-1)+"_type").val(type)
+            $("#data_"+(i-1)+"_url").val(url)
+            $("#data_"+(i-1)+"_jsonString").val(jsonString)
+            data.attr("id", "data-"+(i-1));
+          }
+        });
+
+        data.splice(dataIndex, 1);
+        register_remove_data();
       });
     }
 
@@ -177,8 +494,6 @@
         if (dataIndex < graphs[graphIndex]-1){
           for (var i = parseInt(dataIndex)+1; i < graphs[graphIndex]; i++){
             var graphData = $("#graphs-"+graphIndex+"-data-"+i);
-
-            console.log( graphData.html());
 
             var newHtml = graphData.html().
                replace(new RegExp("data\\-"+i, 'g'), "data-"+(i-1)).

@@ -7,6 +7,9 @@ Rails.application.routes.draw do
 
   get "init" => "application#init"
   get "no_data" => "application#no_data"
+  get "json_string" => "application#json_string"
+  get "modal_test" => "application#modal_test"
+  get "row_insertion_menu" => "application#row_insertion_menu"
   get "dragdrop" => "application#dragdrop"
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
