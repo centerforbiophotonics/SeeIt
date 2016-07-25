@@ -80,7 +80,7 @@
 
 #graph-data-menu-template
   = label_tag 'graphs[GRAPHINDEX][data][GRAPHDATAINDEX][dataset_title]', 'Dataset:'
-  = select_tag 'graphs[GRAPHINDEX][data][GRAPHDATAINDEX][dataset_title]'
+  = select_tag 'graphs[GRAPHINDEX][data][GRAPHDATAINDEX][dataset_title]', '', class: "graph_dataset_selector_FAKE"
 
   = label_tag 'graphs[GRAPHINDEX][data][GRAPHDATAINDEX][column_header]', 'Column:', :id => "graphs_GRAPHINDEX_data_GRAPHDATAINDEX_column_label"
   = select_tag 'graphs[GRAPHINDEX][data][GRAPHDATAINDEX][column_header]'
@@ -112,10 +112,32 @@
     var i = 0;
     while(i < datasets.length){
       if (datasets[i].dataIndex == removeIndex){
-        datasets.splice(i, 1)
+        $(".graph_dataset_selector_real").each(function(){
+          var deselect = 0;
+          if($(this).val() == datasets[i].title){
+            $(this).siblings().each(function(index){
+              if (index != 0 && index != 5){
+                $(this).hide();
+              }
+            })
+            deselect = 1;
+          }
+          if($(this).prop('selectedIndex') == -1){
+            deselect = 1;
+          }
+          $(this).children().each(function(){
+            if ($(this).val() == datasets[i].title){
+              $(this).remove()
+            }
+          })
+          if (deselect){
+            $(this).prop('selectedIndex', -1);
+          }
+        })
+        datasets.splice(i, 1);
       }
       else{
-        i++
+        i++;
       }
     }  
   }
@@ -243,7 +265,15 @@
           removeOldSets(datasets, index)
         }
         callback = function(dataset){
-          dataset.dataIndex = index
+          dataset.dataIndex = index;
+          $(".graph_dataset_selector_real").each(function(index){
+            var test = $(this).prop('selectedIndex')
+            $(this).append("<option>"+dataset.title+"</option>");
+
+            if (datasets.length == 0 || test == -1) {
+              $(this).prop('selectedIndex', -1);
+            }
+          })
           datasets.push(dataset)
         }
         error_cb = function(){
@@ -306,6 +336,19 @@
               txtRes = filereader.result;
               myData = Papa.parse(txtRes, {skipEmptyLines: true}).data;
               dataset = {"isLabeled": "true", "title": filename, "dataset": myData, "dataIndex": index};
+
+              $(".graph_dataset_selector_real").each(function(index){
+                var deselect = 0;
+                if ($(this).prop('selectedIndex') == -1){
+                  deselect = 1;
+                }
+                $(this).append("<option>"+dataset.title+"</option>");
+
+                if (deselect){
+                  $(this).prop('selectedIndex', -1);
+                }
+              })              
+
               datasets.push(dataset)
               $("#data_"+index+"_jsonString").val(JSON.stringify(dataset))
             }
@@ -316,6 +359,19 @@
               txtRes = filereader.result;
               myData = JSON.parse(txtRes);
               myData.dataIndex = index
+
+              $(".graph_dataset_selector_real").each(function(index){
+                var deselect = 0;
+                if($(this).prop('selectedIndex') == -1){
+                  deselect = 1;
+                }
+                $(this).append("<option>"+myData.title+"</option>");
+
+                if (deselect){
+                  $(this).prop('selectedIndex', -1);
+                }
+              })
+
               datasets.push(myData)
               $("#data_"+index+"_jsonString").val(JSON.stringify(myData))
             }
@@ -355,7 +411,8 @@
         var raw = $("#graph-data-menu-template").
           html().
           replace(new RegExp('GRAPHINDEX', 'g'), graphIndex).
-          replace(new RegExp('GRAPHDATAINDEX', 'g'), graphDataIndex);
+          replace(new RegExp('GRAPHDATAINDEX', 'g'), graphDataIndex).
+          replace(new RegExp('FAKE', 'g'), "real");
 
         $menu.append(raw);        
 
@@ -494,6 +551,9 @@
         if (dataIndex < graphs[graphIndex]-1){
           for (var i = parseInt(dataIndex)+1; i < graphs[graphIndex]; i++){
             var graphData = $("#graphs-"+graphIndex+"-data-"+i);
+            var dataset = $("#graphs_"+graphIndex+"_data_"+i+"_dataset_title").val()
+            var column = $("#graphs_"+graphIndex+"_data_"+i+"_column_header").val()
+            var role = $("#graphs_"+graphIndex+"_data_"+i+"_role_in_graph").val()
 
             var newHtml = graphData.html().
                replace(new RegExp("data\\-"+i, 'g'), "data-"+(i-1)).
@@ -502,6 +562,9 @@
 
             graphData.html(newHtml);
             graphData.attr("id", "graphs-"+graphIndex+"-data-"+(i-1));
+            $("#graphs_"+graphIndex+"_data_"+(i-1)+"_dataset_title").val(dataset);
+            $("#graphs_"+graphIndex+"_data_"+(i-1)+"_column_header").val(column);
+            $("#graphs_"+graphIndex+"_data_"+(i-1)+"_role_in_graph").val(role);
           }
 
         }
