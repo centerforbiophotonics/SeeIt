@@ -204,11 +204,6 @@
       self = @
       data = @model.addDataset(dataset)
 
-      # @listenTo(app.dataCollectionView, 'graphs:requestIDs', (cb) ->
-      #   app.trigger('graphs:requestIDs', cb)
-      # )
-      # @dataCollectionView.addDatasetView(data)
-
     ###*
       # Initialize Backbone event listeners in which controller listens to members
     ###

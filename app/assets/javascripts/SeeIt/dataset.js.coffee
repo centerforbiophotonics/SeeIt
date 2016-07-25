@@ -106,11 +106,11 @@
 				self.data[idx].setHeader(value)
 
 			@on 'label:change', (value, idx) ->
-				self.labels[idx] = value
-				self.trigger('label:changed', value, idx)
-
-				self.data.forEach (d) ->
-					d.setLabel(idx, value)
+        console.log "label:change"
+        self.labels[idx] = value
+        self.trigger('label:changed', value, idx)
+        self.data.forEach (d) ->
+          d.setLabel(idx, value)
 
 			@on 'dataColumn:destroy', (col) ->
 				self.destroyColumn.call(self, col)
