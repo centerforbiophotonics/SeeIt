@@ -357,8 +357,14 @@
           event.preventDefault()
           event.target.style.background = '#FFAFAF'
 
+        dragEndListener: (event) ->
+          event.preventDefault()
+          console.log "HELLOOO"
+          event.target.style.background = ''
+
         dropListener: (event) ->
           event.preventDefault()
+          console.log "hello"
           $(".data-drop-zone").css("background-color", '')
           btnName = event.originalEvent.dataTransfer.getData("text")
           dataSetName = event.originalEvent.dataTransfer.getData("datasetName")
