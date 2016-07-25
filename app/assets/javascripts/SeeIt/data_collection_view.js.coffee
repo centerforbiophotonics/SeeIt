@@ -74,7 +74,7 @@
     initHandlers: ->
       self = @
       self.handlers = {
-        dragListener: (event) ->
+        dragStartListener: (event) ->
           event.originalEvent.dataTransfer.setData("text", event.target.id) 
           event.originalEvent.dataTransfer.setData("datasetName", $(this).attr('name'))
           $(".data-drop-zone").css("background-color", "#FFAFAF")
@@ -300,12 +300,11 @@
       for i in [0...@data.datasets.length]
         @addDatasetView(@data.datasets[i])
 
-
     addDatasetView: (data) ->
       @container.find('.dataset-list .new-dataset').before("<div class='SeeIt dataset-container'></div>")
       datasetView = new SeeIt.DatasetView(@app, @container.find(".SeeIt.dataset-container:not(.new-dataset)").last(), data)
       @initHandlers()
-      @container.find('.source').off('dragstart').on('dragstart', @handlers.dragListener)
+      @container.find('.source').off('dragstart').on('dragstart', @handlers.dragStartListener)
       @container.find('.source').off('dragend').on('dragend', @handlers.dragEndListener)
       @initDatasetListeners(datasetView)
       datasetView.trigger('populate:dropdowns')

@@ -14,7 +14,7 @@
           <div class="SeeIt data-column-panel-body panel-body">
             <div class="SeeIt btn-group" role="group" style="width: 100%">
               <div role="group" title='Add to graph' class="data-column-button SeeIt btn-group SeeIt dropdown-container" style='width: 25%'></div>
-              <button name="#{@dataset.title}" id="#{@data.header}" draggable="true" type="button" class="data-column-button SeeIt btn btn-default data source" style='width: 50%'>#{@data.header}</button>
+              <span name="#{@dataset.title}" id="#{@data.header}" draggable="true" class="data-column-button SeeIt btn btn-default data source" style='width: 50%'>#{@data.header}</span>
               <button type="button" title='Change Color' class="color-picker data-column-button SeeIt btn btn-default" style="background-color: #{@data.color}; width: 25%">
               </button>
             </div>

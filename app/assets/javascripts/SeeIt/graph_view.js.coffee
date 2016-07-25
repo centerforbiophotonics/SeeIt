@@ -357,17 +357,11 @@
           event.preventDefault()
           event.target.style.background = '#FFAFAF'
 
-        dragEndListener: (event) ->
-          event.preventDefault()
-          console.log "HELLOOO"
-          event.target.style.background = ''
-
         dropListener: (event) ->
           event.preventDefault()
-          console.log "hello"
           $(".data-drop-zone").css("background-color", '')
-          dataSetName = event.originalEvent.dataTransfer.getData("datasetName")
           btnName = event.originalEvent.dataTransfer.getData("text")
+          dataSetName = event.originalEvent.dataTransfer.getData("datasetName")
           graph.trigger('graph:addData', {graph: $(this).attr('id'), data:[{name: $(this).attr('data-id'), data: graph.findDataSet(dataSetName, btnName, graph.data)}]})
       }
 
