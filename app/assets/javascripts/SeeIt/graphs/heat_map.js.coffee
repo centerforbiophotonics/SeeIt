@@ -23,8 +23,8 @@
             self.draw.call(self, options)
           else
             self.refresh.call(self, options)
-        #else
-        #  self.draw.call(self, options)
+        else
+          @container.html("")
       @eventCallbacks['data:assigned'] = @eventCallbacks['data:created']
       @eventCallbacks['data:destroyed'] = @eventCallbacks['data:created']
       @eventCallbacks['column:destroyed'] = @eventCallbacks['data:created']
@@ -39,7 +39,7 @@
         @on e, cb
 
     formatData: ->
-      graph = @
+      self = @
       Pairs = {}
       xColumn = @dataset[0].data[0].data()
       yColumn = @dataset[1].data[0].data()
@@ -50,11 +50,11 @@
         xLabel = xColumn[i].value()
         yLabel = yColumn[i].value()
         val = vColumn[i].value()
-        if xLabel not in graph.xMembers
-          graph.xMembers.push(xLabel)
+        if xLabel not in self.xMembers
+          self.xMembers.push(xLabel)
 
-        if yLabel not in graph.yMembers
-          graph.yMembers.push(yLabel)
+        if yLabel not in self.yMembers
+          self.yMembers.push(yLabel)
 
         if !Pairs[xLabel]
           Pairs[xLabel] = {}
@@ -65,14 +65,14 @@
           Pairs[xLabel][yLabel].count++
           Pairs[xLabel][yLabel].total += val
 
-        if Pairs[xLabel][yLabel].count > graph.MaxCount
-          graph.MaxCount = Pairs[xLabel][yLabel].count
+        if Pairs[xLabel][yLabel].count > self.MaxCount
+          self.MaxCount = Pairs[xLabel][yLabel].count
 
-        if Pairs[xLabel][yLabel].total > graph.MaxTotal
-          graph.MaxTotal = Pairs[xLabel][yLabel].total
+        if Pairs[xLabel][yLabel].total > self.MaxTotal
+          self.MaxTotal = Pairs[xLabel][yLabel].total
 
-        if Pairs[xLabel][yLabel].total/Pairs[xLabel][yLabel].count > graph.MaxAverage
-          graph.MaxAverage = Pairs[xLabel][yLabel].total/Pairs[xLabel][yLabel].count
+        if Pairs[xLabel][yLabel].total/Pairs[xLabel][yLabel].count > self.MaxAverage
+          self.MaxAverage = Pairs[xLabel][yLabel].total/Pairs[xLabel][yLabel].count
 
       return Pairs
 
@@ -82,13 +82,9 @@
       @draw(options)
 
     draw: (options) ->
-      graph = @
-      #console.log @dataset
+      self = @
       colors = []
-      #StartMajors = ["CSE", "BIS", "PHY", "MAT"]
-      #EndMajors = ["CSE", "BIS", "PHY", "MAT", "EVE"]
-      #Pairs = {'CSE': {'CSE': {count:5, total:15}, 'BIS': {count:2, total:7}, 'MAT': {count:1, total:4}}, 'BIS': {'BIS': {count:6, total:4}, 'EVE': {count:3, total:11}}, 'PHY': {'PHY': {count:7, total:18}, 'MAT': {count:2, total:6}}, 'MAT': {'MAT': {count:1, total:4}}}
-      Pairs = graph.formatData()        
+      Pairs = self.formatData()        
       @xMembers.sort()
       @yMembers.sort()
       @xAxis = d3.svg.axis()
@@ -101,7 +97,7 @@
       @style.width = @container.width() - @style.margin.left - @style.margin.right
       @style.height = Math.max(270, @container.height()) - @style.margin.top - @style.margin.bottom
 
-      gridSize = @style.height / graph.yMembers.length
+      gridSize = @style.height / self.yMembers.length
       @svg = d3.select(@container[0]).append("svg")
         .attr("width", @style.width + @style.margin.left + @style.margin.right)
         .attr("height", @style.height + @style.margin.top + @style.margin.bottom)
@@ -110,7 +106,7 @@
 
       console.log(gridSize)
       @yLabels = @svg.selectAll(".startLabel")
-                      .data(graph.yMembers)
+                      .data(self.yMembers)
                       .enter().append("text")
                         .text((d) -> return d)
                         .attr("x", 0)
@@ -119,7 +115,7 @@
                         .attr("transform", "translate(-6, " + gridSize / 1.5 + ")")
 
       @xLabels = @svg.selectAll(".endLabel")
-                      .data(graph.xMembers)
+                      .data(self.xMembers)
                       .enter().append("text")
                         .text((d) -> return d)
                         .attr("x", (d,i) -> return i*gridSize)
@@ -127,64 +123,63 @@
                         .style("text-anchor", "middle")
                         .attr("transform", "translate(" + gridSize / 2 + ", -6)")
 
-      graph.xMembers.forEach (entry) ->
+      self.xMembers.forEach (entry) ->
         console.log Pairs[entry]
-        graph.yMembers.forEach (endEntry) ->
+        self.yMembers.forEach (endEntry) ->
           
           if (Pairs[entry][endEntry])
             console.log "Drawing " + Pairs[entry][endEntry]
             
             fillstyle = options[0].value
             
-            #console.log "MAXAVG " + graph.MaxAverage + " MAXTOT "  + graph.MaxTotal + " MAXCOUNT " + graph.MaxCount
             if (fillstyle == "1")
               
-              graph.svg
+              self.svg
                 .append("rect")
-                  .attr("x", -> return graph.xMembers.indexOf(entry) * gridSize)
-                  .attr("y", -> return graph.yMembers.indexOf(endEntry) * gridSize)
+                  .attr("x", -> return self.xMembers.indexOf(entry) * gridSize)
+                  .attr("y", -> return self.yMembers.indexOf(endEntry) * gridSize)
                   .attr("rx", 3)
                   .attr("ry", 3)
                   .attr("width", gridSize-2)
                   .attr("height", gridSize-2)
                   .style("fill", "green")
-                  .style("fill-opacity", -> return ((Pairs[entry][endEntry].total / Pairs[entry][endEntry].count) / graph.MaxAverage))
+                  .style("fill-opacity", -> return ((Pairs[entry][endEntry].total / Pairs[entry][endEntry].count) / self.MaxAverage))
                   .style("stroke", "black")
                   .style("stroke-width", "1px")
 
             else if (fillstyle == "2") 
-              graph.svg
+              self.svg
                 .append("rect")
-                  .attr("x", -> return graph.xMembers.indexOf(entry) * gridSize)
-                  .attr("y", -> return graph.yMembers.indexOf(endEntry) * gridSize)
+                  .attr("x", -> return self.xMembers.indexOf(entry) * gridSize)
+                  .attr("y", -> return self.yMembers.indexOf(endEntry) * gridSize)
                   .attr("rx", 3)
                   .attr("ry", 3)
                   .attr("width", gridSize-2)
                   .attr("height", gridSize-2)
                   .style("fill", "red")
-                  .style("fill-opacity", Pairs[entry][endEntry].total / graph.MaxTotal)
+                  .style("fill-opacity", Pairs[entry][endEntry].total / self.MaxTotal)
                   .style("stroke", "black")
                   .style("stroke-width", "1px")
 
             else if (fillstyle == "3")
-              graph.svg
+              self.svg
                 .append("rect")
-                  .attr("x", -> return graph.xMembers.indexOf(entry) * gridSize)
-                  .attr("y", -> return graph.yMembers.indexOf(endEntry) * gridSize)
+                  .attr("x", -> return self.xMembers.indexOf(entry) * gridSize)
+                  .attr("y", -> return self.yMembers.indexOf(endEntry) * gridSize)
                   .attr("rx", 3)
                   .attr("ry", 3)
                   .attr("width", gridSize-2)
                   .attr("height", gridSize-2)
                   .style("fill", "blue")
-                  .style("fill-opacity", Pairs[entry][endEntry].count / graph.MaxCount)
+                  .style("fill-opacity", Pairs[entry][endEntry].count / self.MaxCount)
                   .style("stroke", "black")
                   .style("stroke-width", "1px")
           else 
             #DRAWEMPTYCELL
-            graph.svg
+            self.svg
               .append("rect")
-                .attr("x", -> return graph.xMembers.indexOf(entry) * gridSize)
-                .attr("y", -> return graph.yMembers.indexOf(endEntry) * gridSize)
+                .attr("x", -> return self.xMembers.indexOf(entry) * gridSize)
+                .attr("y", -> return self.yMembers.indexOf(endEntry) * gridSize)
                 .attr("rx", 3)
                 .attr("ry", 3)
                 .attr("width", gridSize-2)
