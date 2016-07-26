@@ -500,9 +500,9 @@ div.SeeIt.expanded-data-zone {
   min-height: 300px;
 }
 
-.SeeIt.maximized {
-/*  min-height: 100vh*/
-/*  min-height: 300px;*/
+.SeeIt.spreadsheet_maximized {
+  min-height: calc(100vh - 150px);
+  height: calc(100vh - 150px);
 }
 
 .SeeIt.maximized .SeeIt.graph-wrapper {

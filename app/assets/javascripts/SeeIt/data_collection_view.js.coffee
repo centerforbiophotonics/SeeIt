@@ -23,6 +23,10 @@
     init: ->
       @container.html("""
         <ul class="SeeIt dataset-list list-group">
+          <div class="SeeIt panel-heading" style=" background-color: #f5f5f5">  
+            <button class="SeeIt upload btn btn-default" value="csv-file" title='Upload Data'><span class="glyphicon glyphicon glyphicon-save"></span></button>  
+            <button class="SeeIt hide_data btn btn-default"  title='Hide Data' style="float:right"><span class="glyphicon glyphicon-arrow-left"></span></button>  
+          </div>
         </ul>
       """)
 
@@ -127,6 +131,12 @@
         $(@).parent().parent().find('.new-dataset-form').slideToggle()
 
       self.container.find(".new-dataset-li").on('click', toggleForm)
+
+      self.container.find('.hide_data').on 'click', () ->  
+        self.app.handlers.toggleDataVisible()  
+ 
+      self.container.find(".upload").on 'click', () ->  
+        console.log self.container.find('.upload').val()
 
       self.container.find("#create-dataset").on 'click', (event) ->
         return self.handleDatasetCreate.call(self, self.container.find("#dataset-select").val())

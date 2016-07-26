@@ -57,6 +57,8 @@
       
       return csvContent;
   
+    maximize: ->  
+      console.log "Maximize"
 
     toggleFullscreen: ->
       if @isFullscreen 
@@ -88,7 +90,6 @@
       self = @
 
       @listenTo(@dataset, 'dataColumn:destroyed dataColumn:created row:destroyed row:created data:changed', ->
-        console.log 'spreadsheet reset'
         self.resetTable.call(self)
       )
 
@@ -116,6 +117,10 @@
 
       @listenTo(@app, 'data:changed', (origin) ->
         #Do nothing
+      )
+
+      @listenTo(self, 'spreadsheet:maximize', (num) ->  
+        self.maximize.call(self, num)
       )
 
       @handlers = {
@@ -160,7 +165,10 @@
       )
 
       @container.find('.maximize').off('click').on('click', () -> 
-        console.log 'maximize'
+        console.log 'max button'
+        self.trigger('spreadsheet:maximize', 6)
+        self.container.find('.maximize .glyphicon').toggleClass('glyphicon-resize-full glyphicon-resize-small')
+        self.container.toggleClass('spreadsheet_maximized')
       )
 
       @container.find('.remove').off('click').on('click', () -> 
@@ -185,11 +193,11 @@
 
         return
 
-      spreadsheetView = @
+      self = @
 
       #Creates 'afterGet' callbacks for row and column headers
       headerCallbackFactory = (dim = "header") ->
-        data = if dim == "label" then spreadsheetView.dataset.labels else spreadsheetView.dataset.headers
+        data = if dim == "label" then self.dataset.labels else self.dataset.headers
 
         if dim != "label" && dim != "header" then dim = "header"
 
@@ -231,7 +239,7 @@
               if event.keyCode == 13
                 value = $(input).val()
 
-                if !spreadsheetView.validateUniqueness(value, data, [idx])
+                if !self.validateUniqueness(value, data, [idx])
                   tip = new Opentip($(input).parent(), "#{dim.charAt(0).toUpperCase() + dim.slice(1)} must be unique", {style: "alert", target: $(input).parent(), showOn: "creation"})
                   tip.setTimeout(->
                     tip.hide.call(tip)
@@ -239,7 +247,7 @@
                   , 5) 
                   return false
 
-                spreadsheetView.dataset.trigger("#{dim}:change", value, idx)
+                self.dataset.trigger("#{dim}:change", value, idx)
 
                 instance.updateSettings({
                   "#{if dim == 'header' then 'colHeaders' else 'rowHeaders'}": data
@@ -266,10 +274,10 @@
         data: privateMethods.formatModelData(),
         columns: privateMethods.formatColumns(),
         className: "SeeIt-htCenter",
-        height: Math.max(270, spreadsheetView.container.find('.SeeIt.Handsontable-Container').parent().height()),
+        height: Math.max(270, self.container.find('.SeeIt.Handsontable-Container').parent().height()),
         colWidths: ->
           Math.max(
-            (spreadsheetView.container.find('.SeeIt.Handsontable-Container').parent().width() - 50) / spreadsheetView.dataset.headers.length,
+            (self.container.find('.SeeIt.Handsontable-Container').parent().width() - 50) / self.dataset.headers.length,
             50
           )
         stretchH: "all",
@@ -279,8 +287,8 @@
         manualColumnResize: true,
         manualRowResize: true,
         copyPaste: true,
-        maxCols: spreadsheetView.dataset.data.length,
-        maxRows: spreadsheetView.dataset.data[0].data().length,
+        maxCols: self.dataset.data.length,
+        maxRows: self.dataset.data[0].data().length,
         beforeKeyDown: (event) ->
           if $(event.realTarget).hasClass('spreadsheet-header-input')
             event.stopImmediatePropagation()
@@ -290,27 +298,27 @@
             event.stopImmediatePropagation()
             event.preventDefault()
             return false
-        contextMenu: if !spreadsheetView.dataset.editable then null else {
+        contextMenu: if !self.dataset.editable then null else {
           items: {
             "multiple_row": {
               name: "<i class='glyphicon glyphicon-plus'></i> Insert row",
               callback: (key, options) ->
-                spreadsheetView.spreadsheetContextMenuView.display_row_menu(key, options)                
+                self.spreadsheetContextMenuView.display_row_menu(key, options)                
             },
             "multiple_col": {
               name: "<i class='glyphicon glyphicon-plus'></i> Insert column",
               callback: (key, options) ->
-                spreadsheetView.spreadsheetContextMenuView.display_column_menu(key, options)
+                self.spreadsheetContextMenuView.display_column_menu(key, options)
             },
             "hsep2": "---------",
             "my_remove_row": {
               name: "<i class='glyphicon glyphicon-minus'></i> Remove row",
               callback: (key, options) ->
-                if spreadsheetView.hot.countRows.call(spreadsheetView.hot) > 1
-                  spreadsheetView.dataset.trigger('row:destroy', options.end.row)
+                if self.hot.countRows.call(self.hot) > 1
+                  self.dataset.trigger('row:destroy', options.end.row)
                 else
                   setTimeout(->
-                    cell = spreadsheetView.hot.getCell(options.end.row, options.end.col)
+                    cell = self.hot.getCell(options.end.row, options.end.col)
                     tip = new Opentip($(cell), "Dataset must have at least one row", {style: "alert", target: $(cell), showOn: "creation"})
                     tip.setTimeout(->
                       tip.hide.call(tip)
@@ -321,11 +329,11 @@
             "my_remove_col": {
               name: "<i class='glyphicon glyphicon-minus'></i> Remove column",
               callback: (key, options) ->
-                if spreadsheetView.hot.countCols.call(spreadsheetView.hot) > 1
-                  spreadsheetView.dataset.trigger('dataColumn:destroy', options.end.col)
+                if self.hot.countCols.call(self.hot) > 1
+                  self.dataset.trigger('dataColumn:destroy', options.end.col)
                 else
                   setTimeout(->
-                    cell = spreadsheetView.hot.getCell(options.end.row, options.end.col)
+                    cell = self.hot.getCell(options.end.row, options.end.col)
                     tip = new Opentip($(cell), "Dataset must have at least one column", {style: "alert", target: $(cell), showOn: "creation"})
                     tip.setTimeout(->
                       tip.hide.call(tip)
@@ -343,16 +351,16 @@
                     key: "change_col_type:numeric"
                     name: "<i class='glyphicon glyphicon-triangle-right'></i> Numeric",
                     callback: (key, options) ->
-                      spreadsheetView.dataset.trigger('dataColumn:type:change', options.end.col, "numeric", (success, msg) ->
-                        spreadsheetView.displayTypeChangeMsg(options.end.col, success, msg)
+                      self.dataset.trigger('dataColumn:type:change', options.end.col, "numeric", (success, msg) ->
+                        self.displayTypeChangeMsg(options.end.col, success, msg)
                       )
                   },
                   {
                     key: "change_col_type:categorical",
                     name: "<i class='glyphicon glyphicon-triangle-right'></i> Categorical",
                     callback: (key, options) ->
-                      spreadsheetView.dataset.trigger('dataColumn:type:change', options.end.col, "categorical", (success, msg) ->
-                        spreadsheetView.displayTypeChangeMsg(options.end.col, success, msg)
+                      self.dataset.trigger('dataColumn:type:change', options.end.col, "categorical", (success, msg) ->
+                        self.displayTypeChangeMsg(options.end.col, success, msg)
                       )
                   }
                 ]
@@ -361,7 +369,7 @@
           }
         },
         afterChange: (changes, source) ->
-          spreadsheetView.trigger('data:changed', spreadsheetView)
+          self.trigger('data:changed', self)
         afterSelection: (rowstart, colstart, rowend, colend) ->
           currentselection = [rowstart, colstart, rowend, colend]
       }

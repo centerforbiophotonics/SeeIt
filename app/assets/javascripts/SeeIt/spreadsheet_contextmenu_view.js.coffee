@@ -4,6 +4,18 @@
     _.extend(@prototype, Backbone.Events)
 
     constructor: (@parent) ->
+      @initHandlers()  
+ 
+    initHandlers: ->  
+      self = @  
+ 
+      @listenTo(@parent, 'spreadsheet:maximize', (num) ->  
+        self.print_function.call(self, num)  
+ 
+      )
+ 
+    print_function: (num) ->  
+      console.log 'hi there from contextmenu: ' + num
 
     display_row_menu: (key, options) ->
 
@@ -48,8 +60,9 @@
 
       $('#myModal').modal('show')
 
-      $(document).off("keypress").on("keypress", ":input:not(textarea)", (event) ->
-        if event.keyCode == 13
+      $(document).off("keypress").on("keypress", ":input:not(textarea)", (e) ->    
+        if e.keyCode == 13
+          e.preventDefault()
           $('#done_button').click()
       );
       
@@ -140,8 +153,9 @@
 
       $('#myModal').modal('show')
 
-      $(document).off("keypress").on("keypress", ":input:not(textarea)", (event) ->
-        if event.keyCode == 13
+      $(document).off("keypress").on("keypress", ":input:not(textarea)", (e) ->       
+        if e.keyCode == 13
+          e.preventDefault()
           $('#done_button').click()
       );
 
@@ -166,7 +180,6 @@
       $("#done_button").on("click", () ->
         input = parseInt($('#number_field').val());
         type = $("input[name=options]:checked").val();
-        console.log("creating " + input + " " + $("input[name=options]:checked").val() + " columns on the " + $("input[name=pos_options]:checked").val());
 
         if input != null
           if $("input[name=pos_options]:checked").val() == 'left'
