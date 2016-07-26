@@ -474,6 +474,19 @@
         else
           filteredData = _.union(filteredData, requirement(parentColumn))
 
+      data = parentColumn.data().map((d) ->
+        {
+          label: d.label()
+          value: d.value()
+        }
+      ).filter((d, i) ->
+        return filteredData.indexOf(i) > -1
+      )  
+      console.log "this is the actual data filtered by filterData", data
+
+      filteredColumn = new SeeIt.FilteredColumn(parentColumn, self.requirements, self.operator)
+      someData = filteredColumn.data()
+      console.log "this is the filtered column doing the filtering", someData
       dataColumn.trigger 'filter:changed', filteredData
 
     addFilterGroup: ->

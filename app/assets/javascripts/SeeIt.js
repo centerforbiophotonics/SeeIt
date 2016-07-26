@@ -23,6 +23,7 @@
 //= require SeeIt/graph_collection_view
 //= require SeeIt/application_view
 //= require SeeIt/application_controller
+//= require SeeIt/filter_decorator
 
 require('jquery');
 require('./handsontable.full.js');

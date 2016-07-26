@@ -54,3 +54,4 @@
 //= require SeeIt/application_view
 //= require SeeIt/application_controller
 //= require SeeIt/spreadsheet_contextmenu_view
+//= require SeeIt/filter_decorator
