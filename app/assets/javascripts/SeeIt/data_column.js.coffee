@@ -5,10 +5,11 @@
     constructor: (@app, @header, data, @datasetTitle, @type, @color, editable = true, @dataSet) ->
       if !@color then @color = SeeIt.Utils.getRandomColor()
 
+
       dataArray = []
 
       self = @
-
+    
       setDataArray = ->
         dataArray = []
         data.forEach (d, i) ->
@@ -28,6 +29,7 @@
 
       setDataArray()
 
+      @registerListeners()
       @staleData = false
 
       @length = ->
@@ -135,6 +137,7 @@
       @color = color
       @trigger('color:changed')
 
+
     getHeader: ->
       return @header
 
@@ -143,31 +146,38 @@
       @header = header
       @trigger('header:changed')
 
-    @registerListeners: ->
-      @listenTo @dataSet, 'palette:change', (paletteType) -> 
-        console.log("bottom")
+    
+    registerListeners: ->
+      @listenTo @dataSet, 'palette:change', (paletteType) ->
+        color = paletteType.class.getColor() 
+        @setColor(color)
+        @trigger('palette:change', color)
+  
+        
+       
+       
 
 
     @new: ->
       # Being created from array of arrays
       if $.isArray(arguments[1])
-        return ((app, dataset, column, title, type, color, editable) ->
+        return ((app, dataset, column, title, type, color, editable, dataSet) ->
           header = dataset[0][column] + ''
           data = []
 
           for i in [1...dataset.length]
             data.push({label: dataset[i][0], value: dataset[i][column]})
 
-          return new DataColumn(app, header, data, title, type, color, editable)
+          return new DataColumn(app, header, data, title, type, color, editable, dataSet)
         ).apply(@, arguments)
       else
-        return ((app, data, column, title, type, color, editable) ->
+        return ((app, data, column, title, type, color, editable, dataSet) ->
           dataColumn = []
 
           for i in [0...data.columns[column].data.length]
             dataColumn.push({label: data.labels[i], value: data.columns[column].data[i]})
 
-          return new DataColumn(app, data.columns[column].header, dataColumn, title, type, color, editable)
+          return new DataColumn(app, data.columns[column].header, dataColumn, title, type, color, editable, dataSet)
         ).apply(@,arguments)
 
 

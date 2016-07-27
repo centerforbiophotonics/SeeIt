@@ -5,10 +5,8 @@
     constructor: (@app, @container, @data) ->
       @graphRoles = {}
       @init()
-
     init: ->
       self = @
-
 
       @container.html("""
         <div class="SeeIt data-column-panel panel panel-default">
@@ -55,6 +53,9 @@
       @listenTo(@data, 'destroy', ->
         self.destroy.call(self)
       )
+
+      @listenTo @data, 'palette:change', (color) -> 
+        @setColor(color)
 
       @on 'graph:created', (graphId, dataRoles) ->
         self.addGraphOption.call(self, graphId, dataRoles)

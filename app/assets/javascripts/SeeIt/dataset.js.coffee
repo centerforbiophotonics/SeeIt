@@ -41,6 +41,7 @@
 					]
 				}
 
+
 			#Data will be an array of DataColumns
 			@labels = []
 			@headers = []
@@ -50,6 +51,7 @@
 			extend(@, ConverterFactory(@rawFormat))
 			@loadData(data)
 			@registerListeners()
+		
 
 		getByHeader: (header) ->
 			idx = @headers.indexOf(header)
@@ -96,8 +98,13 @@
 			else
 				return "numeric"
 
+
 		registerListeners: ->
 			self = @
+
+			@listenTo @dataCollection, 'palette:change', (paletteType) -> 
+				paletteType.class.makePalette(self.headers.length)
+				self.trigger('palette:change', paletteType)
 
 			@on 'header:change', (value, idx) ->
 				self.headers[idx] = value
@@ -138,8 +145,6 @@
 			@on 'request:values:unique', (colIdx, callback) ->
 				callback self.data[colIdx].uniqueData()
 
-			@listenTo @dataCollection, 'palette:change', (paletteType) -> 
-        		self.trigger('palette:change', paletteType)
 
 
 		generateLabel: (labels) ->
@@ -158,7 +163,6 @@
 				else
 					@data[i].insertElement(row, label, null)
 
-			console.log @data
 
 			@labels.splice(row, 0, label)
 			@trigger('row:created', row)
@@ -172,11 +176,9 @@
 
 			for i in [0...@labels.length]
 				dataColumn.push({label: @labels[i], value: null})
-
-			column = new SeeIt.DataColumn(@app, header, dataColumn, @title, undefined, @editable, @)
+			column = SeeIt.DataColumn.new(@app, header, dataColumn, @title, undefined, @editable, self)
 			@data.splice(col, 0, column)
 			@listenTo column, 'data:changed', (source, idx) ->
-				console.log 'data:changed triggered in dataset'
 				self.trigger('data:changed', source, idx)
 
 			@headers.splice(col, 0, header)
@@ -250,8 +252,6 @@
 
 				getColTypes: ->
 					for i in [1...@rawDataCols()]
-						# console.log "rawData: ", @rawData[1][i]
-						# console.log "type: ", @getType(@rawData[1][i])
 						@types.push(@getType(@rawData[1][i]))
 
 				padRows: (maxCols) ->
@@ -267,11 +267,11 @@
 				initData: ->
 					self = @
 					# Assume data is already in array of arrays format and is uniformly padded with 'undefined's
+
 					for i in [1...@rawDataCols()]
-						column = SeeIt.DataColumn.new(@app, @rawData, i, @title, @types[i-1], undefined, @editable)
+						column = SeeIt.DataColumn.new(@app, @rawData, i, @title, @types[i-1], undefined, @editable, self)
 						@data.push(column)
 						@listenTo column, 'data:changed', (source, idx) ->
-							console.log 'data:changed triggered in dataset'
 							self.trigger('data:changed', source, idx)
 
 
@@ -322,10 +322,9 @@
 				initData: ->
 					self = @
 					for i in [0...@rawData.columns.length]
-						column = SeeIt.DataColumn.new(@app, @rawData, i, @title, @types[i], undefined, @editable) 
+						column = SeeIt.DataColumn.new(@app, @rawData, i, @title, @types[i], undefined, @editable, self) 
 						@data.push(column)
 						@listenTo column, 'data:changed', (source, idx) ->
-							console.log 'data:changed triggered in dataset'
 							self.trigger('data:changed', source, idx)
 
 			}

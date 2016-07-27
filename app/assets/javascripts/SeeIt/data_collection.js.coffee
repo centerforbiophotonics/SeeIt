@@ -48,12 +48,12 @@
       @listenTo @app, 'request:dataset', (name, callback) ->
         found_dataset = self.datasets.filter((d) -> d.title == name)
 
-      @listenTo @app, 'palette:change', (paletteType) -> 
-        self.trigger('palette:change', paletteType)
-
         if found_dataset.length
           found_dataset = found_dataset[0]
           callback found_dataset
+
+      @listenTo @app, 'palette:change', (paletteType) ->
+        self.trigger('palette:change', paletteType)
 
     getByTitle: (dataset_title) ->
       for i in [0...@datasets.length]
