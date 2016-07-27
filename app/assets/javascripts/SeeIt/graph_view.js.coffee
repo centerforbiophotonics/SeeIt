@@ -315,7 +315,7 @@
 
         editTitle: ->
           if !self.editing
-            self.container.find(".graph-title-content").html("<input id='graph-title-input' type='text' value='#{graph.id}'>")
+            self.container.find(".graph-title-content").html("<input id='graph-title-input' type='text' value='#{self.id}'>")
             self.container.find('#graph-title-input').off('keyup', self.handlers.graphTitleInputKeyup).on('keyup', self.handlers.graphTitleInputKeyup)
             self.editing = true
           else
@@ -339,7 +339,7 @@
 
         graphTitleInputKeyup: (event) ->
           if event.keyCode == 13
-            graph.container.find(".graph-title-edit-icon").trigger('click')
+            self.container.find(".graph-title-edit-icon").trigger('click')
 
             
       }

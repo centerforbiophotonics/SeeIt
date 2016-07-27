@@ -25,7 +25,8 @@
         <ul class="SeeIt dataset-list list-group">
           <div class="SeeIt panel-heading" style=" background-color: #f5f5f5">  
             <label id="upload_modal" class="btn btn-primary btn-file SeeIt new-dataset-input">
-              <span class='glyphicon glyphicon-upload'></span>
+              <span class='glyphicon glyphicon-upload' style=""></span>
+                Upload Data
             </label>
             <button class="SeeIt hide_data btn btn-default"  title='Hide Data' style="float:right"><span class="glyphicon glyphicon-arrow-left"></span></button>  
           </div>
@@ -80,8 +81,7 @@
     newDatasetMaker: ->
       @container.find('.dataset-list').append("""
         <div class='SeeIt dataset-container new-dataset'>
-        </div>
-        
+        </div>  
       """)
 
       @container.find('.dataset-list').append("""
@@ -89,9 +89,10 @@
           <div class="modal-dialog modal-sm">
               <div class="modal-content">
                 <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                   <h4 class="modal-title">How do you want to create the dataset?</h4>
                 </div>
-                
+                <div class="modal-header">
                   <select class="form-control" id="dataset-select">
                     <option value="spreadsheet">Fill out spreadsheet</option>
                     <option value="google">Load from Google Spreadsheet</option>
@@ -100,11 +101,14 @@
                     <option value="csv-endpoint">Load from CSV endpoint</option>
                     <option value="csv-file">Load from CSV file</option>
                   </select>
+                </div>
+                <div class="modal-header">
                   <input type="text" placeholder="Dataset Title" class="form-control SeeIt new-dataset-input dataset-name spreadsheet">
                   <input type="text" placeholder="Spreadsheet URL" class="form-control SeeIt new-dataset-input dataset-spreadsheet-url hidden google">
                   <input type="text" placeholder="JSON URL" class="form-control SeeIt new-dataset-input dataset-json-url hidden json-endpoint">
                   <input type="text" placeholder="CSV URL" class="form-control SeeIt new-dataset-input dataset-csv-url hidden csv-endpoint">
                   <span class="SeeIt new-dataset-msg"></span>
+                </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                   <label class="btn btn-primary btn-file SeeIt new-dataset-input dataset-json-file hidden json-file">
