@@ -333,7 +333,7 @@
             newId = self.container.find("#graph-title-input").val()
             self.trigger('graph:id:change', oldId, newId, (success) ->
               if success
-                self.id = value
+                self.id = newId
                 self.container.find(".graph-title-content").html(newId)
               else
                 self.container.find(".graph-title-content").html(oldId)
