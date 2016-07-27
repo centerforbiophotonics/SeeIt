@@ -80,10 +80,6 @@
     newDatasetMaker: ->
       @container.find('.dataset-list').append("""
         <div class='SeeIt dataset-container new-dataset'>
-          <li class="SeeIt list-group-item new-dataset-li">
-            <a class="SeeIt" style="font-weight: bold">Add Dataset</a>
-            <span class='glyphicon glyphicon-plus' style='float: right;'></span>
-          </li>
         </div>
         
       """)
@@ -150,27 +146,13 @@
         return self.handleDatasetCreate.call(self, self.container.find("#dataset-select").val())
 
       self.container.find(".json-file input, .csv-file input").on 'change', (event) ->
-        console.log @files[0]
         return self.handleDatasetCreate.call(self, self.container.find("#dataset-select").val(), {file: @files[0]})
 
       self.container.find("#upload_modal").on 'click', (e) -> 
-        console.log "upload_modal" 
         $('#newdata_modal').modal('show')
-        self.container.find('.new-dataset-li').trigger('click')
-
-      $('#newdata_modal').on('shown.bs.modal', () ->
-        
-      );
-
-      $('#newdata_modal').on('hidden.bs.modal', () ->
-        self.container.find('.new-dataset-li').trigger('click')
-        # $(this).remove()
-      );
       
-      $(".json-file, .csv-file").on("click", () -> 
+      $(".json-file, .csv-file").on "click", () -> 
         $('#newdata_modal').modal('hide')
-      );
-
 
     handleDatasetCreate: (selected, data = {}) ->
       self = @
