@@ -36,9 +36,7 @@
 
     formatData: ->
       data = []
-      console.log "formatData:"
-      console.log @dataset[0]
-      
+
       # clear previous data
       if @dataset[0].data.length > 1 
         @dataset[0].data.splice(0,1)
@@ -79,9 +77,6 @@
             if !counts[d.value()]
               counts[d.value()] = 0
             counts[d.value()]++
-          
-          console.log "COUNTS:"
-          console.log counts    #[Freshman: 3, Transfer: 2]
 
           dat = []
           Object.keys(counts).forEach (key) ->
@@ -104,12 +99,6 @@
         .attr('height', '100%')
         .data([data])
         .call(chart)
-
-        console.log "dat"
-        console.log dat
-
-        console.log "data"
-        console.log data
 
         nv.utils.windowResize(chart.update);
         self.chartObject = chart

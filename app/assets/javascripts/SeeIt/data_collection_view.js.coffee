@@ -77,6 +77,19 @@
         self.trigger('graphs:requestIDs', cb)
       )
 
+    initHandlers: ->
+      self = @
+      self.handlers = {
+        dragStartListener: (event) ->
+          event.originalEvent.dataTransfer.setData("text", event.target.id) 
+          event.originalEvent.dataTransfer.setData("datasetName", $(this).attr('name'))
+          $(".data-drop-zone").css("background-color", "#FFAFAF")
+
+        dragEndListener: (event) ->
+          event.preventDefault()
+          $(".data-drop-zone").css("background-color", "")
+      }
+
     newDatasetMaker: ->
       @container.find('.dataset-list').append("""
         <div class='SeeIt dataset-container new-dataset'>
@@ -290,8 +303,6 @@
             self.dataLoadingMsg.hide()
           )
 
-
-
     validateTitle: (title) ->
       for i in [0...@data.datasets.length]
         if @data.datasets[i].title == title then return false
@@ -308,10 +319,12 @@
       for i in [0...@data.datasets.length]
         @addDatasetView(@data.datasets[i])
 
-
     addDatasetView: (data) ->
       @container.find('.dataset-list .new-dataset').before("<div class='SeeIt dataset-container'></div>")
       datasetView = new SeeIt.DatasetView(@app, @container.find(".SeeIt.dataset-container:not(.new-dataset)").last(), data)
+      @initHandlers()
+      @container.find('.source').off('dragstart').on('dragstart', @handlers.dragStartListener)
+      @container.find('.source').off('dragend').on('dragend', @handlers.dragEndListener)
       @initDatasetListeners(datasetView)
       datasetView.trigger('populate:dropdowns')
       @datasetViewCollection.push(datasetView)
@@ -322,7 +335,6 @@
       )
 
       return datasetView
-
 
     toggleVisible: ->
       @container.toggle()
