@@ -45,7 +45,7 @@
       @spreadsheetVisible = false
 
       # Container for graphs
-      @graphCollectionView = new SeeIt.GraphCollectionView(@, @layoutContainers['Graphs'], @ui.graph_editable)
+      @graphCollectionView = new SeeIt.GraphCollectionView(@, @layoutContainers['Graphs'], @ui.graph_editable, @model)
 
       if @ui.dataMenu
         #Container for list of datasets
@@ -282,6 +282,11 @@
 
       @listenTo self.graphCollectionView, 'request:dataset', (name, callback) ->
         self.trigger 'request:dataset', name, callback
+
+      # listen for trigger in graphCollectionView and will trigger the actual function in graphCollectionView
+      @listenTo app.graphCollectionView, 'graph:addData', (dataGraph) ->
+        app.trigger 'graph:addData', dataGraph
+
 
     ###*
       # Toggles visibility of SpreadsheetView

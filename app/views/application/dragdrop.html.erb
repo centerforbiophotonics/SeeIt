@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<body>
+	<!-- CSS -->
+	<style type="text/css">
+	.container1 .done1 {
+	  border: 1px solid #000;
+	  min-height:50px;
+	  background:#EEE;
+	}
+
+	.container2 .done2 {
+	  border: 1px solid #000;
+	  min-height:50px;
+	  background:#EEE;
+	}
+
+	.elem {
+	  padding:10px;
+	  border: 1px solid #000;
+	  background:#FFF;
+	  margin:5px;
+	  display: inline-block;
+	}
+	</style>
+
+	<!-- HTML -->
+	<div class="all">
+		<div id="c1" class="container1 done1">
+			<div class="m1">
+				<div class="m2">drag here
+					<div class="m3">
+						<button class="elem">Button</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="c1" class="container1 done1">
+			<div class="m1">
+				<div class="m2">drag here
+					<div class="m3">
+						<button class="elem">Button</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<div id="c2" class="container2 done2"></div>
+
+	<!-- JavaScript -->
+	<script type="text/javascript">
+		// [].slice.call converts DOM NodeList into a regular array 
+		console.log (document.querySelectorAll('.all'));
+		dragula([document.querySelectorAll('.all'), document.querySelectorAll('.done2')], {
+			moves: function(el, container, target) {
+				return target.classList.contains('elem')
+			}
+  		// copy: function (el, source) {
+    // 		return source === document.querySelector('.container1.done1')
+  		// },
+  		// accepts: function (el, target) {
+    // 		return target !== document.querySelector('.done2')
+  		// }// removeOnSpill: false
+		});
+
+	</script>
+
+</body>

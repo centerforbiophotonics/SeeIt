@@ -2,20 +2,19 @@
   class DataColumnView
     _.extend(@prototype, Backbone.Events)
 
-    constructor: (@app, @container, @data) ->
+    constructor: (@app, @container, @data, @dataset) ->
       @graphRoles = {}
       @init()
 
     init: ->
       self = @
 
-
       @container.html("""
         <div class="SeeIt data-column-panel panel panel-default">
           <div class="SeeIt data-column-panel-body panel-body">
             <div class="SeeIt btn-group" role="group" style="width: 100%">
               <div role="group" title='Add to graph' class="data-column-button SeeIt btn-group SeeIt dropdown-container" style='width: 25%'></div>
-              <button type="button" class="data-column-button SeeIt btn btn-default data" style='width: 50%'>#{@data.header}</button>
+              <span name="#{@dataset.title}" id="#{@data.header}" draggable="true" class="data-column-button SeeIt btn btn-default data source" style='width: 50%'>#{@data.header}</span>
               <button type="button" title='Change Color' class="color-picker data-column-button SeeIt btn btn-default" style="background-color: #{@data.color}; width: 25%">
               </button>
             </div>
@@ -38,44 +37,12 @@
       @populateGraphSelectBox()
       @registerListeners()
       @alignGroupHeight()
-
+      
+      
     setColor: (color) ->
       @data.setColor(color)
 
       @container.find('.color-picker').css('background-color', @data.color)
-
-    registerListeners: ->
-      self = @
-
-      @listenTo(@data, 'header:changed', ->
-        self.container.find('.SeeIt.data').html(@data.header)
-        self.alignGroupHeight.call(self)
-      )
-
-      @listenTo(@data, 'destroy', ->
-        self.destroy.call(self)
-      )
-
-      @on 'graph:created', (graphId, dataRoles) ->
-        self.addGraphOption.call(self, graphId, dataRoles)
-
-      @on 'graph:destroyed', (graphId) ->
-        self.removeGraphOption.call(self, graphId)
-
-      @on 'graph:id:change', (oldId, newId) ->
-        self.updateGraphOption.call(self, oldId, newId)
-
-      @listenTo @app, 'ready', ->
-        self.populateGraphDropdown.call(self)
-
-      @on 'populate:dropdown', ->
-        self.populateGraphDropdown.call(self)
-
-      @on 'dataColumns:show', ->
-        self.alignGroupHeight.call(self)
-
-      $(window).on 'resize', ->
-        self.alignGroupHeight.call(self)
 
     alignGroupHeight: ->
       headerHeight = @container.find('.SeeIt.data').height()
@@ -117,17 +84,15 @@
 
     addGraphOption: (graphId, dataRoles) ->
       self = @
-
       @graphRoles[graphId] = dataRoles
 
       if dataRoles.length == 1
         @container.find('.SeeIt.dropdown-menu.main-graph-dropdown').append("<li class='add_to_graph graph_li' style='box-shadow: none'><a href='#' class='dropdown_child' data-id='#{graphId}'>#{graphId}</a></li>")
 
         selectGraph = (event) ->
-          #data: {name: "default", data: self.data} is a temporary placeholder. I need to pass the data-role info to this view
           if $(@).find('.disabled').length == 0
             self.trigger('graph:addData', {graph: $(@).find('.dropdown_child').attr('data-id'), data: [{name: dataRoles[0].name, data: self.data}]})
-
+        
         @container.find('.add_to_graph').off('click', selectGraph).on('click', selectGraph)
       else
         appendRoles = ->
@@ -151,10 +116,7 @@
 
         $('.add_to_graph_submenu').click(->
           self.disableInvalidGraphs.call(self)
-          #dropDownFixPosition($(@),$(@).find('.dropdown-menu'))
-          # $(window).on 'scroll'
         )
-
 
         selectGraphDataRole = ->
           if $(@).find('.disabled').length == 0
@@ -165,6 +127,45 @@
 
       true
        
+
+    selectGraph: ->
+      self = @
+      if $(@).find('.disabled').length == 0
+        self.trigger('graph:addData', {graph: $(@).find('.dropdown_child').attr('data-id'), data: [{name: "default", data: self.data}]})
+
+
+    registerListeners: ->
+      self = @
+
+      @listenTo(@data, 'header:changed', ->
+        self.container.find('.SeeIt.data').html(@data.header)
+        self.alignGroupHeight.call(self)
+      )
+
+      @listenTo(@data, 'destroy', ->
+        self.destroy.call(self)
+      )
+
+      @on 'graph:created', (graphId, dataRoles) ->
+        self.addGraphOption.call(self, graphId, dataRoles)
+
+      @on 'graph:destroyed', (graphId) ->
+        self.removeGraphOption.call(self, graphId)
+
+      @on 'graph:id:change', (oldId, newId) ->
+        self.updateGraphOption.call(self, oldId, newId)
+
+      @listenTo @app, 'ready', ->
+        self.populateGraphDropdown.call(self)
+
+      @on 'populate:dropdown', ->
+        self.populateGraphDropdown.call(self)
+
+      @on 'dataColumns:show', ->
+        self.alignGroupHeight.call(self)
+
+      $(window).on 'resize', ->
+        self.alignGroupHeight.call(self)
 
     disableInvalidGraphs: ->
       self = @
@@ -193,7 +194,6 @@
 
       $('.SeeIt.graph-dropdown').click(->
         self.disableInvalidGraphs()
-        #dropDownFixPosition($(@),$(@).next())
       )
 
   dropDownFixPosition = (button,dropdown) ->
