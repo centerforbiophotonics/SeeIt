@@ -81,84 +81,62 @@
             if d.name == new_data.name then datasetIdx = i
 
           if datasetIdx != -1
-            # delete previous data if multiple is false
-            if @graph.dataset[datasetIdx].multiple == false
-              @dataset[datasetIdx].data.splice(0, 1) 
-              dataIdx = @dataset[datasetIdx].data.indexOf(new_data.data)
-            else
-              dataIdx = @dataset[datasetIdx].data.indexOf(new_data.data)
-
-            if dataIdx == -1
+            if @dataset[datasetIdx].multiple == false && @dataset[datasetIdx].data.length == 0 || @dataset[datasetIdx].multiple == true
               this_data = {}
               this_data.data = @filter(new_data.data, new_data.name)
               this_data.name = new_data.name
 
               @filterColumn(this_data.data, new_data.data, this_data.name)
 
-              # remove footer first
-              if @graph.dataset[0].multiple == false
-                @removeDataFromFooterMultiple()
-                @dataset[datasetIdx].data.push(new_data.data)
-                @filteredDataset[datasetIdx].data.push(this_data.data)
-                @addDataToFooter(new_data)
-              else
-                @dataset[datasetIdx].data.push(new_data.data)
-                @filteredDataset[datasetIdx].data.push(this_data.data)
-                @addDataToFooter(new_data)
+              @dataset[datasetIdx].data.push(new_data.data)
+              @filteredDataset[datasetIdx].data.push(this_data.data)
 
-              self = @
+              @addDataToFooter(new_data)
 
-              @listenTo(this_data.data, 'label:changed', (idx) ->
-                self.graph.trigger('label:changed', self.options.getValues())
-              )
+            else
+              this_data = {}
+              this_data.data = @filter(new_data.data, new_data.name)
+              this_data.name = new_data.name
 
-              @listenTo(this_data.data, 'color:changed', ->
-                self.graph.trigger('color:changed', self.options.getValues())
-              )
+              @filterColumn(this_data.data, new_data.data, this_data.name)
 
-              @listenTo(this_data.data, 'header:changed', ->
-                self.updateFooterData.call(self)
-                self.graph.trigger('header:changed', self.options.getValues())
-              )
+              @removeDataFromFooterMultiple( @dataset[datasetIdx].name, @dataset[datasetIdx].data[0].header, datasetIdx)
+            
+              @dataset[datasetIdx].data.push(new_data.data)
+              @filteredDataset[datasetIdx].data.push(this_data.data)
 
-              @listenTo(this_data.data, 'data:destroyed', ->
-                self.graph.trigger('data:destroyed', self.options.getValues())
-              )
+              @addDataToFooter(new_data)
+              
 
-              @listenTo(this_data.data, 'data:created', ->
-                self.graph.trigger('data:created', self.options.getValues())
-              )
+            self = @
 
-              @listenTo(this_data.data, 'data:changed', ->
-                self.graph.trigger('data:changed', self.options.getValues())
-              )
+            @listenTo(this_data.data, 'label:changed', (idx) ->
+              self.graph.trigger('label:changed', self.options.getValues())
+            )
 
-              @listenTo(this_data.data, 'type:changed', ->
-                if this_data.data.type != self.dataset[datasetIdx].type
-                  idx = -1
+            @listenTo(this_data.data, 'color:changed', ->
+              self.graph.trigger('color:changed', self.options.getValues())
+            )
 
-                  self.dataset.forEach (d, i) ->
-                    if d.name == this_data.name then idx = i
+            @listenTo(this_data.data, 'header:changed', ->
+              self.updateFooterData.call(self)
+              self.graph.trigger('header:changed', self.options.getValues())
+            )
 
-                  if idx >= 0
-                    colToDestroy = self.dataset[idx].data.indexOf(this_data.data)
+            @listenTo(this_data.data, 'data:destroyed', ->
+              self.graph.trigger('data:destroyed', self.options.getValues())
+            )
 
-                    if colToDestroy >= 0
-                      self.dataset[idx].data.splice(colToDestroy, 1)
-                      self.filteredDataset[idx].data.splice(colToDestroy, 1)
-                      self.graph.trigger('column:destroyed', self.options.getValues())
+            @listenTo(this_data.data, 'data:created', ->
+              self.graph.trigger('data:created', self.options.getValues())
+            )
 
-                      msg = "Data removed due to type change"
-                      tip = new Opentip(self.container.find('.data-drop-zone'), msg, {style: "alert", target: self.container.find('.data-drop-zone'), showOn: "creation", tipJoint: "top left"})
-                      tip.setTimeout(->
-                        tip.hide.call(tip)
-                        return
-                      , 5)
+            @listenTo(this_data.data, 'data:changed', ->
+              self.graph.trigger('data:changed', self.options.getValues())
+            )
 
-                  self.updateFooterData.call(self)
-              )
-
-              @listenTo(this_data.data, 'destroy', ->
+            @listenTo(this_data.data, 'type:changed', ->
+              if this_data.data.type != self.dataset[datasetIdx].type
                 idx = -1
 
                 self.dataset.forEach (d, i) ->
@@ -172,15 +150,39 @@
                     self.filteredDataset[idx].data.splice(colToDestroy, 1)
                     self.graph.trigger('column:destroyed', self.options.getValues())
 
+                    msg = "Data removed due to type change"
+                    tip = new Opentip(self.container.find('.data-drop-zone'), msg, {style: "alert", target: self.container.find('.data-drop-zone'), showOn: "creation", tipJoint: "top left"})
+                    tip.setTimeout(->
+                      tip.hide.call(tip)
+                      return
+                    , 5)
+
                 self.updateFooterData.call(self)
-              )
+            )
 
-              if j == data.length - 1
-                if !@initialized
-                  @initGraph()
-                  @initialized = true
+            @listenTo(this_data.data, 'destroy', ->
+              idx = -1
 
-                @graph.trigger('data:assigned', self.options.getValues())
+              self.dataset.forEach (d, i) ->
+                if d.name == this_data.name then idx = i
+
+              if idx >= 0
+                colToDestroy = self.dataset[idx].data.indexOf(this_data.data)
+
+                if colToDestroy >= 0
+                  self.dataset[idx].data.splice(colToDestroy, 1)
+                  self.filteredDataset[idx].data.splice(colToDestroy, 1)
+                  self.graph.trigger('column:destroyed', self.options.getValues())
+
+              self.updateFooterData.call(self)
+            )
+
+            if j == data.length - 1
+              if !@initialized
+                @initGraph()
+                @initialized = true
+
+              @graph.trigger('data:assigned', self.options.getValues())
         ).call(@, new_data)
 
     addDataToFooter: (data) ->
@@ -234,8 +236,10 @@
       @container.find(".data-drop-zone[data-id='#{data.name}'] .data-rep[data-id='#{data.data.header}']").remove()
 
     # remove previous tab in data-drop-zone
-    removeDataFromFooterMultiple: ->
-      @container.find(".data-drop-zone .data-rep:first").remove()    
+    removeDataFromFooterMultiple: (dataName, dataHeader, datasetIdx)->
+      @container.find(".data-drop-zone[data-id='#{dataName}'] .data-rep[data-id='#{dataHeader}']").remove()  
+      @graph.dataset[datasetIdx].data.splice(0, 1) 
+      @dataset[datasetIdx].data.splice(0, 1)   
 
     removeData: (data) ->
       dataset_idx = @dataset.map((d) -> d.name).indexOf(data.name)
@@ -356,15 +360,14 @@
         dragLeaveListener: (event) ->
           event.preventDefault()
           event.target.style.background = '#FFAFAF'
-
+          
         dragEndListener: (event) ->
           event.preventDefault()
-          console.log "HELLOOO"
           event.target.style.background = ''
+          $('.btn-group').css('background-color', '')
 
         dropListener: (event) ->
           event.preventDefault()
-          console.log "hello"
           $(".data-drop-zone").css("background-color", '')
           btnName = event.originalEvent.dataTransfer.getData("text")
           dataSetName = event.originalEvent.dataTransfer.getData("datasetName")

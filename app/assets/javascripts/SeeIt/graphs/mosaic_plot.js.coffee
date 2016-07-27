@@ -255,12 +255,12 @@
         {
           name: "Independent",
           type: "categorical",
-          multiple: true
+          multiple: false
         },
         {
           name: "Dependent",
           type: "categorical",
-          multiple: true
+          multiple: false
         }
       ]
 
