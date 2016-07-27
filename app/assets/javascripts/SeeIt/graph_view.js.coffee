@@ -372,7 +372,7 @@
           $(".data-drop-zone").css("background-color", '')
           btnName = event.originalEvent.dataTransfer.getData("text")
           dataSetName = event.originalEvent.dataTransfer.getData("datasetName")
-          graph.trigger('graph:addData', {graph: $(this).attr('id'), data:[{name: $(this).attr('data-id'), data: graph.findDataSet(dataSetName, btnName, graph.data)}]})
+          self.trigger('graph:addData', {graph: $(this).attr('id'), data:[{name: $(this).attr('data-id'), data: self.findDataSet(dataSetName, btnName, self.data)}]})
       }
 
     initLayout: ->
