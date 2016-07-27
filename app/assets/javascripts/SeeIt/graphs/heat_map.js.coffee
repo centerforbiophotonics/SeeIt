@@ -34,6 +34,7 @@
       @eventCallbacks['header:changed'] = @eventCallbacks['data:created']
       @eventCallbacks['color:changed'] = @eventCallbacks['data:created']
       @eventCallbacks['data:changed'] = @eventCallbacks['data:created']
+      @eventCallbacks['filter:changed'] = @eventCallbacks['data:created']
 
       for e, cb of @eventCallbacks
         @on e, cb

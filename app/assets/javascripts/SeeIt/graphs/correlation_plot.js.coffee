@@ -49,6 +49,7 @@
       @eventCallbacks['size:change'] = @eventCallbacks['data:created']
       @eventCallbacks['options:update'] = @eventCallbacks['data:created']
       @eventCallbacks['data:changed'] = @eventCallbacks['data:created']
+      @eventCallbacks['filter:changed'] = @eventCallbacks['data:created']
 
       # @eventCallbacks['label:changed'] = (options) ->
       #   self.updateLabels.call(self, options)

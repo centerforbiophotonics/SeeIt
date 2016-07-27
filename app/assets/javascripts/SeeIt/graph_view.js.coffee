@@ -8,6 +8,7 @@
       @filterGroups = []
 
       @filter = (dataColumn) ->
+        console.log "filtering a dataColumn", dataColumn
         SeeIt.FilteredColumnFactory(dataColumn, [0...dataColumn.data().length], self)
 
       @requirements = []
@@ -28,14 +29,15 @@
 
       @graph = new @graphType.class(@container.find('.graph-wrapper'),@filteredDataset)
 
-      @graph.dataFormat().forEach (d) ->
-        self.dataset.push({
-          name: d.name,
-          type: d.type,
-          multiple: d.multiple,
-          data: []
-        })
-        self.requirements[d.name] = []
+      #@graph.dataFormat().forEach (d) ->              ###THIS HAPPENS WWITHIN THE GRAPH CONSTRUCTOR
+      #  self.filteredDataset.push({                   ###SINCE ONLY THE FILTERED DATASET IS USED NOW
+      #    name: d.name,                               ###THERE IS NO NEED TO ADD THESE OBJECTS IN HERE AS WELL
+      #    type: d.type,                               ###IT JUST CREATES DUPLICATES
+      #    multiple: d.multiple,
+      #    data: []
+      #  })
+      #  console.log "a data role object was pushed into filteredDataset"
+      #  self.requirements[d.name] = []
 
 
       if !@graph.options().length then @container.find('.options-button').hide()
@@ -59,7 +61,7 @@
 
     getGraphState: ->
       return _.flatten([
-        @dataset.map((role) ->
+        @filteredDataset.map((role) ->
           role.data.map((dataColumn) ->
             {
               dataset_title: dataColumn.datasetTitle,
@@ -73,81 +75,87 @@
     addData: (data) ->
       for j in [0...data.length]
         new_data = data[j]
-
         ((new_data) ->
           datasetIdx = -1
 
-          @dataset.forEach (d, i) ->
+          @filteredDataset.forEach (d, i) ->
             if d.name == new_data.name then datasetIdx = i
 
           if datasetIdx != -1
             # delete previous data if multiple is false
             if @graph.dataset[datasetIdx].multiple == false
-              @dataset[datasetIdx].data.splice(0, 1) 
-              dataIdx = @dataset[datasetIdx].data.indexOf(new_data.data)
+              @filteredDataset[datasetIdx].data.splice(0, 1) 
+              dataIdx = @filteredDataset[datasetIdx].data.indexOf(new_data.data)
             else
-              dataIdx = @dataset[datasetIdx].data.indexOf(new_data.data)
+              dataIdx = @filteredDataset[datasetIdx].data.indexOf(new_data.data)
 
             if dataIdx == -1
-              this_data = {}
-              this_data.data = @filter(new_data.data, new_data.name)
-              this_data.name = new_data.name
+              #this_data = {}                                             ###COMMENTING TO TEST FILTEREDCOLUMN USAGE
+              #this_data.data = @filter(new_data.data, new_data.name)
+              #this_data.name = new_data.name
+              this_data = new SeeIt.FilteredColumn(new_data.data, @requirements, @operator)
 
               # @graph contains multiple: true or false
 
-              @filterColumn(this_data.data, new_data.data, this_data.name)
+              #@filterColumn(this_data.data, new_data.data, this_data.name)
 
               # remove footer first
               if @graph.dataset[0].multiple == false
                 @removeDataFromFooterMultiple()
-                @dataset[datasetIdx].data.push(new_data.data)
-                @filteredDataset[datasetIdx].data.push(this_data.data)
+                #@dataset[datasetIdx].data.push(new_data.data)            ###COMMENTING TO TEST FILTEREDCOLUMN USAGE
+                #@filteredDataset[datasetIdx].data.push(this_data.data)
+                @filteredDataset[datasetIdx].data.push(this_data)
                 @addDataToFooter(new_data)
               else
-                @dataset[datasetIdx].data.push(new_data.data)
-                @filteredDataset[datasetIdx].data.push(this_data.data)
+                #@dataset[datasetIdx].data.push(new_data.data)            ###COMMENTING TO TEST FILTEREDCOLUMN USAGE
+                #@filteredDataset[datasetIdx].data.push(this_data.data)
+                @filteredDataset[datasetIdx].data.push(this_data)
                 @addDataToFooter(new_data)
 
 
               self = @
 
-              @listenTo(this_data.data, 'label:changed', (idx) ->
+              @listenTo(this_data, 'label:changed', (idx) ->
                 self.graph.trigger('label:changed', self.options.getValues())
               )
 
-              @listenTo(this_data.data, 'color:changed', ->
+              @listenTo(this_data, 'color:changed', ->
                 self.graph.trigger('color:changed', self.options.getValues())
               )
 
-              @listenTo(this_data.data, 'header:changed', ->
+              @listenTo(this_data, 'header:changed', ->
                 self.updateFooterData.call(self)
                 self.graph.trigger('header:changed', self.options.getValues())
               )
 
-              @listenTo(this_data.data, 'data:destroyed', ->
+              @listenTo(this_data, 'data:destroyed', ->
                 self.graph.trigger('data:destroyed', self.options.getValues())
               )
 
-              @listenTo(this_data.data, 'data:created', ->
+              @listenTo(this_data, 'data:created', ->
                 self.graph.trigger('data:created', self.options.getValues())
               )
 
-              @listenTo(this_data.data, 'data:changed', ->
+              @listenTo(this_data, 'data:changed', ->
                 self.graph.trigger('data:changed', self.options.getValues())
               )
 
-              @listenTo(this_data.data, 'type:changed', ->
-                if this_data.data.type != self.dataset[datasetIdx].type
+              @listenTo(this_data, 'filter:changed', ->
+                self.graph.trigger('filter:changed', self.options.getValues())
+              )
+
+              @listenTo(this_data, 'type:changed', ->
+                if this_data.data.type != self.filteredDataset[datasetIdx].type
                   idx = -1
 
-                  self.dataset.forEach (d, i) ->
+                  self.filteredDataset.forEach (d, i) ->
                     if d.name == this_data.name then idx = i
 
                   if idx >= 0
-                    colToDestroy = self.dataset[idx].data.indexOf(this_data.data)
+                    colToDestroy = self.filteredDataset[idx].data.indexOf(this_data.data)
 
                     if colToDestroy >= 0
-                      self.dataset[idx].data.splice(colToDestroy, 1)
+                      #self.dataset[idx].data.splice(colToDestroy, 1)
                       self.filteredDataset[idx].data.splice(colToDestroy, 1)
                       self.graph.trigger('column:destroyed', self.options.getValues())
 
@@ -161,17 +169,17 @@
                   self.updateFooterData.call(self)
               )
 
-              @listenTo(this_data.data, 'destroy', ->
+              @listenTo(this_data, 'destroy', ->
                 idx = -1
 
-                self.dataset.forEach (d, i) ->
+                self.filteredDataset.forEach (d, i) ->
                   if d.name == this_data.name then idx = i
 
                 if idx >= 0
-                  colToDestroy = self.dataset[idx].data.indexOf(this_data.data)
+                  colToDestroy = self.filtereDataset[idx].data.indexOf(this_data.data)
 
                   if colToDestroy >= 0
-                    self.dataset[idx].data.splice(colToDestroy, 1)
+                    #self.dataset[idx].data.splice(colToDestroy, 1)
                     self.filteredDataset[idx].data.splice(colToDestroy, 1)
                     self.graph.trigger('column:destroyed', self.options.getValues())
 
@@ -229,7 +237,7 @@
 
       @container.find(".data-rep").remove()
 
-      @dataset.forEach (role) ->
+      @filteredDataset.forEach (role) ->
         role.data.forEach (d) ->
           self.addDataToFooter.call(self, {name: role.name, data: d})
 
@@ -241,12 +249,12 @@
       @container.find(".data-drop-zone .data-rep:first").remove()    
 
     removeData: (data) ->
-      dataset_idx = @dataset.map((d) -> d.name).indexOf(data.name)
+      dataset_idx = @filteredDataset.map((d) -> d.name).indexOf(data.name)
 
       if dataset_idx >= 0
-        idx = @dataset[dataset_idx].data.indexOf(data.data)
+        idx = @filteredDataset[dataset_idx].data.map((d) -> d.column).indexOf(data.data)
         if idx >= 0
-          @dataset[dataset_idx].data.splice(idx, 1)
+          #@dataset[dataset_idx].data.splice(idx, 1)
           @filteredDataset[dataset_idx].data.splice(idx, 1)
           @graph.trigger('data:destroyed', @options.getValues())
           @removeDataFromFooter(data)
@@ -455,10 +463,14 @@
         self.requirements.push filterGroup.getFilter()
         self.filterState.push filterGroup.getFilters()
 
+      #@filteredDataset.forEach (dataset, datasetIdx) ->          ###COMMENTING TO TEST FILTEREDCOLUMN USAGE
+      #  dataset.data.forEach (dataColumn, i) ->
+      #    parentColumn = self.dataset[datasetIdx].data[i]
+      #    self.filterColumn.call(self, dataColumn, parentColumn)
+
       @filteredDataset.forEach (dataset, datasetIdx) ->
-        dataset.data.forEach (dataColumn, i) ->
-          parentColumn = self.dataset[datasetIdx].data[i]
-          self.filterColumn.call(self, dataColumn, parentColumn)
+        dataset.data.forEach (filteredColumn, i) ->
+          filteredColumn.setRequirements(self.requirements)
 
 
     filterColumn: (dataColumn, parentColumn) ->
@@ -482,11 +494,11 @@
       ).filter((d, i) ->
         return filteredData.indexOf(i) > -1
       )  
-      console.log "this is the actual data filtered by filterData", data
+      #console.log "this is the actual data filtered by filterData", data
 
-      filteredColumn = new SeeIt.FilteredColumn(parentColumn, self.requirements, self.operator)
-      someData = filteredColumn.data()
-      console.log "this is the filtered column doing the filtering", someData
+      #filteredColumn = new SeeIt.FilteredColumn(parentColumn, self.requirements, self.operator)
+      #someData = filteredColumn.data()
+      #console.log "this is the filtered column doing the filtering", someData
       dataColumn.trigger 'filter:changed', filteredData
 
     addFilterGroup: ->
@@ -572,6 +584,8 @@
 
       @container.find(".graph-panel-content").toggleClass('in')
       @container.find('.collapse-btn .glyphicon').toggleClass('glyphicon-collapse-down glyphicon-collapse-up')
+      if @collapsed
+        @graph.trigger('data:created')
       @collapsed = !@collapsed
 
     collapseFooter: ->
