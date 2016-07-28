@@ -20,24 +20,12 @@
       @graph = null
       @options = null
       @optionsVisible = false
-      @dataset = []
       @filteredDataset = []
       @initHandlers()
       @initLayout()
 
 
       @graph = new @graphType.class(@container.find('.graph-wrapper'),@filteredDataset)
-
-      #@graph.dataFormat().forEach (d) ->              ###THIS HAPPENS WWITHIN THE GRAPH CONSTRUCTOR
-      #  self.filteredDataset.push({                   ###SINCE ONLY THE FILTERED DATASET IS USED NOW
-      #    name: d.name,                               ###THERE IS NO NEED TO ADD THESE OBJECTS IN HERE AS WELL
-      #    type: d.type,                               ###IT JUST CREATES DUPLICATES
-      #    multiple: d.multiple,
-      #    data: []
-      #  })
-      #  console.log "a data role object was pushed into filteredDataset"
-      #  self.requirements[d.name] = []
-
 
       if !@graph.options().length then @container.find('.options-button').hide()
 
@@ -89,25 +77,17 @@
               dataIdx = @filteredDataset[datasetIdx].data.indexOf(new_data.data)
 
             if dataIdx == -1
-              #this_data = {}                                             ###COMMENTING TO TEST FILTEREDCOLUMN USAGE
-              #this_data.data = @filter(new_data.data, new_data.name)
-              #this_data.name = new_data.name
               this_data = new SeeIt.FilteredColumn(new_data.data, @requirements, @operator)
               new_data.data = this_data
               # @graph contains multiple: true or false
 
-              #@filterColumn(this_data.data, new_data.data, this_data.name)
 
               # remove footer first
               if @graph.dataset[0].multiple == false
                 @removeDataFromFooterMultiple()
-                #@dataset[datasetIdx].data.push(new_data.data)            ###COMMENTING TO TEST FILTEREDCOLUMN USAGE
-                #@filteredDataset[datasetIdx].data.push(this_data.data)
                 @filteredDataset[datasetIdx].data.push(this_data)
                 @addDataToFooter(new_data)
               else
-                #@dataset[datasetIdx].data.push(new_data.data)            ###COMMENTING TO TEST FILTEREDCOLUMN USAGE
-                #@filteredDataset[datasetIdx].data.push(this_data.data)
                 @filteredDataset[datasetIdx].data.push(this_data)
                 @addDataToFooter(new_data)
 
@@ -154,7 +134,6 @@
                     colToDestroy = self.filteredDataset[idx].data.indexOf(this_data.data)
 
                     if colToDestroy >= 0
-                      #self.dataset[idx].data.splice(colToDestroy, 1)
                       self.filteredDataset[idx].data.splice(colToDestroy, 1)
                       self.graph.trigger('column:destroyed', self.options.getValues())
 
@@ -178,7 +157,6 @@
                   colToDestroy = self.filtereDataset[idx].data.indexOf(this_data.data)
 
                   if colToDestroy >= 0
-                    #self.dataset[idx].data.splice(colToDestroy, 1)
                     self.filteredDataset[idx].data.splice(colToDestroy, 1)
                     self.graph.trigger('column:destroyed', self.options.getValues())
 
@@ -249,9 +227,8 @@
       dataset_idx = @filteredDataset.map((d) -> d.name).indexOf(data.name)
 
       if dataset_idx >= 0
-        idx = @filteredDataset[dataset_idx].data.map((d) -> d.column).indexOf(data.data)
+        idx = @filteredDataset[dataset_idx].data.indexOf(data.data)
         if idx >= 0
-          #@dataset[dataset_idx].data.splice(idx, 1)
           @filteredDataset[dataset_idx].data.splice(idx, 1)
           @graph.trigger('data:destroyed', @options.getValues())
           @removeDataFromFooter(data)
@@ -460,11 +437,6 @@
         self.requirements.push filterGroup.getFilter()
         self.filterState.push filterGroup.getFilters()
 
-      #@filteredDataset.forEach (dataset, datasetIdx) ->          ###COMMENTING TO TEST FILTEREDCOLUMN USAGE
-      #  dataset.data.forEach (dataColumn, i) ->
-      #    parentColumn = self.dataset[datasetIdx].data[i]
-      #    self.filterColumn.call(self, dataColumn, parentColumn)
-
       @filteredDataset.forEach (dataset, datasetIdx) ->
         dataset.data.forEach (filteredColumn, i) ->
           filteredColumn.setRequirements(self.requirements)
@@ -491,11 +463,7 @@
       ).filter((d, i) ->
         return filteredData.indexOf(i) > -1
       )  
-      #console.log "this is the actual data filtered by filterData", data
 
-      #filteredColumn = new SeeIt.FilteredColumn(parentColumn, self.requirements, self.operator)
-      #someData = filteredColumn.data()
-      #console.log "this is the filtered column doing the filtering", someData
       dataColumn.trigger 'filter:changed', filteredData
 
     addFilterGroup: ->
