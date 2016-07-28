@@ -61,10 +61,10 @@
           Pairs[xLabel] = {}
 
         if !Pairs[xLabel][yLabel]
-          Pairs[xLabel][yLabel] = {count:1, total:val}
+          Pairs[xLabel][yLabel] = {count:1, total:Number(val)}
         else
           Pairs[xLabel][yLabel].count++
-          Pairs[xLabel][yLabel].total += val
+          Pairs[xLabel][yLabel].total += Number(val)
 
         if Pairs[xLabel][yLabel].count > self.MaxCount
           self.MaxCount = Pairs[xLabel][yLabel].count
@@ -125,11 +125,9 @@
                         .attr("transform", "translate(" + gridSize / 2 + ", -6)")
 
       self.xMembers.forEach (entry) ->
-        console.log Pairs[entry]
         self.yMembers.forEach (endEntry) ->
           
           if (Pairs[entry][endEntry])
-            console.log "Drawing " + Pairs[entry][endEntry]
             
             fillstyle = options[0].value
             
@@ -144,7 +142,7 @@
                   .attr("width", gridSize-2)
                   .attr("height", gridSize-2)
                   .style("fill", "green")
-                  .style("fill-opacity", -> return ((Pairs[entry][endEntry].total / Pairs[entry][endEntry].count) / self.MaxAverage))
+                  .style("fill-opacity", ((Pairs[entry][endEntry].total / Pairs[entry][endEntry].count) / self.MaxAverage))
                   .style("stroke", "black")
                   .style("stroke-width", "1px")
 
