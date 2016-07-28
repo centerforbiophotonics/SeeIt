@@ -43,7 +43,7 @@
       data = []
 
       @dataset[0].data.forEach (dataColumn) ->
-        data.push({values: dataColumn.data(), key: dataColumn.header, color: dataColumn.color})
+        data.push({values: dataColumn.data(), key: dataColumn.header, color: dataColumn.getColor()})
 
       return data
 

@@ -70,7 +70,10 @@
 
           if datasetIdx != -1
             # delete previous data if multiple is false
+            old_data = {}
             if @graph.dataset[datasetIdx].multiple == false
+              old_data.name = new_data.name
+              old_data.data = @filteredDataset[datasetIdx].data[0]
               @filteredDataset[datasetIdx].data.splice(0, 1) 
               dataIdx = @filteredDataset[datasetIdx].data.indexOf(new_data.data)
             else
@@ -84,7 +87,9 @@
 
               # remove footer first
               if @graph.dataset[0].multiple == false
-                @removeDataFromFooterMultiple()
+                if old_data.data != undefined
+                  @removeDataFromFooter(old_data)
+                #@removeDataFromFooterMultiple()
                 @filteredDataset[datasetIdx].data.push(this_data)
                 @addDataToFooter(new_data)
               else
