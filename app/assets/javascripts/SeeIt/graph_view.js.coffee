@@ -8,7 +8,6 @@
       @filterGroups = []
 
       @filter = (dataColumn) ->
-        console.log "filtering a dataColumn", dataColumn
         SeeIt.FilteredColumnFactory(dataColumn, [0...dataColumn.data().length], self)
 
       @requirements = []
@@ -94,7 +93,7 @@
               #this_data.data = @filter(new_data.data, new_data.name)
               #this_data.name = new_data.name
               this_data = new SeeIt.FilteredColumn(new_data.data, @requirements, @operator)
-
+              new_data.data = this_data
               # @graph contains multiple: true or false
 
               #@filterColumn(this_data.data, new_data.data, this_data.name)
@@ -196,10 +195,9 @@
 
     addDataToFooter: (data) ->
       self = @
-
       @container.find(".data-drop-zone[data-id='#{data.name}']").append("""
         <div class="SeeIt data-rep btn-group" role="group" data-id='#{data.data.header}'>
-          <button class="SeeIt data-rep-color btn btn-default" style="background-color: #{data.data.color}"></button>
+          <button class="SeeIt data-rep-color btn btn-default" style="background-color: #{data.data.getColor()}"></button>
           <button class="SeeIt data-rep-text btn btn-default">#{data.data.header}</button>
           <button class="SeeIt data-rep-remove btn btn-default" title='Remove Data'><span class="glyphicon glyphicon-remove"></span></button>
         </div>
@@ -208,7 +206,7 @@
       item = @container.find(".data-drop-zone[data-id='#{data.name}'] .data-rep-color:last")
 
       @listenTo data.data, 'color:changed', ->
-        item.css('background-color', data.data.color)
+        item.css('background-color', data.data.getColor())
       
       # X button
       @container.find(".data-rep[data-id='#{data.data.header}'] .data-rep-remove").on 'click', ->
@@ -216,21 +214,20 @@
 
       @container.find(".data-rep[data-id='#{data.data.header}'] .data-rep-text").on 'click', ->
         context = @
-        data.data.trigger 'request:childLength', (childLength) ->
 
-          msg = """
-            <b>Dataset:</b> #{data.data.datasetTitle}
-            <br>
-            <b>Data Type:</b> #{data.data.type}
-            <br>
-            <b>Filters:</b> #{childLength} out of #{data.data.length()} selected by filter
-          """
+        msg = """
+          <b>Dataset:</b> #{data.data.datasetTitle}
+          <br>
+          <b>Data Type:</b> #{data.data.type}
+          <br>
+          <b>Filters:</b> #{data.data.length()} out of #{data.data.originalLength()} selected by filter
+        """
 
-          tip = new Opentip($(context), msg, {target: $(context), showOn: "creation"})
-          tip.setTimeout(->
-            tip.hide.call(tip)
-            return
-          , 5)
+        tip = new Opentip($(context), msg, {target: $(context), showOn: "creation"})
+        tip.setTimeout(->
+          tip.hide.call(tip)
+          return
+        , 5)
 
     updateFooterData: ->
       self = @
