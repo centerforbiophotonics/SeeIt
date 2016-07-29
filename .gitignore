@@ -21,3 +21,11 @@ SeeIt.iml
 /.idea/*
 
 Gemfile.lock
+
+# Production Assets
+/public/assets
+/public/lookups
+/public/system
+
+# Mac finder artifacts
+.DS_Store
