@@ -56,3 +56,4 @@
 //= require SeeIt/spreadsheet_contextmenu_view
 //= require SeeIt/application_controller
 //= require SeeIt/jquery_extensions.js
+//= require eq.js

@@ -542,3 +542,18 @@ td:not(.htNumeric).SeeIt-htCenter {
   background-color: #428bca;
   transition: all 0.3s ease-in-out;
 }
+
+
+.SeeIt.row .SeeIt.Data[data-eq-state="small"] {
+  background-color: orange;
+}
+.SeeIt.row .SeeIt.Data[data-eq-state="small medium"] {
+  background-color: blue;
+}
+
+.SeeIt.row .SeeIt.Data[data-eq-state="large"] {
+  background-color: purple;
+}
+
+
+
