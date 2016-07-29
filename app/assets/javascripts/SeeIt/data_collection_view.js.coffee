@@ -23,6 +23,12 @@
     init: ->
       @container.html("""
         <ul class="SeeIt dataset-list list-group">
+          <div class="SeeIt panel-heading" style=" background-color: #f5f5f5">  
+            <label id="upload_modal" class="btn btn-primary btn-file SeeIt new-dataset-input">
+              <span class='glyphicon glyphicon-upload'></span>
+            </label>
+            <button class="SeeIt hide_data btn btn-default"  title='Hide Data' style="float:right"><span class="glyphicon glyphicon-arrow-left"></span></button>  
+          </div>
         </ul>
       """)
 
@@ -87,38 +93,44 @@
     newDatasetMaker: ->
       @container.find('.dataset-list').append("""
         <div class='SeeIt dataset-container new-dataset'>
-          <li class="SeeIt list-group-item new-dataset-li">
-            <a class="SeeIt" style="font-weight: bold">Add Dataset</a>
-            <span class='glyphicon glyphicon-plus' style='float: right;'></span>
-          </li>
         </div>
-        <div class="SeeIt new-dataset-form">
-          <label for="dataset-select">How do you want to create the dataset?</label>
-          <select class="form-control" id="dataset-select">
-            <option value="spreadsheet">Fill out spreadsheet</option>
-            <option value="google">Load from Google Spreadsheet</option>
-            <option value="json-endpoint">Load from JSON endpoint</option>
-            <option value="json-file">Load from JSON file</option>
-            <option value="csv-endpoint">Load from CSV endpoint</option>
-            <option value="csv-file">Load from CSV file</option>
-          </select>
-          <input type="text" placeholder="Dataset Title" class="form-control SeeIt new-dataset-input dataset-name spreadsheet">
-          <input type="text" placeholder="Spreadsheet URL" class="form-control SeeIt new-dataset-input dataset-spreadsheet-url hidden google">
-          <input type="text" placeholder="JSON URL" class="form-control SeeIt new-dataset-input dataset-json-url hidden json-endpoint">
-          <label class="btn btn-primary btn-file SeeIt new-dataset-input dataset-json-file hidden json-file" style='width: 100%'>
-            <span class='glyphicon glyphicon-upload'></span>
-            Select JSON file <input type="file" class="form-control SeeIt" style='display: none'>
-          </label>
-          <input type="text" placeholder="CSV URL" class="form-control SeeIt new-dataset-input dataset-csv-url hidden csv-endpoint">
-          <label class="btn btn-primary btn-file SeeIt new-dataset-input dataset-json-file hidden csv-file" style='width: 100%'>
-            <span class='glyphicon glyphicon-upload'></span>
-            Select CSV file <input type="file" placeholder="CSV File" class="form-control SeeIt" style='display: none'>
-          </label>
-          <span class="SeeIt new-dataset-msg"></span>
-          <button type="button" class="SeeIt btn btn-primary" id="create-dataset" style='width: 100%' 
-                  data-loading-text="<span class='SeeIt glyphicon glyphicon-refresh spin'></span>">
-            Create Dataset
-          </button>
+        
+      """)
+
+      @container.find('.dataset-list').append("""
+        <div id="newdata_modal" class="modal fade">
+          <div class="modal-dialog modal-sm">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title">How do you want to create the dataset?</h4>
+                </div>
+                
+                  <select class="form-control" id="dataset-select">
+                    <option value="spreadsheet">Fill out spreadsheet</option>
+                    <option value="google">Load from Google Spreadsheet</option>
+                    <option value="json-endpoint">Load from JSON endpoint</option>
+                    <option value="json-file">Load from JSON file</option>
+                    <option value="csv-endpoint">Load from CSV endpoint</option>
+                    <option value="csv-file">Load from CSV file</option>
+                  </select>
+                  <input type="text" placeholder="Dataset Title" class="form-control SeeIt new-dataset-input dataset-name spreadsheet">
+                  <input type="text" placeholder="Spreadsheet URL" class="form-control SeeIt new-dataset-input dataset-spreadsheet-url hidden google">
+                  <input type="text" placeholder="JSON URL" class="form-control SeeIt new-dataset-input dataset-json-url hidden json-endpoint">
+                  <input type="text" placeholder="CSV URL" class="form-control SeeIt new-dataset-input dataset-csv-url hidden csv-endpoint">
+                  <span class="SeeIt new-dataset-msg"></span>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                  <label class="btn btn-primary btn-file SeeIt new-dataset-input dataset-json-file hidden json-file">
+                    <span class='glyphicon glyphicon-upload'></span>
+                    Select JSON file <input type="file" class="form-control SeeIt" style='display: none'>
+                  </label>
+                  <label class="btn btn-primary btn-file SeeIt new-dataset-input dataset-json-file hidden csv-file">
+                    <span class='glyphicon glyphicon-upload'></span>
+                    Select CSV file <input type="file" placeholder="CSV File" class="form-control SeeIt" style='display: none'>
+                  </label>
+                </div>
+              </div>
+          </div>
         </div>
       """)
 
@@ -133,13 +145,15 @@
         self.container.find(".new-dataset-input").val("")
         self.container.find(".new-dataset-input:not(.#{selected})").addClass("hidden")
         self.container.find(".#{selected}").removeClass("hidden")
+        self.container.find("#upload_modal").removeClass("hidden")
 
       toggleForm = ->
         $(@).toggleClass('active')
         $(@).find('a').toggleClass('selected')
         $(@).parent().parent().find('.new-dataset-form').slideToggle()
 
-      self.container.find(".new-dataset-li").on('click', toggleForm)
+      self.container.find('.hide_data').on 'click', () ->
+        self.app.handlers.toggleDataVisible()
 
       self.container.find("#create-dataset").on 'click', (event) ->
         return self.handleDatasetCreate.call(self, self.container.find("#dataset-select").val())
@@ -147,6 +161,11 @@
       self.container.find(".json-file input, .csv-file input").on 'change', (event) ->
         return self.handleDatasetCreate.call(self, self.container.find("#dataset-select").val(), {file: @files[0]})
 
+      self.container.find("#upload_modal").on 'click', (e) -> 
+        $('#newdata_modal').modal('show')
+      
+      $(".json-file, .csv-file").on "click", () -> 
+        $('#newdata_modal').modal('hide')
 
     handleDatasetCreate: (selected, data = {}) ->
       self = @

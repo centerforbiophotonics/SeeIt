@@ -1,0 +1,11 @@
+Use two spaces for tabs.
+
+Set indentation to 2 spaces.
+
+In classes, use a @handlers attribute to keep all handler functions in one place.
+
+File names should be snake case:  my_class.js.coffee
+
+Class names should be capitalized camel case: MyClass
+
+When aliasing 'this' or '@' use the variable name self wherever possible.

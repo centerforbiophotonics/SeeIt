@@ -1,6 +1,7 @@
 SeeIt.new({
   selector: css selector string OR native javascript DOM element OR jquery DOM element  -- default 'body'
 
+  read_url: boolean -- default false. This will tell SeeIt to parse the URL params on the page for init options. The amount of data that can be loaded in this way is limited so data sources should be specified by URL.,
   data: [ single element array or where each element can be:
     * javascript variable like the following
       
@@ -25,10 +26,10 @@ SeeIt.new({
         } 
 
     * javascript object like the following
-
-        {
-          jsonString: string //a JSON string representing the same as the previous option
-        }
+    {
+        url: string
+        type: string with the value "csv", "json", or "google"
+    }
 
     * javascript object like the following
 

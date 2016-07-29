@@ -136,147 +136,152 @@
       # Initializes SeeIt.ApplicationController.handlers with DOM event handlers
     ###
     initHandlers: ->
-      app = @
+      self = @
 
-      app.handlers = {
+      self.handlers = {
         toggleDataVisible: ->
-          app.toggleDataVisible.call(app)
+          self.toggleDataVisible.call(self)
         toggleSpreadsheetVisible: ->
-          app.toggleSpreadsheetVisible.call(app)
+          self.toggleSpreadsheetVisible.call(self)
         addGraph: ->
           graphName = $(@).attr('data-id')
-          graphType = app.graphTypes.filter((g) -> g.name == graphName)[0]
+          graphType = self.graphTypes.filter((g) -> g.name == graphName)[0]
 
-          app.trigger('graph:create', graphType)
+
+          self.trigger('graph:create', graphType)
+          # app.graphCollectionView.addGraph()
+          # #DEMO PATCH
+          # app.dataCollectionView.datasetViewCollection.forEach (datasetView) ->
+          #   datasetView.dataColumnViews.forEach (dataView) ->
+          #     dataView.init.call(dataView)
 
         saveCSVData: (event) ->
           event.stopPropagation()
 
-          app.csvManager.handleUpload(@files[0], (data) ->
+          self.csvManager.handleUpload(@files[0], (data) ->
             dataset = {
               isLabeled: true,
               dataset: data
             }
 
-            app.addDataset.call(app, dataset)
+            self.addDataset.call(self, dataset)
           )
 
           return false
 
         uploadCSV: ->
           if !$("#hidden-csv-upload").length
-            app.container.append "<input id='hidden-csv-upload' type='file' style='display: none'>"
+            self.container.append "<input id='hidden-csv-upload' type='file' style='display: none'>"
 
-          $("#hidden-csv-upload").off('change', app.handlers.saveCSVData).on('change', app.handlers.saveCSVData)
+          $("#hidden-csv-upload").off('change', self.handlers.saveCSVData).on('change', self.handlers.saveCSVData)
           $("#hidden-csv-upload").click()
     
         uploadJson: ->
           if !$("#hidden-json-upload").length
-            app.container.append "<input id='hidden-json-upload' type='file' style='display: none'>"
+            self.container.append "<input id='hidden-json-upload' type='file' style='display: none'>"
 
-          $("#hidden-json-upload").off('change', app.handlers.saveJsonData).on('change', app.handlers.saveJsonData)
+          $("#hidden-json-upload").off('change', self.handlers.saveJsonData).on('change', self.handlers.saveJsonData)
           $("#hidden-json-upload").click()
 
         saveJsonData: (event) ->
           event.stopPropagation()
 
-          app.jsonManager.handleUpload(@files[0], (data) ->
+          self.jsonManager.handleUpload(@files[0], (data) ->
             data.forEach (d) ->
-              app.addDataset.call(app, d)
+              self.addDataset.call(self, d)
           )
 
           return false
 
         saveInitJson: (event) ->
-          app.saveInitOptions.call(app)
+          self.saveInitOptions.call(self)
 
         downloadJson: (event) ->
-          app.jsonManager.handleDownload(app.model)
+          self.jsonManager.handleDownload(self.model)
       }
 
     addDataset: (dataset) ->
-      app = @
+      self = @
       data = @model.addDataset(dataset)
-
-      # @listenTo(app.dataCollectionView, 'graphs:requestIDs', (cb) ->
-      #   app.trigger('graphs:requestIDs', cb)
-      # )
-      # @dataCollectionView.addDatasetView(data)
 
     ###*
       # Initialize Backbone event listeners in which controller listens to members
     ###
     registerListeners: ->
-      app = @
+      self = @
 
-      @listenTo(app.graphCollectionView, 'graphSettings:get', (graphName, cb) ->
-        if (idx = app.graph_settings.map((s) -> s.type).indexOf(graphName)) >= 0
-          cb(app.graph_settings[idx])
+      @listenTo(self.graphCollectionView, 'graphSettings:get', (graphName, cb) ->
+        if (idx = self.graph_settings.map((s) -> s.type).indexOf(graphName)) >= 0
+          cb(self.graph_settings[idx])
         else
           cb()
       )
 
-      @listenTo(app.dataCollectionView, 'spreadsheet:load', (dataset) ->
-        if !app.spreadsheetVisible then app.toggleSpreadsheetVisible.call(app)
+      @listenTo(self.dataCollectionView, 'spreadsheet:load', (dataset) ->
+        if !self.spreadsheetVisible then self.toggleSpreadsheetVisible.call(self)
 
-        app.trigger('spreadsheet:load', dataset)
+        self.trigger('spreadsheet:load', dataset)
       )
 
-      @listenTo(app.dataCollectionView, 'spreadsheet:unload', ->
-        app.trigger('spreadsheet:unload')
+      @listenTo(self.dataCollectionView, 'spreadsheet:unload', ->
+        self.trigger('spreadsheet:unload')
 
-        if app.spreadsheetVisible then app.toggleSpreadsheetVisible.call(app)
+        if self.spreadsheetVisible then self.toggleSpreadsheetVisible.call(self)
       )
 
-      @listenTo(app.spreadsheetView, 'data:changed', (origin) ->
-        app.trigger('data:changed', origin)
+      @listenTo(self.spreadsheetView, 'data:changed', (origin) ->
+        self.trigger('data:changed', origin)
       )
 
-      @listenTo(app.dataCollectionView, 'graph:addData', (graphData) ->
-        app.trigger('graph:addData', graphData)
+      @listenTo(self.dataCollectionView, 'graph:addData', (graphData) ->
+        self.trigger('graph:addData', graphData)
       )
 
-      @listenTo(app.dataCollectionView, 'dataset:create', (title) ->
-        app.trigger('dataset:create', title)
+      @listenTo(self.dataCollectionView, 'dataset:create', (title) ->
+        self.trigger('dataset:create', title)
       )
 
-      @listenTo(app.dataCollectionView, 'datasets:create', (collection) ->
+      @listenTo(self.dataCollectionView, 'datasets:create', (collection) ->
         collection.forEach (dataset) ->
-          app.addDataset.call(app, dataset)
+          self.addDataset.call(self, dataset)
       )
 
-      @listenTo(app.model, 'dataset:created', (dataset) ->
-        app.trigger('dataset:created', dataset)
+      @listenTo(self.model, 'dataset:created', (dataset) ->
+        self.trigger('dataset:created', dataset)
+
+        # if !app.spreadsheetVisible then app.toggleSpreadsheetVisible.call(app)
+
+        # app.trigger('spreadsheet:load', dataset)
       )
 
-      @listenTo(app.graphCollectionView, 'graph:created', (graphId, dataRoles) ->
-        app.lastGraphId = graphId
-        app.trigger('graph:created', graphId, dataRoles)
+      @listenTo(self.graphCollectionView, 'graph:created', (graphId, dataRoles) ->
+        self.lastGraphId = graphId
+        self.trigger('graph:created', graphId, dataRoles)
       )
 
-      @listenTo(app.dataCollectionView, 'graphs:requestIDs', (cb) ->
-        app.trigger('graphs:requestIDs', cb)
+      @listenTo(self.dataCollectionView, 'graphs:requestIDs', (cb) ->
+        self.trigger('graphs:requestIDs', cb)
       )
 
-      @listenTo(app.graphCollectionView, 'graph:destroyed', (graphId) ->
-        app.trigger('graph:destroyed', graphId)
+      @listenTo(self.graphCollectionView, 'graph:destroyed', (graphId) ->
+        self.trigger('graph:destroyed', graphId)
       )
 
-      @listenTo(app.graphCollectionView, 'graph:id:change', (oldId, newId) ->
-        app.trigger('graph:id:change', oldId, newId)
+      @listenTo(self.graphCollectionView, 'graph:id:change', (oldId, newId) ->
+        self.trigger('graph:id:change', oldId, newId)
       )
 
-      @listenTo app.graphCollectionView, 'request:dataset_names', (cb) ->
-        app.trigger 'request:dataset_names', cb
+      @listenTo self.graphCollectionView, 'request:dataset_names', (cb) ->
+        self.trigger 'request:dataset_names', cb
 
-      @listenTo app.graphCollectionView, 'request:columns', (dataset, cb) ->
-        app.trigger 'request:columns', dataset, cb
+      @listenTo self.graphCollectionView, 'request:columns', (dataset, cb) ->
+        self.trigger 'request:columns', dataset, cb
 
-      @listenTo app.graphCollectionView, 'request:values:unique', (dataset, colIdx, cb) ->
-        app.trigger 'request:values:unique', dataset, colIdx, cb
+      @listenTo self.graphCollectionView, 'request:values:unique', (dataset, colIdx, cb) ->
+        self.trigger 'request:values:unique', dataset, colIdx, cb
 
-      @listenTo app.graphCollectionView, 'request:dataset', (name, callback) ->
-        app.trigger 'request:dataset', name, callback
+      @listenTo self.graphCollectionView, 'request:dataset', (name, callback) ->
+        self.trigger 'request:dataset', name, callback
 
       # listen for trigger in graphCollectionView and will trigger the actual function in graphCollectionView
       @listenTo app.graphCollectionView, 'graph:addData', (dataGraph) ->
