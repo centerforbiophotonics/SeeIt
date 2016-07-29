@@ -7,9 +7,6 @@
       @maximized = false
       @filterGroups = []
 
-      @filter = (dataColumn) ->
-        SeeIt.FilteredColumnFactory(dataColumn, [0...dataColumn.data().length], self)
-
       @requirements = []
       @filterState = []
       @operator = "AND"
@@ -89,7 +86,6 @@
               if @graph.dataset[0].multiple == false
                 if old_data.data != undefined
                   @removeDataFromFooter(old_data)
-                #@removeDataFromFooterMultiple()
                 @filteredDataset[datasetIdx].data.push(this_data)
                 @addDataToFooter(new_data)
               else
@@ -445,31 +441,6 @@
       @filteredDataset.forEach (dataset, datasetIdx) ->
         dataset.data.forEach (filteredColumn, i) ->
           filteredColumn.setRequirements(self.requirements)
-
-
-    filterColumn: (dataColumn, parentColumn) ->
-      self = @
-
-      filteredData = [0...parentColumn.data().length]
-
-      if self.requirements.length > 0 && self.operator == "OR" then filteredData = []
-
-      self.requirements.forEach (requirement) ->
-        if self.operator == "AND"
-          filteredData = _.intersection(filteredData, requirement(parentColumn))
-        else
-          filteredData = _.union(filteredData, requirement(parentColumn))
-
-      data = parentColumn.data().map((d) ->
-        {
-          label: d.label()
-          value: d.value()
-        }
-      ).filter((d, i) ->
-        return filteredData.indexOf(i) > -1
-      )  
-
-      dataColumn.trigger 'filter:changed', filteredData
 
     addFilterGroup: ->
       self = @
