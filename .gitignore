@@ -19,3 +19,5 @@
 # Ignore IntelliJ project config files
 SeeIt.iml
 /.idea/*
+
+Gemfile.lock
