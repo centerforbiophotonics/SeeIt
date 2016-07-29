@@ -294,7 +294,6 @@
         cb(self.graph.dataFormat())
 
       @on 'size:change', ->
-        # graph.setGraphHeight.call(graph)
         if self.initialized then self.graph.trigger('size:change', self.options.getValues())
 
       @on 'filter', (filterData) ->
@@ -364,13 +363,17 @@
           btnName = event.originalEvent.dataTransfer.getData("text")
           dataSetName = event.originalEvent.dataTransfer.getData("datasetName")
           dataFromButton = self.findDataSet(dataSetName, btnName, self.data)
-          validType = self.checkType(self.graph.dataset, dataFromButton.type, $(this).attr('data-id'))
+          validType = self.findType(self.graph.dataset, $(this).attr('data-id'))
 
-          if validType
+          if validType == dataFromButton.type || validType == "any"
             self.trigger('graph:addData', {graph: $(this).attr('id'), data:[{name: $(this).attr('data-id'), data: dataFromButton}]})
-          else 
-            alert("Invalid Data")
-
+          else
+            msg = "Invalid data type. Type must be " + validType
+            tip = new Opentip(self.container.find(this), msg, {style: "alert", target: self.container.find(this), showOn: "creation"})
+            tip.setTimeout(->
+              tip.hide.call(tip)
+              return
+            , 5)
       }
 
     findDataSet: (datasetName, buttonName, setOfData) ->
@@ -383,14 +386,12 @@
 
       return match
 
-    checkType: (graphSet, buttonType, dataId) ->
+    findType: (graphSet, dataId) ->
       match = null
       graphSet.forEach (i) ->
         # match container name with dataset name and button type with dataset type 
-        if dataId == i.name && i.type == buttonType
-          match = true
-        else if  dataId == i.name && i.type == "any"
-          match = true
+        if dataId == i.name
+          match = i.type
 
       return match
 
