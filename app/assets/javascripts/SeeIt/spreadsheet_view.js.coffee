@@ -30,6 +30,7 @@
               </div>
           </div>
           <div class="SeeIt panel-body spreadsheet">
+            <div class= "info SeeIt" >Key:</div> 
             <div class= "info SeeIt" style= "background-color: #ffedcc;">Numeric</div>             
             <div class= "info SeeIt" style= "background-color: #ccffcc;">Categorical</div>            
             <div class="SeeIt Handsontable-Container" style="position: relative; overflow: hidden; height: 100%; min-height: 100%"></div>
@@ -40,22 +41,6 @@
       @initHandlers()
       @resetTable()
       @toggleVisible()
-
-
-    parseRow: (infoArray, index, csvContent) ->
-      self = @
-
-      sizeData = _.size(self.hot.getData());
-      if (index < sizeData - 1) 
-        dataString = "";
-        _.each(infoArray, (col, i) ->
-          dataString += _.contains(col, ",") ? "\"" + col + "\"" : col;
-          dataString += i < _.size(infoArray) - 1 ? "," : "";
-        )
-
-        csvContent += index < sizeData - 2 ? dataString + "\n" : dataString;
-      
-      return csvContent;
   
     maximize: ->  
       console.log "Maximize"
@@ -159,9 +144,16 @@
       @container.find('.title-edit-icon').off('click', @handlers.editTitle).on('click', @handlers.editTitle)
 
       @container.find('.export').off('click').on('click', (e) ->
-        console.log self.dataset
-        # window.open('data:application/vnd.ms-excel,' + @dataset);
-        e.preventDefault();
+        
+
+        element = document.createElement('a');
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(self.dataset.toCSV()));
+        element.setAttribute('download', self.dataset.title+".csv");
+
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
       )
 
       @container.find('.maximize').off('click').on('click', () -> 
@@ -173,6 +165,7 @@
 
       @container.find('.remove').off('click').on('click', () -> 
         $("button:contains('#{self.dataset.title}')").siblings('.show-in-spreadsheet').trigger('click')
+        
       )
 
     validateUniqueness: (val, data, ignore) ->

@@ -194,6 +194,8 @@
             tooltip.transition()
                  .duration(500)
                  .style('visibility', 'hidden')
+                 
+            # $('.tooltip').remove()
         )
         .attr('opacity', 0.3)
         .transition().duration(300)

@@ -284,8 +284,8 @@
         self.trigger 'request:dataset', name, callback
 
       # listen for trigger in graphCollectionView and will trigger the actual function in graphCollectionView
-      @listenTo app.graphCollectionView, 'graph:addData', (dataGraph) ->
-        app.trigger 'graph:addData', dataGraph
+      @listenTo self.graphCollectionView, 'graph:addData', (dataGraph) ->
+        self.trigger 'graph:addData', dataGraph
 
 
     ###*

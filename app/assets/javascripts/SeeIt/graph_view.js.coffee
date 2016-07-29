@@ -326,7 +326,7 @@
 
         editTitle: ->
           if !self.editing
-            self.container.find(".graph-title-content").html("<input id='graph-title-input' type='text' value='#{graph.id}'>")
+            self.container.find(".graph-title-content").html("<input id='graph-title-input' type='text' value='#{self.id}'>")
             self.container.find('#graph-title-input').off('keyup', self.handlers.graphTitleInputKeyup).on('keyup', self.handlers.graphTitleInputKeyup)
             self.editing = true
           else
@@ -334,7 +334,7 @@
             newId = self.container.find("#graph-title-input").val()
             self.trigger('graph:id:change', oldId, newId, (success) ->
               if success
-                self.id = value
+                self.id = newId
                 self.container.find(".graph-title-content").html(newId)
               else
                 self.container.find(".graph-title-content").html(oldId)
@@ -350,7 +350,7 @@
 
         graphTitleInputKeyup: (event) ->
           if event.keyCode == 13
-            graph.container.find(".graph-title-edit-icon").trigger('click')
+            self.container.find(".graph-title-edit-icon").trigger('click')
 
         dragOverListener: (event) ->
           event.preventDefault()
@@ -373,7 +373,7 @@
           $(".data-drop-zone").css("background-color", '')
           btnName = event.originalEvent.dataTransfer.getData("text")
           dataSetName = event.originalEvent.dataTransfer.getData("datasetName")
-          graph.trigger('graph:addData', {graph: $(this).attr('id'), data:[{name: $(this).attr('data-id'), data: graph.findDataSet(dataSetName, btnName, graph.data)}]})
+          self.trigger('graph:addData', {graph: $(this).attr('id'), data:[{name: $(this).attr('data-id'), data: self.findDataSet(dataSetName, btnName, self.data)}]})
       }
 
     initLayout: ->
@@ -588,6 +588,10 @@
 
       @container.find(".graph-panel-content").toggleClass('in')
       @container.find('.collapse-btn .glyphicon').toggleClass('glyphicon-collapse-down glyphicon-collapse-up')
+
+      if @collapsed
+        @graph.trigger('data:created')
+
       @collapsed = !@collapsed
 
     collapseFooter: ->
