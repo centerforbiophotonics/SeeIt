@@ -19,5 +19,4 @@
 # Ignore IntelliJ project config files
 SeeIt.iml
 /.idea/*
-
 /.DS_Store
