@@ -30,6 +30,7 @@
       @eventCallbacks['header:changed'] = @eventCallbacks['data:created']
       @eventCallbacks['color:changed'] = @eventCallbacks['data:created']
       @eventCallbacks['data:changed'] = @eventCallbacks['data:created']
+      @eventCallbacks['filter:changed'] = @eventCallbacks['data:created']
 
       for e, cb of @eventCallbacks
         @on e, cb
@@ -42,7 +43,7 @@
       data = []
 
       @dataset[0].data.forEach (dataColumn) ->
-        data.push({values: dataColumn.data(), key: dataColumn.header, color: dataColumn.color})
+        data.push({values: dataColumn.data(), key: dataColumn.header, color: dataColumn.getColor()})
 
       return data
 

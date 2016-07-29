@@ -7,9 +7,6 @@
       @maximized = false
       @filterGroups = []
 
-      @filter = (dataColumn) ->
-        SeeIt.FilteredColumnFactory(dataColumn, [0...dataColumn.data().length], self)
-
       @requirements = []
       @filterState = []
       @operator = "AND"
@@ -20,23 +17,12 @@
       @graph = null
       @options = null
       @optionsVisible = false
-      @dataset = []
       @filteredDataset = []
       @initHandlers()
       @initLayout()
 
 
       @graph = new @graphType.class(@container.find('.graph-wrapper'),@filteredDataset)
-
-      @graph.dataFormat().forEach (d) ->
-        self.dataset.push({
-          name: d.name,
-          type: d.type,
-          multiple: d.multiple,
-          data: []
-        })
-        self.requirements[d.name] = []
-
 
       if !@graph.options().length then @container.find('.options-button').hide()
 
@@ -59,7 +45,7 @@
 
     getGraphState: ->
       return _.flatten([
-        @dataset.map((role) ->
+        @filteredDataset.map((role) ->
           role.data.map((dataColumn) ->
             {
               dataset_title: dataColumn.datasetTitle,
@@ -73,124 +59,124 @@
     addData: (data) ->
       for j in [0...data.length]
         new_data = data[j]
-
         ((new_data) ->
           datasetIdx = -1
 
-          @dataset.forEach (d, i) ->
+          @filteredDataset.forEach (d, i) ->
             if d.name == new_data.name then datasetIdx = i
 
           if datasetIdx != -1
-            if @dataset[datasetIdx].multiple == false && @dataset[datasetIdx].data.length == 0 || @dataset[datasetIdx].multiple == true
-              this_data = {}
-              this_data.data = @filter(new_data.data, new_data.name)
-              this_data.name = new_data.name
-
-              @filterColumn(this_data.data, new_data.data, this_data.name)
-
-              @dataset[datasetIdx].data.push(new_data.data)
-              @filteredDataset[datasetIdx].data.push(this_data.data)
-
-              @addDataToFooter(new_data)
-
+            # delete previous data if multiple is false
+            old_data = {}
+            if @graph.dataset[datasetIdx].multiple == false
+              old_data.name = new_data.name
+              old_data.data = @filteredDataset[datasetIdx].data[0]
+              @filteredDataset[datasetIdx].data.splice(0, 1) 
+              dataIdx = @filteredDataset[datasetIdx].data.indexOf(new_data.data)
             else
-              this_data = {}
-              this_data.data = @filter(new_data.data, new_data.name)
-              this_data.name = new_data.name
+              dataIdx = @filteredDataset[datasetIdx].data.indexOf(new_data.data)
 
-              @filterColumn(this_data.data, new_data.data, this_data.name)
+            if dataIdx == -1
+              this_data = new SeeIt.FilteredColumn(new_data.data, @requirements, @operator)
+              new_data.data = this_data
+              # @graph contains multiple: true or false
 
-              @removeDataFromFooterMultiple( @dataset[datasetIdx].name, @dataset[datasetIdx].data[0].header, datasetIdx)
-            
-              @dataset[datasetIdx].data.push(new_data.data)
-              @filteredDataset[datasetIdx].data.push(this_data.data)
+
+              # remove footer first
+              if @graph.dataset[0].multiple == false
+                if old_data.data != undefined
+                  @removeDataFromFooter(old_data)
+                @filteredDataset[datasetIdx].data.push(this_data)             
+              else
+                @filteredDataset[datasetIdx].data.push(this_data)
+             
 
               @addDataToFooter(new_data)
-              
 
-            self = @
+              self = @
 
-            @listenTo(this_data.data, 'label:changed', (idx) ->
-              self.graph.trigger('label:changed', self.options.getValues())
-            )
+              @listenTo(this_data, 'label:changed', (idx) ->
+                self.graph.trigger('label:changed', self.options.getValues())
+              )
 
-            @listenTo(this_data.data, 'color:changed', ->
-              self.graph.trigger('color:changed', self.options.getValues())
-            )
+              @listenTo(this_data, 'color:changed', ->
+                self.graph.trigger('color:changed', self.options.getValues())
+              )
 
-            @listenTo(this_data.data, 'header:changed', ->
-              self.updateFooterData.call(self)
-              self.graph.trigger('header:changed', self.options.getValues())
-            )
+              @listenTo(this_data, 'header:changed', ->
+                self.updateFooterData.call(self)
+                self.graph.trigger('header:changed', self.options.getValues())
+              )
 
-            @listenTo(this_data.data, 'data:destroyed', ->
-              self.graph.trigger('data:destroyed', self.options.getValues())
-            )
+              @listenTo(this_data, 'data:destroyed', ->
+                self.graph.trigger('data:destroyed', self.options.getValues())
+              )
 
-            @listenTo(this_data.data, 'data:created', ->
-              self.graph.trigger('data:created', self.options.getValues())
-            )
+              @listenTo(this_data, 'data:created', ->
+                self.graph.trigger('data:created', self.options.getValues())
+              )
 
-            @listenTo(this_data.data, 'data:changed', ->
-              self.graph.trigger('data:changed', self.options.getValues())
-            )
+              @listenTo(this_data, 'data:changed', ->
+                self.graph.trigger('data:changed', self.options.getValues())
+              )
 
-            @listenTo(this_data.data, 'type:changed', ->
-              if this_data.data.type != self.dataset[datasetIdx].type
+              @listenTo(this_data, 'filter:changed', ->
+                self.graph.trigger('filter:changed', self.options.getValues())
+              )
+
+              @listenTo(this_data, 'type:changed', ->
+                if this_data.data.type != self.filteredDataset[datasetIdx].type
+                  idx = -1
+
+                  self.filteredDataset.forEach (d, i) ->
+                    if d.name == this_data.name then idx = i
+
+                  if idx >= 0
+                    colToDestroy = self.filteredDataset[idx].data.indexOf(this_data.data)
+
+                    if colToDestroy >= 0
+                      self.filteredDataset[idx].data.splice(colToDestroy, 1)
+                      self.graph.trigger('column:destroyed', self.options.getValues())
+
+                      msg = "Data removed due to type change"
+                      tip = new Opentip(self.container.find('.data-drop-zone'), msg, {style: "alert", target: self.container.find('.data-drop-zone'), showOn: "creation", tipJoint: "top left"})
+                      tip.setTimeout(->
+                        tip.hide.call(tip)
+                        return
+                      , 5)
+
+                  self.updateFooterData.call(self)
+              )
+
+              @listenTo(this_data, 'destroy', ->
                 idx = -1
 
-                self.dataset.forEach (d, i) ->
+                self.filteredDataset.forEach (d, i) ->
                   if d.name == this_data.name then idx = i
 
                 if idx >= 0
-                  colToDestroy = self.dataset[idx].data.indexOf(this_data.data)
+                  colToDestroy = self.filteredDataset[idx].data.indexOf(this_data.data)
 
                   if colToDestroy >= 0
-                    self.dataset[idx].data.splice(colToDestroy, 1)
                     self.filteredDataset[idx].data.splice(colToDestroy, 1)
                     self.graph.trigger('column:destroyed', self.options.getValues())
 
-                    msg = "Data removed due to type change"
-                    tip = new Opentip(self.container.find('.data-drop-zone'), msg, {style: "alert", target: self.container.find('.data-drop-zone'), showOn: "creation", tipJoint: "top left"})
-                    tip.setTimeout(->
-                      tip.hide.call(tip)
-                      return
-                    , 5)
-
                 self.updateFooterData.call(self)
-            )
+              )
 
-            @listenTo(this_data.data, 'destroy', ->
-              idx = -1
+              if j == data.length - 1
+                if !@initialized
+                  @initGraph()
+                  @initialized = true
 
-              self.dataset.forEach (d, i) ->
-                if d.name == this_data.name then idx = i
-
-              if idx >= 0
-                colToDestroy = self.dataset[idx].data.indexOf(this_data.data)
-
-                if colToDestroy >= 0
-                  self.dataset[idx].data.splice(colToDestroy, 1)
-                  self.filteredDataset[idx].data.splice(colToDestroy, 1)
-                  self.graph.trigger('column:destroyed', self.options.getValues())
-
-              self.updateFooterData.call(self)
-            )
-
-            if j == data.length - 1
-              if !@initialized
-                @initGraph()
-                @initialized = true
-
-              @graph.trigger('data:assigned', self.options.getValues())
+                @graph.trigger('data:assigned', self.options.getValues())
         ).call(@, new_data)
 
     addDataToFooter: (data) ->
       self = @
-
       @container.find(".data-drop-zone[data-id='#{data.name}']").append("""
         <div class="SeeIt data-rep btn-group" role="group" data-id='#{data.data.header}'>
-          <button class="SeeIt data-rep-color btn btn-default" style="background-color: #{data.data.color}"></button>
+          <button class="SeeIt data-rep-color btn btn-default" style="background-color: #{data.data.getColor()}"></button>
           <button class="SeeIt data-rep-text btn btn-default">#{data.data.header}</button>
           <button class="SeeIt data-rep-remove btn btn-default" title='Remove Data'><span class="glyphicon glyphicon-remove"></span></button>
         </div>
@@ -199,7 +185,7 @@
       item = @container.find(".data-drop-zone[data-id='#{data.name}'] .data-rep-color:last")
 
       @listenTo data.data, 'color:changed', ->
-        item.css('background-color', data.data.color)
+        item.css('background-color', data.data.getColor())
       
       # X button
       @container.find(".data-rep[data-id='#{data.data.header}'] .data-rep-remove").on 'click', ->
@@ -207,28 +193,27 @@
 
       @container.find(".data-rep[data-id='#{data.data.header}'] .data-rep-text").on 'click', ->
         context = @
-        data.data.trigger 'request:childLength', (childLength) ->
 
-          msg = """
-            <b>Dataset:</b> #{data.data.datasetTitle}
-            <br>
-            <b>Data Type:</b> #{data.data.type}
-            <br>
-            <b>Filters:</b> #{childLength} out of #{data.data.length()} selected by filter
-          """
+        msg = """
+          <b>Dataset:</b> #{data.data.datasetTitle}
+          <br>
+          <b>Data Type:</b> #{data.data.type}
+          <br>
+          <b>Filters:</b> #{data.data.length()} out of #{data.data.originalLength()} selected by filter
+        """
 
-          tip = new Opentip($(context), msg, {target: $(context), showOn: "creation"})
-          tip.setTimeout(->
-            tip.hide.call(tip)
-            return
-          , 5)
+        tip = new Opentip($(context), msg, {target: $(context), showOn: "creation"})
+        tip.setTimeout(->
+          tip.hide.call(tip)
+          return
+        , 5)
 
     updateFooterData: ->
       self = @
 
       @container.find(".data-rep").remove()
 
-      @dataset.forEach (role) ->
+      @filteredDataset.forEach (role) ->
         role.data.forEach (d) ->
           self.addDataToFooter.call(self, {name: role.name, data: d})
 
@@ -236,18 +221,15 @@
       @container.find(".data-drop-zone[data-id='#{data.name}'] .data-rep[data-id='#{data.data.header}']").remove()
 
     # remove previous tab in data-drop-zone
-    removeDataFromFooterMultiple: (dataName, dataHeader, datasetIdx)->
-      @container.find(".data-drop-zone[data-id='#{dataName}'] .data-rep[data-id='#{dataHeader}']").remove()  
-      @graph.dataset[datasetIdx].data.splice(0, 1) 
-      @dataset[datasetIdx].data.splice(0, 1)   
+    removeDataFromFooterMultiple: ->
+      @container.find(".data-drop-zone .data-rep:first").remove()    
 
     removeData: (data) ->
-      dataset_idx = @dataset.map((d) -> d.name).indexOf(data.name)
+      dataset_idx = @filteredDataset.map((d) -> d.name).indexOf(data.name)
 
       if dataset_idx >= 0
-        idx = @dataset[dataset_idx].data.indexOf(data.data)
+        idx = @filteredDataset[dataset_idx].data.indexOf(data.data)
         if idx >= 0
-          @dataset[dataset_idx].data.splice(idx, 1)
           @filteredDataset[dataset_idx].data.splice(idx, 1)
           @graph.trigger('data:destroyed', @options.getValues())
           @removeDataFromFooter(data)
@@ -411,6 +393,7 @@
       @container.find(".graph-title-edit-icon").on('click', @handlers.editTitle)
       @container.find(".collapse-footer").on('click', @handlers.collapseFooter)
 
+
     initDataContainers: ->
       self = @
       dataFormat = @graph.dataFormat()
@@ -487,24 +470,9 @@
         self.filterState.push filterGroup.getFilters()
 
       @filteredDataset.forEach (dataset, datasetIdx) ->
-        dataset.data.forEach (dataColumn, i) ->
-          parentColumn = self.dataset[datasetIdx].data[i]
-          self.filterColumn.call(self, dataColumn, parentColumn)
+        dataset.data.forEach (filteredColumn, i) ->
+          filteredColumn.setRequirements(self.requirements)
 
-    filterColumn: (dataColumn, parentColumn) ->
-      self = @
-
-      filteredData = [0...parentColumn.data().length]
-
-      if self.requirements.length > 0 && self.operator == "OR" then filteredData = []
-
-      self.requirements.forEach (requirement) ->
-        if self.operator == "AND"
-          filteredData = _.intersection(filteredData, requirement(parentColumn))
-        else
-          filteredData = _.union(filteredData, requirement(parentColumn))
-
-      dataColumn.trigger 'filter:changed', filteredData
 
     addFilterGroup: ->
       self = @
@@ -587,10 +555,8 @@
 
       @container.find(".graph-panel-content").toggleClass('in')
       @container.find('.collapse-btn .glyphicon').toggleClass('glyphicon-collapse-down glyphicon-collapse-up')
-
       if @collapsed
         @graph.trigger('data:created')
-
       @collapsed = !@collapsed
 
     collapseFooter: ->

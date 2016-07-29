@@ -49,10 +49,10 @@
 //= require_tree ./SeeIt/graphs
 //= require SeeIt/filter
 //= require SeeIt/filter_group
+//= require SeeIt/filter_decorator
 //= require SeeIt/graph_view
 //= require SeeIt/graph_collection_view
 //= require SeeIt/application_view
-//= require SeeIt/application_controller
 //= require SeeIt/spreadsheet_contextmenu_view
-//= require SeeIt/application_controller
 //= require SeeIt/jquery_extensions.js
+//= require SeeIt/application_controller

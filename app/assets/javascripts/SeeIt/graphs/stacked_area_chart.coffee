@@ -28,6 +28,7 @@
       @eventCallbacks['header:changed'] = @eventCallbacks['data:created']
       @eventCallbacks['color:changed'] = @eventCallbacks['data:created']
       @eventCallbacks['data:changed'] = @eventCallbacks['data:created']
+      @eventCallbacks['filter:changed'] = @eventCallbacks['data:created']
 
       for e, cb of @eventCallbacks
         @on e, cb
@@ -44,7 +45,7 @@
           each2.push(d.label())
           each2.push(d.value())
           each1.push(each2)
-        data.push({values:each1, key:dataColumn.header}) 
+        data.push({values:each1, key:dataColumn.header, color:dataColumn.getColor()}) 
 
       return data
 
@@ -91,7 +92,7 @@
         {
           name: "default",
           type: "numeric",
-          multiple: false
+          multiple: true
         }
       ]
 

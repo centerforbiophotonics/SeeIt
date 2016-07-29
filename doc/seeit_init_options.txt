@@ -27,16 +27,14 @@ SeeIt.new({
 
     * javascript object like the following
     {
-        url: string
-        type: string with the value "csv", "json", or "google"
+        jsonString: string representing a json that describes the same thing as above.
     }
 
     * javascript object like the following
-
-        {
-          type: string  //can be 'csv', 'json', or 'google spreadsheet'
-          url: string   //a url that can be used to retrieve any of the above types of data (if the URL is in the same domain it will make an AJAX call if it’s another domain it will try JSONP)
-        }
+    {
+        url: string
+        type: string with the value "csv", "json", or "google spreadsheet"
+    }
 
     * native javascript file object (so you can create a form with a file upload and pass it right to SeeIt)
 

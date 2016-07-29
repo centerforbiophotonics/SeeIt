@@ -29,6 +29,7 @@
       @eventCallbacks['size:change'] = @eventCallbacks['data:created']
       @eventCallbacks['options:update'] = @eventCallbacks['data:created']
       @eventCallbacks['data:changed'] = @eventCallbacks['data:created']
+      @eventCallbacks['filter:changed'] = @eventCallbacks['data:created']
 
       @eventCallbacks['label:changed'] = (options) ->
         self.updateLabels.call(self, options)
@@ -114,7 +115,8 @@
             return "translate(0," + i * 20 + ")"
           )
 
-        @legend.append("rect")
+        @legend.data(legendData)
+          .enter().append("rect")
           .attr("x", @style.width - 18)
           .attr("width", 18)
           .attr("height", 18)
@@ -122,7 +124,8 @@
             return d.color
           )
 
-        @legend.append("text")
+        @legend.data(legendData)
+          .enter().append("text")
           .attr("x", @style.width - 24)
           .attr("y", 9)
           .attr("dy", ".35em")
@@ -192,7 +195,7 @@
       @placeData()
 
       @drawGraph(options)
-      #@drawLegend(options)
+      @drawLegend(options)
 
 
     drawStats: (options) ->
