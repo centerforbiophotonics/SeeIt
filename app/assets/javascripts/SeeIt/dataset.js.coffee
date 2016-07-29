@@ -49,8 +49,12 @@
 			@rawFormat = Dataset.getFormat(data)
 			@data = []
 			extend(@, ConverterFactory(@rawFormat))
+			@app.rainBowPalette.makePalette(@headers.length)
 			@loadData(data)
 			@registerListeners()
+			
+
+	
 		
 
 		getByHeader: (header) ->
@@ -171,6 +175,7 @@
 			self = @
 
 			header = @generateLabel(@headers)
+			#console.log "header length: ",header.length
 
 			dataColumn = []
 

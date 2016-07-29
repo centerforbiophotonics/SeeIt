@@ -23,7 +23,7 @@
       #Get data
       #TODO: Add more validation of data
       data = if params.data != undefined then params.data else []
-
+      # SeeIt.Utils()
       
       
       color = d3.scale.linear().domain([-1, 0, 1]).range(["red", "white", "green"])
@@ -45,20 +45,20 @@
       rainBowColor.push(rainBow(6*num/100)) for num in [0..100]
       colorBlue.push(blue(num/100) ) for num in [0..100]
       
-      colorBlindness = new SeeIt.ColorPalette('Color Blindness', blindColor)
-      redPalette = new SeeIt.ColorPalette('Red', colorRed)
-      greenPalette = new SeeIt.ColorPalette('Green', colorGreen)
-      blackPalette = new SeeIt.ColorPalette("Black and White", blackAndWhite)
-      rainBowPalette = new SeeIt.ColorPalette("Rainbow", rainBowColor)
-      bluePalette = new SeeIt.ColorPalette("Blue", colorBlue)
+      @colorBlindness = new SeeIt.ColorPalette('Color Blindness', blindColor)
+      @redPalette = new SeeIt.ColorPalette('Red', colorRed)
+      @greenPalette = new SeeIt.ColorPalette('Green', colorGreen)
+      @blackPalette = new SeeIt.ColorPalette("Black and White", blackAndWhite)
+      @rainBowPalette = new SeeIt.ColorPalette("Rainbow", rainBowColor)
+      @bluePalette = new SeeIt.ColorPalette("Blue", colorBlue)
 
       @paletteTypes = [];
-      @paletteTypes.push({name: blackPalette.name, class: blackPalette })
-      @paletteTypes.push({name: redPalette.name, class: redPalette })
-      @paletteTypes.push({name: greenPalette.name, class: greenPalette })
-      @paletteTypes.push({name: rainBowPalette.name, class: rainBowPalette})
-      @paletteTypes.push({name: bluePalette.name, class: bluePalette})
-      @paletteTypes.push({name: colorBlindness.name, class: colorBlindness})  
+      @paletteTypes.push({name: @blackPalette.name, class: @blackPalette })
+      @paletteTypes.push({name: @redPalette.name, class: @redPalette })
+      @paletteTypes.push({name: @greenPalette.name, class: @greenPalette })
+      @paletteTypes.push({name: @rainBowPalette.name, class: @rainBowPalette})
+      @paletteTypes.push({name: @bluePalette.name, class: @bluePalette})
+      @paletteTypes.push({name: @colorBlindness.name, class: @colorBlindness})  
 
 
 

@@ -3,7 +3,8 @@
     _.extend(@prototype, Backbone.Events)
     
     constructor: (@app, @header, data, @datasetTitle, @type, @color, editable = true, @dataSet) ->
-      if !@color then @color = SeeIt.Utils.getRandomColor()
+     # console.log "bottom",@app.rainBowPalette.palette
+      if !@color then @color = SeeIt.Utils.getRandomColor() #@app.rainBowPalette.getColor()
 
 
       dataArray = []

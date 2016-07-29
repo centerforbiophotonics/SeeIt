@@ -29,6 +29,7 @@
 //= require tabletop.js
 //= require jquery.serialize-object.min.js
 //= require SeeIt/init
+//= require SeeIt/color_palette
 //= require SeeIt/utils
 //= require SeeIt/least_squares
 //= require SeeIt/validators_module
@@ -52,5 +53,4 @@
 //= require SeeIt/graph_view
 //= require SeeIt/graph_collection_view
 //= require SeeIt/application_view
-//= require SeeIt/color_palette
 //= require SeeIt/application_controller
