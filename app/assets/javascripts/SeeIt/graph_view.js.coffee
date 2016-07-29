@@ -287,16 +287,6 @@
 
         @saveFilters()
 
-    findDataSet: (datasetName, buttonName, setOfData) ->
-      match = null
-      setOfData.datasets.forEach (value, index) ->
-        if value.title == datasetName
-          value.data.forEach (i) ->
-            if i.header == buttonName
-              match = i
-
-      return match
-
     initHandlers: ->
       self = @
 
@@ -357,7 +347,7 @@
 
         dragEnterListener: (event) ->
           event.preventDefault()
-          event.target.style.background = '#BAEA65'      
+          event.target.style.background = '#BAEA65'
 
         dragLeaveListener: (event) ->
           event.preventDefault()
@@ -373,8 +363,36 @@
           $(".data-drop-zone").css("background-color", '')
           btnName = event.originalEvent.dataTransfer.getData("text")
           dataSetName = event.originalEvent.dataTransfer.getData("datasetName")
-          self.trigger('graph:addData', {graph: $(this).attr('id'), data:[{name: $(this).attr('data-id'), data: self.findDataSet(dataSetName, btnName, self.data)}]})
+          dataFromButton = self.findDataSet(dataSetName, btnName, self.data)
+          validType = self.checkType(self.graph.dataset, dataFromButton.type, $(this).attr('data-id'))
+
+          if validType
+            self.trigger('graph:addData', {graph: $(this).attr('id'), data:[{name: $(this).attr('data-id'), data: dataFromButton}]})
+          else 
+            alert("Invalid Data")
+
       }
+
+    findDataSet: (datasetName, buttonName, setOfData) ->
+      match = null
+      setOfData.datasets.forEach (value, index) ->
+        if value.title == datasetName
+          value.data.forEach (i) ->
+            if i.header == buttonName
+              match = i
+
+      return match
+
+    checkType: (graphSet, buttonType, dataId) ->
+      match = null
+      graphSet.forEach (i) ->
+        # match container name with dataset name and button type with dataset type 
+        if dataId == i.name && i.type == buttonType
+          match = true
+        else if  dataId == i.name && i.type == "any"
+          match = true
+
+      return match
 
     initLayout: ->
       @container.html("""
