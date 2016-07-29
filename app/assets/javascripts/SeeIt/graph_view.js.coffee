@@ -25,7 +25,6 @@
       @initHandlers()
       @initLayout()
 
-
       @graph = new @graphType.class(@container.find('.graph-wrapper'),@filteredDataset)
 
       @graph.dataFormat().forEach (d) ->
@@ -36,7 +35,6 @@
           data: []
         })
         self.requirements[d.name] = []
-
 
       if !@graph.options().length then @container.find('.options-button').hide()
 
@@ -81,6 +79,7 @@
             if d.name == new_data.name then datasetIdx = i
 
           if datasetIdx != -1
+            # No data in column
             if @dataset[datasetIdx].multiple == false && @dataset[datasetIdx].data.length == 0 || @dataset[datasetIdx].multiple == true
               this_data = {}
               this_data.data = @filter(new_data.data, new_data.name)
@@ -93,6 +92,7 @@
 
               @addDataToFooter(new_data)
 
+            # Replacing previous data
             else
               this_data = {}
               this_data.data = @filter(new_data.data, new_data.name)
@@ -100,6 +100,7 @@
 
               @filterColumn(this_data.data, new_data.data, this_data.name)
 
+              # Remove footer and data in dataset 
               @removeDataFromFooterMultiple( @dataset[datasetIdx].name, @dataset[datasetIdx].data[0].header, datasetIdx)
             
               @dataset[datasetIdx].data.push(new_data.data)
