@@ -587,6 +587,10 @@
 
       @container.find(".graph-panel-content").toggleClass('in')
       @container.find('.collapse-btn .glyphicon').toggleClass('glyphicon-collapse-down glyphicon-collapse-up')
+
+      if @collapsed
+        @graph.trigger('data:created')
+
       @collapsed = !@collapsed
 
     collapseFooter: ->

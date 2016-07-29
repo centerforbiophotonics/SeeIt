@@ -95,6 +95,7 @@
 				data: []
 			}
 			
+
 			@labels.forEach (l) ->
 				obj.data.push [l]
 
@@ -103,6 +104,7 @@
 				d.data().forEach (r,i) ->
 					obj.data[i].push r.value()
 
+			
 			Papa.unparse(obj)
 		# replace typeof
 		getType: (d) ->

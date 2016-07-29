@@ -124,6 +124,9 @@
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                  <button type="button" class="SeeIt btn btn-primary" id="create-dataset" data-loading-text="<span class='SeeIt glyphicon glyphicon-refresh spin'></span>">  
+                    Create Dataset  
+                  </button>
                   <label class="btn btn-primary btn-file SeeIt new-dataset-input dataset-json-file hidden json-file">
                     <span class='glyphicon glyphicon-upload'></span>
                     Select JSON file <input type="file" class="form-control SeeIt" style='display: none'>
@@ -156,10 +159,18 @@
         $(@).find('a').toggleClass('selected')
         $(@).parent().parent().find('.new-dataset-form').slideToggle()
 
+      $(document).off("keypress").on("keypress", ":input:not(textarea)", (e) ->
+        selected = self.container.find("#dataset-select").val()
+        if e.keyCode == 13 && (selected != 'json-file' || selected != 'csv-file')
+          e.preventDefault()
+          $('#create-dataset').click()
+      );
+
       self.container.find('.hide_data').on 'click', () ->
         self.app.handlers.toggleDataVisible()
 
       self.container.find("#create-dataset").on 'click', (event) ->
+        $('#newdata_modal').modal('hide')
         return self.handleDatasetCreate.call(self, self.container.find("#dataset-select").val())
 
       self.container.find(".json-file input, .csv-file input").on 'change', (event) ->
@@ -170,6 +181,10 @@
       
       $(".json-file, .csv-file").on "click", () -> 
         $('#newdata_modal').modal('hide')
+
+      $('#newdata_modal').on('shown.bs.modal', () ->
+        $(this).find('input:text').first().focus()
+      );
 
     handleDatasetCreate: (selected, data = {}) ->
       self = @
