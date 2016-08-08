@@ -462,13 +462,29 @@
               selectedGraph = key
             }
           }
+
           var graphFormat = SeeIt.Graphs[selectedGraph].prototype.dataFormat()
+          $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_role_in_graph").html("")
           for (var i in graphFormat) {
             $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_role_in_graph").append("<option>"+graphFormat[i].name+"</option>")
           }
 
 
+          $("#graphs_"+graphIndex+"_type").on("change", function(){
+            var selectedGraph = $("#graphs_"+graphIndex+"_type").val()
+            for (var key in SeeIt.GraphNames){
+              if (selectedGraph == SeeIt.GraphNames[key]){
+                selectedGraph = key
+              }
+            }
 
+            var graphFormat = SeeIt.Graphs[selectedGraph].prototype.dataFormat()
+            $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_role_in_graph").html("")
+            
+            for (var i in graphFormat) {
+              $("#graphs_"+graphIndex+"_data_"+graphDataIndex+"_role_in_graph").append("<option>"+graphFormat[i].name+"</option>")
+            }
+          })
         })
 
         register_remove_graphs_data();
