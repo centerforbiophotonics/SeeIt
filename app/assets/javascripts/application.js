@@ -49,7 +49,7 @@
 //= require_tree ./SeeIt/graphs
 //= require SeeIt/filter
 //= require SeeIt/filter_group
-//= require SeeIt/filter_decorator
+//= require SeeIt/filtered_column
 //= require SeeIt/graph_view
 //= require SeeIt/graph_collection_view
 //= require SeeIt/application_view
