@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<body>
+	<!-- CSS -->
+	<style type="text/css"> 
+
+	body {
+		text-align: center;
+	}
+
+	#holder { 
+		border: 10px dashed #ccc; 
+		width: inherit; 
+		height:100vh;
+		margin: 20px auto;
+		text-align: center;
+	}
+	#holder.hover {
+	 border: 10px dashed #333; 
+	}
+
+	</style>
+
+	<!-- HTML -->
+
+	<p id="status">File API & FileReader API not supported</p>
+	<div id="holder"></div>   
+
+	<!-- JavaScript -->
+	<script type="text/javascript">
+		// modified from http://html5demos.com/file-api
+		var holder = document.getElementById('holder'),
+		    state = document.getElementById('status');
+
+		if (typeof window.FileReader === 'undefined') {
+		    state.className = 'fail';
+		} else {
+		    state.className = 'success';
+		    state.innerHTML = 'File API & FileReader available';
+		}
+
+		holder.ondragover = function() {
+		    this.className = 'hover';
+		    return false;
+		};
+		holder.ondragend = function() {
+		    this.className = '';
+		    return false;
+		};
+		holder.ondrop = function(e) {
+		    this.className = '';
+		    e.preventDefault();
+
+		    var file = e.dataTransfer.files[0],
+		        reader = new FileReader();
+		    reader.onload = function(event) {
+		        console.log(event.target);
+		        holder.innerText = event.target.result;
+		    };
+		    console.log(file);
+		    reader.readAsText(file);
+
+		    return false;
+		};
+
+	</script>
+
+</body>

@@ -85,6 +85,7 @@
               }
 
     refresh: (options) ->
+      $('.tooltip').remove()
       @container.html("")
       @draw(options)
 
@@ -196,7 +197,6 @@
                  .duration(500)
                  .style('visibility', 'hidden')
                  
-            # $('.tooltip').remove()
         )
         .attr('opacity', 0.3)
         .transition().duration(300)

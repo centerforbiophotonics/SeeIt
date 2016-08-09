@@ -25,10 +25,10 @@
         <ul class="SeeIt dataset-list list-group">
           <div class="SeeIt panel-heading" style=" background-color: #f5f5f5">  
             <label id="upload_modal" class="btn btn-primary btn-file SeeIt new-dataset-input">
-              <span class='glyphicon glyphicon-upload' style=""></span>
+              <span class='glyphicon glyphicon-upload'></span>
                 Upload Data
             </label>
-            <button class="SeeIt hide_data btn btn-default"  title='Hide Data' style="float:right"><span class="glyphicon glyphicon-arrow-left"></span></button>  
+            <button class="SeeIt hide_data btn btn-default"  title='Hide Data' style="float:right"><span class="glyphicon glyphicon-arrow-left"></span></button>
           </div>
         </ul>
       """)
@@ -332,8 +332,10 @@
       @newDatasetMaker()
 
       if !@app.ui.dataset_add_remove
-        $('.new-dataset').addClass("hidden")
-        $('.new-dataset-form').addClass("hidden")
+        $('#upload_modal').addClass("hidden")
+
+      if !@app.ui.toolbar
+        $('.hide_data').addClass('hidden')
 
       for i in [0...@data.datasets.length]
         @addDatasetView(@data.datasets[i])

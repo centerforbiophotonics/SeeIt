@@ -338,11 +338,11 @@
 
         dragEnterListener: (event) ->
           event.preventDefault()
-          event.target.style.background = '#BAEA65'      
+          # event.target.style.background = '#BAEA65'    
 
         dragLeaveListener: (event) ->
           event.preventDefault()
-          event.target.style.background = '#FFAFAF'
+          # event.target.style.background = '#FFAFAF'
           
         dragEndListener: (event) ->
           event.preventDefault()

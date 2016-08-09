@@ -225,10 +225,6 @@
   padding: 0;
 }
 
-.SeeIt.dataset-list {
-  margin-bottom: 200px;
-}
-
 .SeeIt.bar rect {
   fill: steelblue;
 /*  border: 2px inset black;*/
@@ -256,6 +252,10 @@
   border-top-left-radius: 4px;
   border: 1px solid #ddd;
   overflow-y: auto;
+}
+
+.SeeIt.Data.hover {
+  border: 10px dashed #333;
 }
 
 .SeeIt.spreadsheet-button-group {
