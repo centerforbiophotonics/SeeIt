@@ -543,3 +543,16 @@ td:not(.htNumeric).SeeIt-htCenter {
   background-color: #428bca;
   transition: all 0.3s ease-in-out;
 }
+
+@-webkit-keyframes rotateFullCircle {
+  0%  {
+    transform: rotate(0deg);
+  }
+  100%  {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  -webkit-animation: rotateFullCircle 1s infinite;
+}

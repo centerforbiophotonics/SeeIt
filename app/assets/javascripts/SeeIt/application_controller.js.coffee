@@ -43,7 +43,7 @@
       @graphGoAhead = false       #This variable lets the app know if it can initialize graphs immediately because all data is locally passed to the app. Will be set to true if none of the datsets in data require downloading from remote urls
       @model = new SeeIt.DataCollection(@, data, @ui.editable)
       if !@graphGoAhead then @listenTo(@model, 'datasets:loaded', ->    #This event is triggered once all datasets from remote urls are downloaded, if they exist
-        console.log "THE ApplicationController KNOWS WE ARE LOADED"
+        #console.log "THE ApplicationController KNOWS WE ARE LOADED"
         if self.ui.dataMenu
           #Container for list of datasets
           self.dataCollectionView = new SeeIt.DataCollectionView(
@@ -110,7 +110,7 @@
       #@trigger('ready')
 
       if @graphGoAhead            #If no data was required from remote endpoints, graphs can now be initialized
-        console.log "we got a goAhead"
+        #console.log "we got a goAhead"
         if @ui.dataMenu
           #Container for list of datasets
           @dataCollectionView = new SeeIt.DataCollectionView(

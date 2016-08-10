@@ -7,7 +7,7 @@
       @datasets = []
       @pendingDatasets = []               #Keeps track of all datasets in the initialization data that need to be loaded from a remote source
       @loadingMessage = new Opentip(
-        $(".container-fluid"), "", "Loading Datasets",
+        $(".container-fluid"), '<span class="glyphicon glyphicon-refresh spinner"></span>', 'Loading Datasets',
         {
           showOn: null,
           style:"glass",
@@ -98,7 +98,7 @@
           if cbUrl                                                                #If a cbUrl is passed to the callback
             self.pendingDatasets.splice(self.pendingDatasets.indexOf(cbUrl), 1)   #it is removed from pendingDatasets
             if self.pendingDatasets.length == 0                   #If pendingDatasets is empty
-              console.log "pendingDatasets IS EMPTY"
+              #console.log "pendingDatasets IS EMPTY"
               self.loadingMessage.hide()
               self.initialized = true                             #The DataCollection is fully initialized
               self.trigger 'datasets:loaded'                      #And the AppController can continue on to initialize the graphs.
