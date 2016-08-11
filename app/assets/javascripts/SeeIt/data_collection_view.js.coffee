@@ -115,12 +115,10 @@
 
           dragOverListener: (event) ->
             event.preventDefault()
-            console.log 'dragover'
             return false
 
           dragEnterListener: (event) ->
             event.preventDefault()
-            console.log 'Entering view'
             $('#holder').toggleClass('hover')
             $('.upload_msg').toggleClass('hidden')
             $('.upload_icon').toggleClass('hidden')
@@ -128,12 +126,10 @@
 
           dragEndListener: (event) ->
             event.preventDefault()
-            console.log 'dragend'
             return false
 
           dragLeaveListener: (event) ->
             event.preventDefault()
-            console.log 'leaving view'
             $('#holder').toggleClass('hover')
             $('.upload_msg').toggleClass('hidden')
             $('.upload_icon').toggleClass('hidden')
@@ -141,7 +137,6 @@
 
           dropListener: (event) ->
             event.preventDefault()
-            console.log 'dropping'
             $('#holder').toggleClass('hover')
             $('.upload_msg').toggleClass('hidden')
             $('.upload_icon').toggleClass('hidden')

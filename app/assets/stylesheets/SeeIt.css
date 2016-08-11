@@ -543,6 +543,10 @@ td:not(.htNumeric).SeeIt-htCenter {
   height: 100vh;
   text-align: center;
   padding: 40vh 0;
+  position: absolute;
+  min-height: 200px;
+  min-width: 200px;
+  z-index: 100;
 }
 .hover {
   border: 5px dashed #808080;
