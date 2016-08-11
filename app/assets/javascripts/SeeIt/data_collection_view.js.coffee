@@ -19,6 +19,20 @@
           showEffect: "none"
         }
       )
+      @ErrorMsg = new Opentip(  
+        @container, "Title is already in use", "",  
+        { 
+          showOn: null,  
+          style:"glass",  
+          stem: false,  
+          target: true,  
+          tipJoint: "center",  
+          targetJoint: "center",  
+          showEffectDuration: 0,  
+          showEffect: "none",
+          hideDelay: 0.5
+        }  
+      )
 
     init: ->
       @container.html("""
@@ -95,7 +109,6 @@
           dragEndListener: (event) ->
             event.preventDefault()
             $(".data-drop-zone").css("background-color", "")
-
         }
         
         file: {
@@ -133,16 +146,17 @@
             $('.upload_msg').toggleClass('hidden')
             $('.upload_icon').toggleClass('hidden')
 
-            file = event.originalEvent.dataTransfer.files[0]
+            uploaded_file = event.originalEvent.dataTransfer.files[0]
 
-            console.log file
+            if uploaded_file.type == 'application/vnd.ms-excel'
+              return self.handleDatasetCreate.call(self, 'csv-file', {file: uploaded_file})
+            else
+              return self.handleDatasetCreate.call(self, 'json-file', {file: uploaded_file})
 
             return false
         }
 
       }
-
-
 
     newDatasetMaker: ->
       @container.find('.dataset-list').append("""
@@ -367,13 +381,17 @@
 
           self.container.find(".csv-endpoint").val("")
         when "csv-file"
-          csv_manager = new SeeIt.CSVManager()
           filename = data.file.name.split('.')[0]
-          self.dataLoadingMsg.show()
-          csv_manager.handleUpload(data.file, (d) ->
-            self.trigger 'datasets:create', [{isLabeled: true, title: filename, dataset: d}]
-            self.dataLoadingMsg.hide()
-          )
+          if self.validateTitle(filename)
+            csv_manager = new SeeIt.CSVManager()
+            self.dataLoadingMsg.show()
+            csv_manager.handleUpload(data.file, (d) ->
+              self.trigger 'datasets:create', [{isLabeled: true, title: filename, dataset: d}]
+              self.dataLoadingMsg.hide()
+            )
+          else
+            @ErrorMsg.show()
+
 
     validateTitle: (title) ->
       for i in [0...@data.datasets.length]
