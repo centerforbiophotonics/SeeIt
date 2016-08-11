@@ -30,6 +30,11 @@
             </label>
             <button class="SeeIt hide_data btn btn-default"  title='Hide Data' style="float:right"><span class="glyphicon glyphicon-arrow-left"></span></button>
           </div>
+          <div id="holder">
+            <h1 class="upload_msg hidden">Drop file here</h1>
+            <svg class="upload_icon hidden" width="50" height="43" viewBox="0 0 50 43">
+              <path d="M48.4 26.5c-.9 0-1.7.7-1.7 1.7v11.6h-43.3v-11.6c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v13.2c0 .9.7 1.7 1.7 1.7h46.7c.9 0 1.7-.7 1.7-1.7v-13.2c0-1-.7-1.7-1.7-1.7zm-24.5 6.1c.3.3.8.5 1.2.5.4 0 .9-.2 1.2-.5l10-11.6c.7-.7.7-1.7 0-2.4s-1.7-.7-2.4 0l-7.1 8.3v-25.3c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v25.3l-7.1-8.3c-.7-.7-1.7-.7-2.4 0s-.7 1.7 0 2.4l10 11.6z"/></svg>
+          </div>
         </ul>
       """)
 
@@ -81,15 +86,63 @@
     initHandlers: ->
       self = @
       self.handlers = {
-        dragStartListener: (event) ->
-          event.originalEvent.dataTransfer.setData("text", event.target.id)
-          event.originalEvent.dataTransfer.setData("datasetName", $(this).attr('name'))
-          $(".data-drop-zone").css("background-color", "#FFAFAF")
+        column: {
+          dragStartListener: (event) ->
+            event.originalEvent.dataTransfer.setData("text", event.target.id)
+            event.originalEvent.dataTransfer.setData("datasetName", $(this).attr('name'))
+            $(".data-drop-zone").css("background-color", "#FFAFAF")
 
-        dragEndListener: (event) ->
-          event.preventDefault()
-          $(".data-drop-zone").css("background-color", "")
+          dragEndListener: (event) ->
+            event.preventDefault()
+            $(".data-drop-zone").css("background-color", "")
+
+        }
+        
+        file: {
+
+          dragOverListener: (event) ->
+            event.preventDefault()
+            console.log 'dragover'
+            return false
+
+          dragEnterListener: (event) ->
+            event.preventDefault()
+            console.log 'Entering view'
+            $('#holder').toggleClass('hover')
+            $('.upload_msg').toggleClass('hidden')
+            $('.upload_icon').toggleClass('hidden')
+            return false
+
+          dragEndListener: (event) ->
+            event.preventDefault()
+            console.log 'dragend'
+            return false
+
+          dragLeaveListener: (event) ->
+            event.preventDefault()
+            console.log 'leaving view'
+            $('#holder').toggleClass('hover')
+            $('.upload_msg').toggleClass('hidden')
+            $('.upload_icon').toggleClass('hidden')
+            return false
+
+          dropListener: (event) ->
+            event.preventDefault()
+            console.log 'dropping'
+            $('#holder').toggleClass('hover')
+            $('.upload_msg').toggleClass('hidden')
+            $('.upload_icon').toggleClass('hidden')
+
+            file = event.originalEvent.dataTransfer.files[0]
+
+            console.log file
+
+            return false
+        }
+
       }
+
+
 
     newDatasetMaker: ->
       @container.find('.dataset-list').append("""
@@ -344,8 +397,15 @@
       @container.find('.dataset-list .new-dataset').before("<div class='SeeIt dataset-container'></div>")
       datasetView = new SeeIt.DatasetView(@app, @container.find(".SeeIt.dataset-container:not(.new-dataset)").last(), data)
       @initHandlers()
-      @container.find('.source').off('dragstart').on('dragstart', @handlers.dragStartListener)
-      @container.find('.source').off('dragend').on('dragend', @handlers.dragEndListener)
+      @container.find('.source').off('dragstart').on('dragstart', @handlers.column.dragStartListener)
+      @container.find('.source').off('dragend').on('dragend', @handlers.column.dragEndListener)
+
+      @container.find('#holder').off('drop').on('drop', @handlers.file.dropListener)
+      @container.find('#holder').off('dragenter').on('dragenter', @handlers.file.dragEnterListener)
+      @container.find('#holder').off('dragleave').on('dragleave', @handlers.file.dragLeaveListener)
+      @container.find('#holder').off('dragover').on('dragover', @handlers.file.dragOverListener)
+      @container.find('#holder').off('dragend').on('dragend', @handlers.file.dragEndListener)
+
       @initDatasetListeners(datasetView)
       datasetView.trigger('populate:dropdowns')
       @datasetViewCollection.push(datasetView)

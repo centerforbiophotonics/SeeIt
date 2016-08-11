@@ -92,6 +92,7 @@
       return obj
 
     @coerceDataset = (dataset, callback) ->
+
       if !dataset.url then callback dataset
 
       error_cb = ->
