@@ -104,7 +104,7 @@
 					selectStr = "<div class='form-group #{if is_disabled then 'hidden' else ''}'><label for='#{id}'>#{option.label()}</label><select id='#{id}' class='form-control'>"
 
 					option.values().forEach (val) ->
-						selectStr += "<option value=#{val}>#{val}</option>"
+						selectStr += "<option value="+'"'+val+'"'+">#{val}</option>"
 
 					selectStr += "</select></div>"
 

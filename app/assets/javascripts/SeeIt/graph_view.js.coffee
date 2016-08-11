@@ -199,7 +199,7 @@
           <br>
           <b>Data Type:</b> #{data.data.type}
           <br>
-          <b>Filters:</b> #{data.data.length()} out of #{data.data.originalLength()} selected by filter
+          <b>Filters:</b> #{data.data.filteredLength()} out of #{data.data.length()} selected by filter
         """
 
         tip = new Opentip($(context), msg, {target: $(context), showOn: "creation"})
