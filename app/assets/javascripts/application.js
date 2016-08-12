@@ -36,7 +36,6 @@
 //= require SeeIt/data_column
 //= require SeeIt/dataset
 //= require SeeIt/data_collection
-//= require SeeIt/filtered_column_factory
 //= require SeeIt/toolbar_view
 //= require SeeIt/data_column_view
 //= require SeeIt/dataset_view
@@ -49,7 +48,7 @@
 //= require_tree ./SeeIt/graphs
 //= require SeeIt/filter
 //= require SeeIt/filter_group
-//= require SeeIt/filter_decorator
+//= require SeeIt/filtered_column
 //= require SeeIt/graph_view
 //= require SeeIt/graph_collection_view
 //= require SeeIt/application_view

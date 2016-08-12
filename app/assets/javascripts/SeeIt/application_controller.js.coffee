@@ -9,6 +9,7 @@
       # @param {Object} container - jQuery object referencing container SeeIt will live in
     ###
     constructor: (params = {}) ->
+      self = @
       @params = params
       @container = if params.container then $(params.container) else $("body")
 
@@ -39,7 +40,24 @@
       @graph_settings = if params.graph_settings then params.graph_settings else []
 
       #Data model
+      @graphGoAhead = false       #This variable lets the app know if it can initialize graphs immediately because all data is locally passed to the app. Will be set to true if none of the datsets in data require downloading from remote urls
       @model = new SeeIt.DataCollection(@, data, @ui.editable)
+      if !@graphGoAhead then @listenTo(@model, 'datasets:loaded', ->    #This event is triggered once all datasets from remote urls are downloaded, if they exist
+        #console.log "THE ApplicationController KNOWS WE ARE LOADED"
+        if self.ui.dataMenu
+          #Container for list of datasets
+          self.dataCollectionView = new SeeIt.DataCollectionView(
+            self,
+            self.layoutContainers['Data'],
+            self.model
+          )
+        else
+          self.layoutContainers['Data'].remove()
+          
+        self.registerListeners()
+        self.trigger('ready')
+        self.initGraphs(graph_init_data)
+      )
 
       @dataVisible = true
       @spreadsheetVisible = false
@@ -47,7 +65,7 @@
       # Container for graphs
       @graphCollectionView = new SeeIt.GraphCollectionView(@, @layoutContainers['Graphs'], @ui.graph_editable, @model)
 
-      if @ui.dataMenu
+      ###if @ui.dataMenu
         #Container for list of datasets
         @dataCollectionView = new SeeIt.DataCollectionView(
           @,
@@ -55,7 +73,7 @@
           @model
         )
       else
-        @layoutContainers['Data'].remove()
+        @layoutContainers['Data'].remove()###
 
       #Create CSV manager
       @csvManager = new SeeIt.CSVManager()
@@ -88,9 +106,26 @@
 
       @lastGraphId = null
 
-      @registerListeners()
-      @trigger('ready')
+      #@registerListeners()
+      #@trigger('ready')
 
+      if @graphGoAhead            #If no data was required from remote endpoints, graphs can now be initialized
+        #console.log "we got a goAhead"
+        if @ui.dataMenu
+          #Container for list of datasets
+          @dataCollectionView = new SeeIt.DataCollectionView(
+            @,
+            @layoutContainers['Data'],
+            @model
+          )
+        else
+          @layoutContainers['Data'].remove()
+
+        @registerListeners()
+        @trigger('ready')
+        @initGraphs(graph_init_data)
+
+    initGraphs: (graph_init_data) ->   #This code used to sit at the end of the constructor. It was moved to this function so that it could be called under multiple circumstances depending on the initialization params
       self = @
       graph_init_data.forEach (d) ->
         graph_types = self.graphTypes.filter((g) -> g.name == d.type)
@@ -116,9 +151,7 @@
               setTimeout(->
                 self.trigger('graph:filter', {graph: lastGraphId, filters: d.filters})
               50)
-            )(self.lastGraphId)
-
-
+            )(self.lastGraphId)      
     loadGraphs: ->
       @graphTypes = []
 
