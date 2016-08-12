@@ -171,6 +171,10 @@
 
       if divIdx > -1 && options[divIdx].value != "None" then @drawDivs(options[divIdx].value)
 
+      fixDivIdx = options.map((option) -> option.label).indexOf('Fixed Size Dividers')
+
+      if fixDivIdx > -1 && options[fixDivIdx].value then @drawDivs(options[fixDivIdx].value)
+
       @svg.selectAll(".dot.SeeIt")
         .data(@graphData.dataArray)
         .enter().append("circle")
@@ -206,40 +210,87 @@
       values = @graphData.dataArray.map((arrayMem) -> arrayMem.data.value())
       values.sort((a,b)-> a-b)
       valLen = values.length
-      if choice == "Two Equal"
-        midIdx = Math.floor(values.length / 2) - 1
-        midVal = (values[midIdx]+values[midIdx+1])/2
-        breaks = [values[0], midVal, values[valLen-1]]
-        breakPopulations = [midIdx+1, valLen-midIdx-1]
-        @svg.selectAll("divTop")
-          .data(breaks)
-          .enter()
-          .append("rect")
-            .attr("x", (d) -> self.x(d) - 1.5)
-            .attr("y", 0)
-            .attr("width", 3)
-            .attr("height", 3)
-            .attr("fill", "green")
-        @svg.selectAll("divLine")
-          .data(breaks)
-          .enter()
-          .append("line")
-            .attr("x1", (d) -> self.x(d))
-            .attr("x2", (d) -> self.x(d))
-            .attr("y1", self.y(8))
-            .attr("y2", self.y(self.style.height - 3))
-            .attr("stroke-width", 1)
-            .attr("stroke", "black")
-        @svg.selectAll("divLabels")
-          .data(breakPopulations)
-          .enter()
-          .append("text")
-            .attr("x", (d,i) -> (self.x(breaks[i+1])+self.x(breaks[i]))/2)
-            .attr("y", 12)
-            .attr("text-anchor", "middle")
-            .text((d) -> d)
-            .attr("fill", "purple")
+      
+      if typeof(choice) == "string"
+        if choice == "Two Equal"
+          midIdx = Math.floor(valLen / 2) - 1
+          midVal = (values[midIdx]+values[midIdx+1])/2 
+          breaks = [values[0], midVal, values[valLen-1]]
+          breakPopulations = [midIdx+1, valLen-midIdx-1]
 
+        if choice == "Four Equal"
+          div = Math.floor((valLen)/4)
+          mod = valLen%4
+          breakIdxs = [0, div-1]
+          for i in [2...5]
+            if i > 4-mod then breakIdxs[i] = breakIdxs[i-1]+div+1 else breakIdxs[i] = breakIdxs[i-1]+div
+
+          breaks = [values[0]]
+          for i in [1...4]
+            breaks[i] = (values[breakIdxs[i]] + values[breakIdxs[i] + 1])/2
+          breaks[4] = values[breakIdxs[4]]
+
+          breakPopulations = [div]
+          for i in [1...4]
+            breakPopulations[i] = breakIdxs[i+1] - breakIdxs[i]
+
+      else if typeof(choice) == "number"
+        breakIdxs = [0]
+        breaks = [values[0]]
+        breakPopulations = [0]
+        i=0
+        for value, idx in values
+          if (idx+1)%choice == 0
+            if idx not in breakIdxs
+              breakIdxs.push(idx)
+              breakPopulations[i]++
+              i++
+            breakPopulations[i] = 0
+          else
+            breakPopulations[i]++
+
+        if values.length-1 not in breakIdxs
+          breakIdxs.push(values.length-1)
+
+        console.log "breakIdxs", breakIdxs
+        console.log "breakPops", breakPopulations
+
+        for j in [1...breakIdxs.length-1]
+          breaks[j] = (values[breakIdxs[j]] + values[breakIdxs[j] + 1])/2
+
+        breaks.push( values[breakIdxs[breakIdxs.length-1]] )
+
+
+
+      @svg.selectAll("divTop")
+        .data(breaks)
+        .enter()
+        .append("rect")
+          .attr("x", (d) -> self.x(d) - 1.5)
+          .attr("y", 0)
+          .attr("width", 3)
+          .attr("height", 3)
+          .attr("fill", "orange")
+      @svg.selectAll("divLine")
+        .data(breaks)
+        .enter()
+        .append("line")
+          .attr("x1", (d) -> self.x(d))
+          .attr("x2", (d) -> self.x(d))
+          .attr("y1", self.y(8))
+          .attr("y2", self.y(self.style.height - 3))
+          .attr("stroke-width", 1)
+          .attr("stroke", "black")
+      @svg.selectAll("divLabels")
+        .data(breakPopulations)
+        .enter()
+        .append("text")
+          .attr("x", (d,i) -> (self.x(breaks[i+1])+self.x(breaks[i]))/2)
+          .attr("y", 12)
+          .attr("text-anchor", "middle")
+          .text((d) -> d)
+          .attr("fill", "purple")
+        
 
 
     drawStats: (options) ->
@@ -398,8 +449,13 @@
       {
         label: "Dividers",
         type: "select",
-        values: ['None', 'Two Equal'],
+        values: ['None', 'Two Equal', 'Four Equal'],
         default: "None"
+      },
+      {
+        label: "Fixed Size Dividers",
+        type: "numeric",
+        default: 0
       },
       {
         label: "Show Median",
