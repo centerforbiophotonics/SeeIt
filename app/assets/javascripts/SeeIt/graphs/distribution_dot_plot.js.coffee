@@ -173,7 +173,11 @@
 
       fixDivIdx = options.map((option) -> option.label).indexOf('Fixed Size Dividers')
 
-      if fixDivIdx > -1 && options[fixDivIdx].value then @drawDivs(options[fixDivIdx].value)
+      if fixDivIdx > -1 && options[fixDivIdx].value then @drawDivs(options[fixDivIdx].value, "size")
+
+      fixWidIdx = options.map((option) -> option.label).indexOf('Fixed Width Dividers')
+
+      if fixWidIdx > -1 && options[fixWidIdx].value then @drawDivs(options[fixWidIdx].value, "width")
 
       @svg.selectAll(".dot.SeeIt")
         .data(@graphData.dataArray)
@@ -205,11 +209,12 @@
       @drawGraph(options)
       @drawLegend(options)
 
-    drawDivs: (choice) ->
+    drawDivs: (choice, widthOrSize) ->
       self = @
       values = @graphData.dataArray.map((arrayMem) -> arrayMem.data.value())
       values.sort((a,b)-> a-b)
       valLen = values.length
+
       
       if typeof(choice) == "string"
         if choice == "Two Equal"
@@ -235,30 +240,57 @@
             breakPopulations[i] = breakIdxs[i+1] - breakIdxs[i]
 
       else if typeof(choice) == "number"
-        breakIdxs = [0]
-        breaks = [values[0]]
-        breakPopulations = [0]
-        i=0
-        for value, idx in values
-          if (idx+1)%choice == 0
-            if idx not in breakIdxs
-              breakIdxs.push(idx)
+        if widthOrSize == "size"
+          breakIdxs = [0]
+          breaks = [values[0]]
+          breakPopulations = [0]
+          i=0
+          for value, idx in values
+            if (idx+1)%choice == 0
+              if idx not in breakIdxs
+                breakIdxs.push(idx)
+                breakPopulations[i]++
+                i++
+              breakPopulations[i] = 0
+            else
               breakPopulations[i]++
-              i++
+
+          if values.length-1 not in breakIdxs
+            breakIdxs.push(values.length-1)
+
+          console.log "breakIdxs", breakIdxs
+          console.log "breakPops", breakPopulations
+
+          for j in [1...breakIdxs.length-1]
+            breaks[j] = (values[breakIdxs[j]] + values[breakIdxs[j] + 1])/2
+
+          breaks.push( values[breakIdxs[breakIdxs.length-1]] )
+
+        else if widthOrSize == "width"
+          breaks = []
+          xDomain = self.x.domain()
+          spot = xDomain[0]
+          while spot <= xDomain[1]
+            breaks.push(spot)
+            spot += choice
+          breakPopulations = [0]
+
+          scanIdx = 0
+          for i in [0...breaks.length - 1]
             breakPopulations[i] = 0
-          else
-            breakPopulations[i]++
+            while (values[scanIdx] <= breaks[i+1] && scanIdx < values.length)
+              breakPopulations[i]++
+              scanIdx++
 
-        if values.length-1 not in breakIdxs
-          breakIdxs.push(values.length-1)
+          if scanIdx < values.length
+            runoff = values.length - scanIdx
+            self.svg.append("text")
+              .attr("x", -> ((self.x(breaks[breaks.length-1]) + self.x(xDomain[1]))/2))
+              .attr("y", 12)
+              .attr("text-anchor", "middle")
+              .text(runoff)
+              .attr("fill", "purple")
 
-        console.log "breakIdxs", breakIdxs
-        console.log "breakPops", breakPopulations
-
-        for j in [1...breakIdxs.length-1]
-          breaks[j] = (values[breakIdxs[j]] + values[breakIdxs[j] + 1])/2
-
-        breaks.push( values[breakIdxs[breakIdxs.length-1]] )
 
 
 
@@ -454,6 +486,11 @@
       },
       {
         label: "Fixed Size Dividers",
+        type: "numeric",
+        default: 0
+      },
+      {
+        label: "Fixed Width Dividers",
         type: "numeric",
         default: 0
       },
