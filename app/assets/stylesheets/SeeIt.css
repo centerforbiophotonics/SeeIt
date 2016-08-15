@@ -191,7 +191,7 @@
   }
 
   .SeeIt.graph-panel .SeeIt.panel-heading {
-    text-align: center;
+    text-align: left;
   }
 
 /*  .SeeIt.graph-title .glyphicon {
@@ -544,8 +544,3 @@ td:not(.htNumeric).SeeIt-htCenter {
   transition: all 0.3s ease-in-out;
 }
 
-
-.SeeIt[data-eq-state="small"] {
-  width: 100%;
-  margin-bottom: 10px;
-}

@@ -12,15 +12,55 @@
             <div class='SeeIt navbar-header'>
               <a class='SeeIt navbar-brand' href='#'>SeeIt</a>
             </div>
-            #{@buildNav()}
+            #{
+              if $(".Globals").width() < 400
+                @buildDropdownNav()
+              else
+                @buildNav()
+            }
           </div>
         </nav>"""
       )
 
       @registerEvents()
 
+    buildDropdownNav: ->
+      htmlStr = '<ul class="nav navbar-nav navbar-right">'
+      htmlStr += """ 
+        <li = class="dropdown">
+          <a class="dropdown-toggle" type="button" data-toggle="dropdown" href="#">
+            Menu<span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu">
+      """
+
+      @navElements.forEach (el) ->
+        icon = if el.icone then "<div class='iconContainer'>#{el.icon}</div>" else ''
+
+        if el.type == "dropdown"
+          htmlStr += """
+            <li class="SeeIt dropdown" style="cursor: pointer;">
+              <div class="icon_container SeeIt nav-el left" style="display: inline-block">#{icon}</div>
+              <div class="dropdown-toggle SeeIt nav-el right" data-toggle="dropdown" aria-haspopup="true" id="#{el.title}_dropdown">
+                <a style="color: #777">
+                  #{el.title}
+                </a>
+              </div>
+              <ul class="dropdown-menu text-center" aria-labelledby="#{el.title}_dropdown">
+                #{el.options.map((option) -> "<li class='#{el.class} toolbar_dropdown_option' data-id='#{option.name}'><a href='#' class='dropdown_child'>#{option.name}</a></li>")}
+              </ul>
+            </li>
+          """
+        else
+          htmlStr += """
+              <li class="#{el.class}">#{icon}<a href="#">#{el.title}</a></li>         
+          """ 
+
+      return htmlStr+"</ul>"+"</li>"+"</ul>"
+
+
     buildNav: ->
-      htmlStr = '<ul class="nav navbar-nav">'
+      htmlStr = '<ul class="nav navbar-nav" display="none">'
       @navElements.forEach (el) ->
         icon = if el.icon then "<div class='iconContainer'>#{el.icon}</div>" else ''
 
