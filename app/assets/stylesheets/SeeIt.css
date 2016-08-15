@@ -543,3 +543,9 @@ td:not(.htNumeric).SeeIt-htCenter {
   background-color: #428bca;
   transition: all 0.3s ease-in-out;
 }
+
+
+.SeeIt[data-eq-state="small"] {
+  width: 100%;
+  margin-bottom: 10px;
+}
