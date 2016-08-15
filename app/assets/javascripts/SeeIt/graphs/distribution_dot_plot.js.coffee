@@ -5,6 +5,7 @@
     constructor: ->
       super
       @rendered = false
+      @customDivs = []
       @initListeners()
 
     initListeners: ->
@@ -332,11 +333,29 @@
       xDomain = @x.domain()
       @customDivNum = 0
 
-      dragStart =  (d,i) ->
+      dragStart = (d,i) ->
+        console.log "dragStart"
+        d3.select(this).select("rect").attr("fill", "yellow")
+      dragging = (d,i) ->
+        d.x += d3.event.dx
+        d3.select(this).attr("transform", "translate(#{d.x},0)")
+      dragEnd = (d,i) ->
+        console.log "dragEnd"
+        d3.select(this).select("rect").attr("fill", "green")
+
+      drag = d3.behavior.drag()
+              .on("dragstart", dragStart)
+              .on("drag", dragging)
+              .on("dragend", dragEnd)
+
+
+      dragStart2 =  (d,i) ->
+        console.log "dragStart2"
         newDiv = self.svg.append("svg:g")
           .data([{"x":d3.mouse(this)[0]}])  
           .attr("id", "divLine#{self.customDivNum}")
           .attr("transform","translate(#{d3.mouse(this)[0]}, 0)")
+          .call(drag)
 
         newDiv.append("line")
           .attr("x1", 0)
@@ -353,24 +372,26 @@
           .attr("fill", "yellow")
           .attr("stroke", "green")
           .attr("stroke-width", 1.5)
-      dragging = (d,i) ->
+      dragging2 = (d,i) ->
         d.x += d3.event.dx
         d3.select("#divLine#{self.customDivNum}").attr("transform", "translate(#{d.x},0)")
-      dragEnd = (d,i) ->
-        d3.select("#divLine#{self.customDivNum}").select("rect").attr("fill", "green")
+      dragEnd2 = (d,i) ->
+        console.log "dragEnd2"
+        d3.select("#divLine#{self.customDivNum}").datum({"x":d.x}).select("rect").attr("fill", "green")
         self.customDivNum++
+        self.customDivs.push(self.x.invert(d.x))
         d.x = self.x(xDomain[0])
 
-      drag = d3.behavior.drag()
-              .on("dragstart", dragStart)
-              .on("drag", dragging) 
-              .on("dragend", dragEnd)
+      drag2 = d3.behavior.drag()
+              .on("dragstart", dragStart2)
+              .on("drag", dragging2) 
+              .on("dragend", dragEnd2)
 
       start = @svg.append("svg:g")
                 .data([ { "x":self.x(xDomain[0]) } ])
                 .attr("class", "startLine")
                 .attr("transform","translate(#{self.x(xDomain[0])}, 0)")
-                .call(drag)
+                .call(drag2)
 
       start.append("line")
         .attr("x1", (d) -> d.x)
@@ -394,6 +415,29 @@
         .attr("y2", 0)
         .attr("stroke-width", 1)
         .attr("stroke", "black")
+
+      if @customDivs.length
+        @customDivs.forEach (divCoord) ->
+          newGuy = self.svg.append("svg:g")
+                    .data([{"x":self.x(divCoord)}])
+                    .attr("class", "divLine")
+                    .attr("transform","translate(#{self.x(divCoord)},0)")
+                    .call(drag)
+          newGuy.append("line")
+            .attr("x1", 0)
+            .attr("x2", 0)
+            .attr("y1", self.y(8))
+            .attr("y2", 0)
+            .attr("stroke-width", 1)
+            .attr("stroke", "black")
+          newGuy.append("rect")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("width", 10)
+            .attr("height", 10)
+            .attr("fill", "green")
+            .attr("stroke", "green")
+            .attr("stroke-width", 1.5)
 
 
     drawStats: (options) ->
