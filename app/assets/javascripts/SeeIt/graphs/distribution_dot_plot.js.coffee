@@ -179,6 +179,10 @@
 
       if fixWidIdx > -1 && options[fixWidIdx].value then @drawDivs(options[fixWidIdx].value, "width")
 
+      mkeYrOwnIdx = options.map((option) -> option.label).indexOf('Make your own Groups')
+
+      if mkeYrOwnIdx > -1 && options[mkeYrOwnIdx].value then @makeYourOwn()
+
       @svg.selectAll(".dot.SeeIt")
         .data(@graphData.dataArray)
         .enter().append("circle")
@@ -323,6 +327,73 @@
           .text((d) -> d)
           .attr("fill", "purple")
         
+    makeYourOwn: () ->
+      self = @
+      xDomain = @x.domain()
+      @customDivNum = 0
+
+      dragStart =  (d,i) ->
+        newDiv = self.svg.append("svg:g")
+          .data([{"x":d3.mouse(this)[0]}])  
+          .attr("id", "divLine#{self.customDivNum}")
+          .attr("transform","translate(#{d3.mouse(this)[0]}, 0)")
+
+        newDiv.append("line")
+          .attr("x1", 0)
+          .attr("x2", 0)
+          .attr("y1", self.y(8))
+          .attr("y2", 0)
+          .attr("stroke-width", 1)
+          .attr("stroke", "black")
+        newDiv.append("rect")
+          .attr("x", self.x(xDomain[0]))
+          .attr("y", 0)
+          .attr("width", 10)
+          .attr("height", 10)
+          .attr("fill", "yellow")
+          .attr("stroke", "green")
+          .attr("stroke-width", 1.5)
+      dragging = (d,i) ->
+        d.x += d3.event.dx
+        d3.select("#divLine#{self.customDivNum}").attr("transform", "translate(#{d.x},0)")
+      dragEnd = (d,i) ->
+        d3.select("#divLine#{self.customDivNum}").select("rect").attr("fill", "green")
+        self.customDivNum++
+        d.x = self.x(xDomain[0])
+
+      drag = d3.behavior.drag()
+              .on("dragstart", dragStart)
+              .on("drag", dragging) 
+              .on("dragend", dragEnd)
+
+      start = @svg.append("svg:g")
+                .data([ { "x":self.x(xDomain[0]) } ])
+                .attr("class", "startLine")
+                .attr("transform","translate(#{self.x(xDomain[0])}, 0)")
+                .call(drag)
+
+      start.append("line")
+        .attr("x1", (d) -> d.x)
+        .attr("x2", (d) -> d.x)
+        .attr("y1", self.y(8))
+        .attr("y2", 0)
+        .attr("stroke-width", 1)
+        .attr("stroke", "black")
+      start.append("rect")
+        .attr("x", self.x(xDomain[0]))
+        .attr("y", 0)
+        .attr("width", 10)
+        .attr("height", 10)
+        .attr("fill", "green")
+        .attr("stroke", "green")
+        .attr("stroke-width", 1.5)
+      @svg.append("line")
+        .attr("x1", self.x(xDomain[1]))
+        .attr("x2", self.x(xDomain[1]))
+        .attr("y1", self.y(8))
+        .attr("y2", 0)
+        .attr("stroke-width", 1)
+        .attr("stroke", "black")
 
 
     drawStats: (options) ->
@@ -493,6 +564,11 @@
         label: "Fixed Width Dividers",
         type: "numeric",
         default: 0
+      },
+      {
+        label: "Make your own Groups",
+        type: "checkbox",
+        default: false
       },
       {
         label: "Show Median",
