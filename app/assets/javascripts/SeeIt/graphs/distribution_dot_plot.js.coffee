@@ -331,16 +331,45 @@
     makeYourOwn: () ->
       self = @
       xDomain = @x.domain()
-      @customDivNum = 0
+      values = @graphData.dataArray.map((arrayMem) -> arrayMem.data.value())
+      values.sort((a,b)-> a-b)
+      @customDivNum = @customDivs.length
+
+      displayPops = (breaks) ->
+        sortedBreaks = breaks.slice(0).sort((a,b)->a-b)
+        scanIdx = 0
+        breakPopulations = []
+        for i in [0...sortedBreaks.length]
+          breakPopulations[i] = 0
+          while (values[scanIdx] <= sortedBreaks[i] && scanIdx < values.length)
+            breakPopulations[i]++
+            scanIdx++
+        breakPopulations.push(values.length - scanIdx)
+        sortedBreaks.push(xDomain[1])
+        sortedBreaks.push(xDomain[0])
+        sortedBreaks.sort((a,b)->a-b)
+        self.svg.selectAll("#populationTag").remove()
+        self.svg.selectAll("#populationTag")
+          .data(breakPopulations)
+          .enter()
+          .append("text")
+            .text((d,i) -> breakPopulations[i])
+            .attr("x", (d,i) -> self.x((sortedBreaks[i]+sortedBreaks[i+1])/2))
+            .attr("id", "populationTag")
+            .attr("y", 12)
+            .attr("text-anchor", "middle")
+            .attr("fill", "purple")
 
       dragStart = (d,i) ->
-        console.log "dragStart"
         d3.select(this).select("rect").attr("fill", "yellow")
       dragging = (d,i) ->
         d.x += d3.event.dx
         d3.select(this).attr("transform", "translate(#{d.x},0)")
+        datum = d3.select(this).datum()
+        id = datum["id"]
+        self.customDivs[id] = self.x.invert(datum["x"])
+        displayPops(self.customDivs)
       dragEnd = (d,i) ->
-        console.log "dragEnd"
         d3.select(this).select("rect").attr("fill", "green")
 
       drag = d3.behavior.drag()
@@ -350,7 +379,7 @@
 
 
       dragStart2 =  (d,i) ->
-        console.log "dragStart2"
+        self.customDivs.push(self.x(d3.mouse(this)[0]))
         newDiv = self.svg.append("svg:g")
           .data([{"x":d3.mouse(this)[0]}])  
           .attr("id", "divLine#{self.customDivNum}")
@@ -375,11 +404,11 @@
       dragging2 = (d,i) ->
         d.x += d3.event.dx
         d3.select("#divLine#{self.customDivNum}").attr("transform", "translate(#{d.x},0)")
+        self.customDivs[self.customDivNum] = self.x.invert(d.x)
+        displayPops(self.customDivs)
       dragEnd2 = (d,i) ->
-        console.log "dragEnd2"
-        d3.select("#divLine#{self.customDivNum}").datum({"x":d.x}).select("rect").attr("fill", "green")
+        d3.select("#divLine#{self.customDivNum}").datum({"x":d.x,"id":self.customDivNum}).select("rect").attr("fill", "green")
         self.customDivNum++
-        self.customDivs.push(self.x.invert(d.x))
         d.x = self.x(xDomain[0])
 
       drag2 = d3.behavior.drag()
@@ -417,9 +446,9 @@
         .attr("stroke", "black")
 
       if @customDivs.length
-        @customDivs.forEach (divCoord) ->
+        @customDivs.forEach (divCoord, i) ->
           newGuy = self.svg.append("svg:g")
-                    .data([{"x":self.x(divCoord)}])
+                    .data([{"x":self.x(divCoord), "id":i}])
                     .attr("class", "divLine")
                     .attr("transform","translate(#{self.x(divCoord)},0)")
                     .call(drag)
@@ -438,7 +467,7 @@
             .attr("fill", "green")
             .attr("stroke", "green")
             .attr("stroke-width", 1.5)
-
+        displayPops(@customDivs)
 
     drawStats: (options) ->
       self = @
