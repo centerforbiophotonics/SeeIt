@@ -256,7 +256,8 @@
                 breakIdxs.push(idx)
                 breakPopulations[i]++
                 i++
-              breakPopulations[i] = 0
+              if idx+1 != values.length
+                breakPopulations[i] = 0
             else
               breakPopulations[i]++
 
@@ -294,7 +295,8 @@
               .attr("y", 12)
               .attr("text-anchor", "middle")
               .text(runoff)
-              .attr("fill", "purple")
+              .attr("fill", if runoff == 0 then "red" else "green")
+              .style("font-weight", "bold")
 
 
 
@@ -326,7 +328,8 @@
           .attr("y", 12)
           .attr("text-anchor", "middle")
           .text((d) -> d)
-          .attr("fill", "purple")
+          .attr("fill", (d) -> if d == 0 then "red" else "green")
+          .style("font-weight", "bold")
         
     makeYourOwn: () ->
       self = @
@@ -354,12 +357,13 @@
           .data(breakPopulations)
           .enter()
           .append("text")
-            .text((d,i) -> breakPopulations[i])
+            .text((d,i) -> d)
             .attr("x", (d,i) -> self.x((sortedBreaks[i]+sortedBreaks[i+1])/2))
             .attr("id", "populationTag")
             .attr("y", 12)
             .attr("text-anchor", "middle")
-            .attr("fill", "purple")
+            .attr("fill", (d,i) ->  if d == 0 then "red" else "green" )
+            .style("font-weight", "bold")
 
       dragStart = (d,i) ->
         d3.select(this).select("rect").attr("fill", "yellow")
