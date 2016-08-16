@@ -331,6 +331,7 @@
     makeYourOwn: () ->
       self = @
       xDomain = @x.domain()
+      xRange = @x.range()
       values = @graphData.dataArray.map((arrayMem) -> arrayMem.data.value())
       values.sort((a,b)-> a-b)
       @customDivNum = @customDivs.length
@@ -363,12 +364,13 @@
       dragStart = (d,i) ->
         d3.select(this).select("rect").attr("fill", "yellow")
       dragging = (d,i) ->
-        d.x += d3.event.dx
-        d3.select(this).attr("transform", "translate(#{d.x},0)")
-        datum = d3.select(this).datum()
-        id = datum["id"]
-        self.customDivs[id] = self.x.invert(datum["x"])
-        displayPops(self.customDivs)
+        if d.x + d3.event.dx >= xRange[0] && d.x+d3.event.dx <= xRange[1]
+          d.x += d3.event.dx
+          d3.select(this).attr("transform", "translate(#{d.x},0)")
+          datum = d3.select(this).datum()
+          id = datum["id"]
+          self.customDivs[id] = self.x.invert(datum["x"])
+          displayPops(self.customDivs)
       dragEnd = (d,i) ->
         d3.select(this).select("rect").attr("fill", "green")
 
@@ -402,10 +404,11 @@
           .attr("stroke", "green")
           .attr("stroke-width", 1.5)
       dragging2 = (d,i) ->
-        d.x += d3.event.dx
-        d3.select("#divLine#{self.customDivNum}").attr("transform", "translate(#{d.x},0)")
-        self.customDivs[self.customDivNum] = self.x.invert(d.x)
-        displayPops(self.customDivs)
+        if d.x + d3.event.dx >= xRange[0] && d.x+d3.event.dx <= xRange[1]
+          d.x += d3.event.dx
+          d3.select("#divLine#{self.customDivNum}").attr("transform", "translate(#{d.x},0)")
+          self.customDivs[self.customDivNum] = self.x.invert(d.x)
+          displayPops(self.customDivs)
       dragEnd2 = (d,i) ->
         d3.select("#divLine#{self.customDivNum}").datum({"x":d.x,"id":self.customDivNum}).select("rect").attr("fill", "green")
         self.customDivNum++
