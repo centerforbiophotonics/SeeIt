@@ -219,8 +219,7 @@
       values = @graphData.dataArray.map((arrayMem) -> arrayMem.data.value())
       values.sort((a,b)-> a-b)
       valLen = values.length
-
-      
+     
       if typeof(choice) == "string"
         if choice == "Two Equal"
           midIdx = Math.floor(valLen / 2) - 1
@@ -298,9 +297,6 @@
               .attr("fill", if runoff == 0 then "red" else "green")
               .style("font-weight", "bold")
 
-
-
-
       @svg.selectAll("divTop")
         .data(breaks)
         .enter()
@@ -341,6 +337,12 @@
 
       displayPops = (breaks) ->
         sortedBreaks = breaks.slice(0).sort((a,b)->a-b)
+        idx = 0
+        while idx < sortedBreaks.length
+          if sortedBreaks[idx] == -Infinity
+            sortedBreaks.splice(idx,1)
+          else
+            idx++
         scanIdx = 0
         breakPopulations = []
         for i in [0...sortedBreaks.length]
@@ -368,15 +370,33 @@
       dragStart = (d,i) ->
         d3.select(this).select("rect").attr("fill", "yellow")
       dragging = (d,i) ->
-        if d.x + d3.event.dx >= xRange[0] && d.x+d3.event.dx <= xRange[1]
+        if d.x + d3.event.dx >= xRange[0] && d.x+d3.event.dx <= xRange[1]+20
+          self.svg.select("#deleteWarning").remove()
           d.x += d3.event.dx
           d3.select(this).attr("transform", "translate(#{d.x},0)")
           datum = d3.select(this).datum()
           id = datum["id"]
           self.customDivs[id] = self.x.invert(datum["x"])
           displayPops(self.customDivs)
+        if d.x > xRange[1]
+          self.svg.select("#deleteWarning").remove()
+          self.svg.append("text")
+            .attr("id", "deleteWarning")
+            .attr("x", d.x)
+            .attr("y", -5)
+            .attr("text-anchor", "end")
+            .attr("fill", "red")
+            .text("Drop here to delete this flag")
+
       dragEnd = (d,i) ->
         d3.select(this).select("rect").attr("fill", "green")
+        if d.x > xRange[1]
+          d3.select(this).remove()
+          self.svg.select("#deleteWarning").remove()
+          datum = d3.select(this).datum()
+          id = datum["id"]
+          self.customDivs[id] = -Infinity
+          displayPops(self.customDivs)
 
       drag = d3.behavior.drag()
               .on("dragstart", dragStart)
@@ -384,8 +404,8 @@
               .on("dragend", dragEnd)
 
 
-      dragStart2 =  (d,i) ->
-        self.customDivs.push(self.x(d3.mouse(this)[0]))
+      dragStart2 =  (d,i) ->                              #All drag2 handlers are specifically for the creator flag at the leftmost point on the x-axis since it makes a new flag when dragged
+        self.customDivs.push(self.x(d3.mouse(this)[0]))   #Instead of it itself being dragged about
         newDiv = self.svg.append("svg:g")
           .data([{"x":d3.mouse(this)[0]}])  
           .attr("id", "divLine#{self.customDivNum}")
@@ -408,13 +428,28 @@
           .attr("stroke", "green")
           .attr("stroke-width", 1.5)
       dragging2 = (d,i) ->
-        if d.x + d3.event.dx >= xRange[0] && d.x+d3.event.dx <= xRange[1]
+        if d.x + d3.event.dx >= xRange[0] && d.x+d3.event.dx <= xRange[1] + 20
+          self.svg.select("#deleteWarning").remove()
           d.x += d3.event.dx
-          d3.select("#divLine#{self.customDivNum}").attr("transform", "translate(#{d.x},0)")
+          self.svg.select("#divLine#{self.customDivNum}").attr("transform", "translate(#{d.x},0)")
           self.customDivs[self.customDivNum] = self.x.invert(d.x)
           displayPops(self.customDivs)
+        if d.x > xRange[1]
+          self.svg.select("#deleteWarning").remove()
+          self.svg.append("text")
+            .attr("id", "deleteWarning")
+            .attr("x", d.x)
+            .attr("y", -5)
+            .attr("text-anchor", "end")
+            .attr("fill", "red")
+            .text("Drop here to delete this flag")  
       dragEnd2 = (d,i) ->
-        d3.select("#divLine#{self.customDivNum}").datum({"x":d.x,"id":self.customDivNum}).select("rect").attr("fill", "green")
+        self.svg.select("#divLine#{self.customDivNum}").datum({"x":d.x,"id":self.customDivNum}).select("rect").attr("fill", "green")
+        if d.x > xRange[1]
+          self.svg.select("#divLine#{self.customDivNum}").remove()
+          self.svg.select("#deleteWarning").remove()
+          self.customDivs[self.customDivNum] = -Infinity
+          displayPops(self.customDivs)
         self.customDivNum++
         d.x = self.x(xDomain[0])
 
@@ -454,27 +489,28 @@
 
       if @customDivs.length
         @customDivs.forEach (divCoord, i) ->
-          newGuy = self.svg.append("svg:g")
-                    .data([{"x":self.x(divCoord), "id":i}])
-                    .attr("class", "divLine")
-                    .attr("transform","translate(#{self.x(divCoord)},0)")
-                    .call(drag)
-          newGuy.append("line")
-            .attr("x1", 0)
-            .attr("x2", 0)
-            .attr("y1", self.y(8))
-            .attr("y2", 0)
-            .attr("stroke-width", 1)
-            .attr("stroke", "black")
-          newGuy.append("rect")
-            .attr("x", 0)
-            .attr("y", 0)
-            .attr("width", 10)
-            .attr("height", 10)
-            .attr("fill", "green")
-            .attr("stroke", "green")
-            .attr("stroke-width", 1.5)
-        displayPops(@customDivs)
+          if divCoord != -Infinity
+            newGuy = self.svg.append("svg:g")
+                      .data([{"x":self.x(divCoord), "id":i}])
+                      .attr("class", "divLine")
+                      .attr("transform","translate(#{self.x(divCoord)},0)")
+                      .call(drag)
+            newGuy.append("line")
+              .attr("x1", 0)
+              .attr("x2", 0)
+              .attr("y1", self.y(8))
+              .attr("y2", 0)
+              .attr("stroke-width", 1)
+              .attr("stroke", "black")
+            newGuy.append("rect")
+              .attr("x", 0)
+              .attr("y", 0)
+              .attr("width", 10)
+              .attr("height", 10)
+              .attr("fill", "green")
+              .attr("stroke", "green")
+              .attr("stroke-width", 1.5)
+      displayPops(@customDivs)
 
     drawStats: (options) ->
       self = @
@@ -624,6 +660,11 @@
 
     options: ->
       [{
+        label: "Editable",
+        type: "checkbox",
+        default: false
+      },
+      {
         label: "Box Plot",
         type: "checkbox",
         default: ->
