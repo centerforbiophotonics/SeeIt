@@ -146,10 +146,19 @@
         .append("g")
         .attr("transform", "translate(" + @style.margin.left + "," + @style.margin.top + ")")
 
+
     drawGraph: (options) ->
       self = @
 
       @initSvg()
+      @addedByClick = 0
+      d3.select(@container[0]).select("svg")
+        .on("click", ->
+            console.log "clicked at", (d3.mouse(this)[0])-40, "or in axis scale", self.x.invert((d3.mouse(this)[0])-40)
+            position = self.x.invert(d3.mouse(this)[0]-40)
+            firstColumn = self.dataset[0].data[0]
+            firstColumn.insertElement(firstColumn.length()+@addedByClick, "click#{@addedByClick++}", position)
+          )
 
       @svg.append("g")
         .attr("class", "x axis SeeIt")
@@ -184,6 +193,28 @@
 
       if mkeYrOwnIdx > -1 && options[mkeYrOwnIdx].value then @makeYourOwn()
 
+      dotDragStart = ->
+        console.log "dotDragStart"
+        d3.select(this).style("opacity", 0.5)
+
+      dotDragging = (d,i) ->
+        console.log d3.select(this).attr("cx")
+        x = Number(d3.select(this).attr("cx")) + d3.event.dx
+        y = Number(d3.select(this).attr("cy")) + d3.event.dy
+        d3.select(this).attr("cx", x).attr("cy", y)
+
+      dotDragEnd = (d,i) ->
+        console.log "dotDragEnd", d
+        d3.select(this).style("opacity", 1)
+        newX = d3.select(this).attr("cx")
+        d.data.value(self.x.invert(newX))
+        
+
+      dotDrag = d3.behavior.drag()
+                  .on('dragstart', dotDragStart)
+                  .on('drag', dotDragging)
+                  .on('dragend', dotDragEnd)
+
       @svg.selectAll(".dot.SeeIt")
         .data(@graphData.dataArray)
         .enter().append("circle")
@@ -198,6 +229,7 @@
         .style("fill", (d) ->
           return d.color()
         )
+        .call(dotDrag)
 
       @drawStats(options)
 
