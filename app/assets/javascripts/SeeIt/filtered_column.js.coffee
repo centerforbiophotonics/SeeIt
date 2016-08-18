@@ -45,6 +45,9 @@ SeeIt.FilteredColumn = ( ->
     insertElement: (idx, label, value) ->         #inserts an element into @column's dataArray at the specified idx with the label and value that is passed in
       @column.insertElement(idx, label, value)
 
+    newElement: (idx, label, value) ->
+      @column.newElement(idx, label, value)     #like insertElement but results in some manipulation on the datasets, this call is coming from the column to the set instead of the other way around
+
     filteredToJson: ->                            #FOR THIS FUNCTION AND UNIQUEDATA,
       {                                   #THE FILTERED VERSION ONLY RETURNS WITH DATA THAT EXISTS IN THE COLUMN AFTER FILTERS ARE APPLIED
         header: @header                   #THE NORMAL CALL WILL RETURN USING ALL DATA THAT EXISTS IN THE DATACOLUMN

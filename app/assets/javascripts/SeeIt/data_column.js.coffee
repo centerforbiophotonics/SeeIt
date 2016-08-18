@@ -8,7 +8,6 @@
       dataArray = []
 
       self = @
-
       setDataArray = ->
         dataArray = []
         data.forEach (d, i) ->
@@ -96,6 +95,15 @@
           value: value
         })
 
+        @trigger('data:created', idx)
+
+      @newElement = (idx, label, value) ->
+        @staleData = true
+        data.splice(idx, 0, {
+          label: label,
+          value: value
+        })
+        @trigger('fill', idx, self.header)
         @trigger('data:created', idx)
 
       @toJson = ->

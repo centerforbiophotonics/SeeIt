@@ -152,13 +152,6 @@
 
       @initSvg()
       @addedByClick = 0
-      d3.select(@container[0]).select("svg")
-        .on("click", ->
-            console.log "clicked at", (d3.mouse(this)[0])-40, "or in axis scale", self.x.invert((d3.mouse(this)[0])-40)
-            position = self.x.invert(d3.mouse(this)[0]-40)
-            firstColumn = self.dataset[0].data[0]
-            firstColumn.insertElement(firstColumn.length()+@addedByClick, "click#{@addedByClick++}", position)
-          )
 
       @svg.append("g")
         .attr("class", "x axis SeeIt")
@@ -193,18 +186,20 @@
 
       if mkeYrOwnIdx > -1 && options[mkeYrOwnIdx].value then @makeYourOwn()
 
+      editableIdx = options.map((option) -> option.label).indexOf('Editable')
+
+      if editableIdx > -1 && options[editableIdx].value then @editable = true
+
+
       dotDragStart = ->
-        console.log "dotDragStart"
         d3.select(this).style("opacity", 0.5)
 
       dotDragging = (d,i) ->
-        console.log d3.select(this).attr("cx")
         x = Number(d3.select(this).attr("cx")) + d3.event.dx
         y = Number(d3.select(this).attr("cy")) + d3.event.dy
         d3.select(this).attr("cx", x).attr("cy", y)
 
       dotDragEnd = (d,i) ->
-        console.log "dotDragEnd", d
         d3.select(this).style("opacity", 1)
         newX = d3.select(this).attr("cx")
         d.data.value(self.x.invert(newX))
@@ -229,7 +224,35 @@
         .style("fill", (d) ->
           return d.color()
         )
-        .call(dotDrag)
+      if @editable
+        @svg.selectAll(".dot.SeeIt").call(dotDrag)
+      if @editable && @graphData._dataset[0].data.length==1
+        d3.select(@container[0]).select("svg")
+          .on("click", ->
+              position = self.x.invert(d3.mouse(this)[0]-40)
+              firstColumn = self.dataset[0].data[0]
+              firstColumn.newElement(firstColumn.length()+self.addedByClick, "click#{self.addedByClick++}", position)
+            )
+      else if @editable
+        d3.select(@container[0]).select("svg")
+          .on("click", ->
+            warningTip = new Opentip(
+              $(self.container), 'Clicking to add data points is disabled if two or more DataColumns are assigned to this graph', '',
+              {
+                showOn: "creation",
+                style:"alert",
+                stem: true,
+                target: null,
+                tipJoint: "top left",
+                targetJoint: "bottom right",
+                showEffectDuration: 0,
+                showEffect: "none"
+              }
+            )
+            window.setTimeout(-> 
+              warningTip.hide()
+            , 5000)
+          )
 
       @drawStats(options)
 
