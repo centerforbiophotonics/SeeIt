@@ -14,7 +14,6 @@
 //= require papaparse.min.js
 //= require turbolinks
 //= require handsontable.full.min
-//= require twitter/bootstrap
 //= require bootstrap.js
 //= require bootstrap-switch.min
 //= require dropdowns-enhancement.js
@@ -57,3 +56,6 @@
 //= require SeeIt/application_controller
 //= require SeeIt/jquery_extensions.js
 //= require eq.js
+//= require bootstrap.js
+//= require EQCSS-polyfills.js
+//= require EQCSS.js

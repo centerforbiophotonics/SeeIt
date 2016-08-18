@@ -4,6 +4,7 @@
 
     constructor: (@app, @container, @navElements) ->
       @init()
+      @resizeListener()
 
     init: ->
       @container.html(
@@ -13,7 +14,7 @@
               <a class='SeeIt navbar-brand' href='#'>SeeIt</a>
             </div>
             #{
-              if $(".Globals").width() < 400
+              if $(".Globals").width() < 650
                 @buildDropdownNav()
               else
                 @buildNav()
@@ -21,7 +22,6 @@
           </div>
         </nav>"""
       )
-
       @registerEvents()
 
     buildDropdownNav: ->
@@ -35,11 +35,12 @@
       """
 
       @navElements.forEach (el) ->
-        icon = if el.icone then "<div class='iconContainer'>#{el.icon}</div>" else ''
+        icon = if el.icon then "<div class='iconContainer'>#{el.icon}</div>" else ''
 
         if el.type == "dropdown"
+          console.log "hello"
           htmlStr += """
-            <li class="SeeIt dropdown" style="cursor: pointer;">
+            <li class="SeeIt dropdown-submenu" style="cursor: pointer;">
               <div class="icon_container SeeIt nav-el left" style="display: inline-block">#{icon}</div>
               <div class="dropdown-toggle SeeIt nav-el right" data-toggle="dropdown" aria-haspopup="true" id="#{el.title}_dropdown">
                 <a style="color: #777">
@@ -53,7 +54,7 @@
           """
         else
           htmlStr += """
-              <li class="#{el.class}">#{icon}<a href="#">#{el.title}</a></li>         
+              <li class="#{el.class}">#{icon}<a href="#" style="color: #777">#{el.title}</a></li>         
           """ 
 
       return htmlStr+"</ul>"+"</li>"+"</ul>"
@@ -90,6 +91,16 @@
       @navElements.forEach (el) ->
         if el.handler
           toolbar.container.find(".#{el.class}").off('click', el.handler).on('click', el.handler)
+
+    resizeListener: ->
+      self = @       
+      $(window).resize ->
+        self.init()
+
+      # mql = window.matchMedia("screen and (min-width: 800px)")
+      # if mql.matches
+      #   alert("800px")
+
 
   ToolbarView
 ).call(@)

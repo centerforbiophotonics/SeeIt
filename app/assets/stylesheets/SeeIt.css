@@ -131,6 +131,8 @@
   left: 0;
 }
 
+
+
 @media (min-width: 992px) {
   .SeeIt.row .SeeIt.Data {
     height: 100%;
@@ -544,3 +546,12 @@ td:not(.htNumeric).SeeIt-htCenter {
   transition: all 0.3s ease-in-out;
 }
 
+.SeeIt .dropdown-submenu {
+    position: relative;
+}
+
+.SeeIt .dropdown-submenu .dropdown-menu {
+    top: 0;
+    left: 100%;
+    margin-top: -1px;
+}
