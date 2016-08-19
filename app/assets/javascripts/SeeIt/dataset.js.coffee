@@ -179,9 +179,10 @@
 			for i in [0...@data.length]
 				if @data[i].header != header
 					if @data[i].type == 'numeric'
-						@data[i].insertElement(row, label, 0)
+						@data[i].insertElement(row, label, null)
 					else
 						@data[i].insertElement(row, label, null)
+
 
 			@labels.splice(row, 0, label)
 			@trigger('row:created', row)
