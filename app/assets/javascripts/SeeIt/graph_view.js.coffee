@@ -217,7 +217,7 @@
             <br>
             <b>Filters:</b> #{childLength} out of #{data.data.length()} selected by filter
           """
-
+          
           tip = new Opentip($(context), msg, {target: $(context), showOn: "creation"})
           tip.setTimeout(->
             tip.hide.call(tip)
@@ -343,23 +343,29 @@
 
         dragOverListener: (event) ->
           event.preventDefault()
+          console.log "over"
 
         dragEnterListener: (event) ->
           event.preventDefault()
-          event.target.style.background = '#BAEA65'
+          console.log "enter"
+          if !($(event.target).is("button")) && !($(event.target).is("span"))
+            event.target.style.background = '#BAEA65'
+          
+          # if $(event.target).attr("id") == "tab"
+          #   console.log "hello"
 
         dragLeaveListener: (event) ->
           event.preventDefault()
-          event.target.style.background = '#FFAFAF'
+          if !($(event.target).is("button")) && !($(event.target).is("span"))
+            event.target.style.background = '#FFAFAF'
           
         dragEndListener: (event) ->
           event.preventDefault()
-          event.target.style.background = ''
-          $('.btn-group').css('background-color', '')
+          $('div.data-drop-zone-container > div').css('background-color', '')
 
         dropListener: (event) ->
           event.preventDefault()
-          $(".data-drop-zone").css("background-color", '')
+          $("div.data-drop-zone-container > div").css("background-color", '')
           btnName = event.originalEvent.dataTransfer.getData("text")
           dataSetName = event.originalEvent.dataTransfer.getData("datasetName")
           dataFromButton = self.findDataSet(dataSetName, btnName, self.data)
@@ -439,7 +445,7 @@
 
       dataFormat.forEach (role) ->
         self.container.find('.footer-row').append("""
-          <div class='SeeIt data-drop-zone-container col-lg-#{cols}'>
+          <div class='SeeIt data-drop-zone-container col-sm-#{cols}'>
             <h3 class='SeeIt role-name text-center'>#{if dataFormat.length > 1 then role.name else "Data"}</h3>
             <div id="#{self.id}" class='SeeIt data-drop-zone' data-id="#{role.name}">
             </div>
@@ -481,7 +487,7 @@
       @container.find('.data-drop-zone').off('dragover').on('dragover', @handlers.dragOverListener)
       @container.find('.data-drop-zone').off('dragleave').on('dragleave', @handlers.dragLeaveListener)
       @container.find('.data-drop-zone').off('dragend').on('dragend', @handlers.dragEndListener)
-
+      
       @container.find(".expanded-data-container .save-filters-all").on 'click', (event) ->
         if self.validateFilters.call(self)
           self.trigger('filter:save-all', self.filterGroups, self.id)

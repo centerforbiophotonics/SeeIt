@@ -120,7 +120,7 @@
             )(self.lastGraphId)
 
     displayTabs: ->
-      if $("#left-region").width() < 650
+      if $("#left-region").width() < 1003
         $(".device-small").css("display","block")
         
         $(".SeeIt.Data").removeClass("col-md-3")

@@ -14,7 +14,7 @@
               <a class='SeeIt navbar-brand' href='#'>SeeIt</a>
             </div>
             #{
-              if $(".Globals").width() < 650
+              if $(".Globals").width() < 1003
                 @buildDropdownNav()
               else
                 @buildNav()
@@ -24,6 +24,7 @@
       )
       @registerEvents()
 
+    # Menu
     buildDropdownNav: ->
       htmlStr = '<ul class="nav navbar-nav navbar-right">'
       htmlStr += """ 
@@ -38,7 +39,6 @@
         icon = if el.icon then "<div class='iconContainer'>#{el.icon}</div>" else ''
 
         if el.type == "dropdown"
-          console.log "hello"
           htmlStr += """
             <li class="SeeIt dropdown-submenu" style="cursor: pointer;">
               <div class="icon_container SeeIt nav-el left" style="display: inline-block">#{icon}</div>
