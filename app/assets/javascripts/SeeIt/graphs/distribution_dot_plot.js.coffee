@@ -85,7 +85,7 @@
       @container.html("")
       @draw(options)
 
-    setViewMembers: ->
+    setViewMembers: (options) ->
       @style = {}
         
       @style.margin = {top: 20, right: 20, bottom: 30, left: 40}
@@ -94,7 +94,11 @@
 
       @x = d3.scale.linear().range([0,@style.width])
       @y = d3.scale.linear().range([@style.height,0])
-      @x.domain(@minMaxWPadding(0))
+
+      minIdx = options.map((option) -> option.label).indexOf("Graph Scale Min")
+      maxIdx = options.map((option) -> option.label).indexOf("Graph Scale Max")
+      @x.domain([options[minIdx].value, options[maxIdx].value])
+#      @x.domain(@minMaxWPadding(0))
       @y.domain([0,@style.height])
 
     placeData: ->
@@ -145,6 +149,8 @@
         .attr("height", @style.height + @style.margin.top + @style.margin.bottom)
         .append("g")
         .attr("transform", "translate(" + @style.margin.left + "," + @style.margin.top + ")")
+        .on("click", -> 
+          d3.event.stopPropagation())
 
 
     drawGraph: (options) ->
@@ -263,7 +269,7 @@
 
       if radiusIdx > -1 && options[radiusIdx].value then R = Math.max(options[radiusIdx].value, 1)
 
-      @setViewMembers()
+      @setViewMembers(options)
       @placeData()
 
       @drawGraph(options)
@@ -317,9 +323,6 @@
 
           if values.length-1 not in breakIdxs
             breakIdxs.push(values.length-1)
-
-          console.log "breakIdxs", breakIdxs
-          console.log "breakPops", breakPopulations
 
           for j in [1...breakIdxs.length-1]
             breaks[j] = (values[breakIdxs[j]] + values[breakIdxs[j] + 1])/2
@@ -423,8 +426,17 @@
             .style("font-weight", "bold")
 
       dragStart = (d,i) ->
+        d3.event.sourceEvent.stopPropagation()
+        maskCirc = self.svg.append("circle")
+          .attr("id", "mask")
+          .attr("fill", "red")
+          .style("opacity", 0)
+          .attr("r", 3)
+          .attr("transform", "translate(#{d3.mouse(self.svg.node())[0]},#{d3.mouse(self.svg.node())[1]})")
         d3.select(this).select("rect").attr("fill", "yellow")
       dragging = (d,i) ->
+        self.svg.select("#mask")
+          .attr("transform", "translate(#{d3.mouse(self.svg.node())[0]},#{d3.mouse(self.svg.node())[1]})")        
         if d.x + d3.event.dx >= xRange[0] && d.x+d3.event.dx <= xRange[1]+20
           self.svg.select("#deleteWarning").remove()
           d.x += d3.event.dx
@@ -444,6 +456,8 @@
             .text("Drop here to delete this flag")
 
       dragEnd = (d,i) ->
+        self.svg.select("#mask").remove()
+        d3.event.sourceEvent.stopPropagation()
         d3.select(this).select("rect").attr("fill", "green")
         if d.x > xRange[1]
           d3.select(this).remove()
@@ -461,10 +475,19 @@
 
       dragStart2 =  (d,i) ->                              #All drag2 handlers are specifically for the creator flag at the leftmost point on the x-axis since it makes a new flag when dragged
         self.customDivs.push(self.x(d3.mouse(this)[0]))   #Instead of it itself being dragged about
+        d3.event.sourceEvent.stopPropagation()
+        maskCirc = self.svg.append("circle")
+          .attr("id", "mask")
+          .attr("fill", "red")
+          .style("opacity", 0)
+          .attr("r", 3)
+          .attr("transform", "translate(#{d3.mouse(this)[0]},#{d3.mouse(this)[1]})")
         newDiv = self.svg.append("svg:g")
           .data([{"x":d3.mouse(this)[0]}])  
           .attr("id", "divLine#{self.customDivNum}")
           .attr("transform","translate(#{d3.mouse(this)[0]}, 0)")
+          .on("click", -> 
+            d3.event.stopPropagation())
           .call(drag)
 
         newDiv.append("line")
@@ -483,6 +506,8 @@
           .attr("stroke", "green")
           .attr("stroke-width", 1.5)
       dragging2 = (d,i) ->
+        self.svg.select("#mask")
+          .attr("transform", "translate(#{d3.mouse(this)[0]},#{d3.mouse(this)[1]})")
         if d.x + d3.event.dx >= xRange[0] && d.x+d3.event.dx <= xRange[1] + 20
           self.svg.select("#deleteWarning").remove()
           d.x += d3.event.dx
@@ -499,6 +524,8 @@
             .attr("fill", "red")
             .text("Drop here to delete this flag")  
       dragEnd2 = (d,i) ->
+        self.svg.select("#mask").remove()
+        d3.event.sourceEvent.stopPropagation()
         self.svg.select("#divLine#{self.customDivNum}").datum({"x":d.x,"id":self.customDivNum}).select("rect").attr("fill", "green")
         if d.x > xRange[1]
           self.svg.select("#divLine#{self.customDivNum}").remove()
@@ -517,6 +544,8 @@
                 .data([ { "x":self.x(xDomain[0]) } ])
                 .attr("class", "startLine")
                 .attr("transform","translate(#{self.x(xDomain[0])}, 0)")
+                .on("click", -> 
+                  d3.event.sourceEvent.stopPropagation())
                 .call(drag2)
 
       start.append("line")
@@ -691,7 +720,7 @@
         .whiskers(iqr(1.5))
         .width(@style.width)
         .height(Math.min(@style.height*.75, 270*.75))
-        .domain(@minMaxWPadding(0))
+        .domain(@x.domain())
 
       @svg.selectAll(".box-plot.SeeIt")
         .data([@graphData.dataArray])
@@ -714,10 +743,23 @@
 
 
     options: ->
+      self = @
       [{
         label: "Editable",
         type: "checkbox",
         default: false
+      },
+      {
+        label: "Graph Scale Min"
+        type: "numeric"
+        default: ->
+          self.minMaxWPadding(0)[0]
+      },
+      {
+        label: "Graph Scale Max"
+        type: "numeric"
+        default: ->
+          self.minMaxWPadding(0)[1]
       },
       {
         label: "Box Plot",
