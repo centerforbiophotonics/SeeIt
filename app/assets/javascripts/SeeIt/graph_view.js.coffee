@@ -347,12 +347,8 @@
 
         dragEnterListener: (event) ->
           event.preventDefault()
-          console.log "enter"
           if !($(event.target).is("button")) && !($(event.target).is("span"))
             event.target.style.background = '#BAEA65'
-          
-          # if $(event.target).attr("id") == "tab"
-          #   console.log "hello"
 
         dragLeaveListener: (event) ->
           event.preventDefault()

@@ -18,8 +18,6 @@
       @view = new SeeIt.ApplicationView(@, @container)
       @layoutContainers = @view.initLayout()
       @initHandlers()
-      @displayTabs()
-      @resizeListener()
 
       #Get data
       #TODO: Add more validation of data
@@ -118,28 +116,6 @@
                 self.trigger('graph:filter', {graph: lastGraphId, filters: d.filters})
               50)
             )(self.lastGraphId)
-
-    displayTabs: ->
-      if $("#left-region").width() < 1003
-        $(".device-small").css("display","block")
-        
-        $(".SeeIt.Data").removeClass("col-md-3")
-        $(".SeeIt.Graphs").removeClass("col-md-9")
-        $(".SeeIt.Data").addClass("col-md-12")
-        $(".SeeIt.Graphs").addClass("col-md-12")
-      else
-        $(".device-small").css("display","none")
-        
-        $(".SeeIt.Data").removeClass("col-md-12")
-        $(".SeeIt.Graphs").removeClass("col-md-12")
-        $(".SeeIt.Data").addClass("col-md-3")
-        $(".SeeIt.Graphs").addClass("col-md-9")
-        $(".tab-pane").addClass("active")
-
-    resizeListener: ->
-      self = @
-      $(window).resize ->
-        self.displayTabs()
 
     loadGraphs: ->
       @graphTypes = []
