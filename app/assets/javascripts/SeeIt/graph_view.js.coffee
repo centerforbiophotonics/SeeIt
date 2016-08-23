@@ -343,7 +343,6 @@
 
         dragOverListener: (event) ->
           event.preventDefault()
-          console.log "over"
 
         dragEnterListener: (event) ->
           event.preventDefault()

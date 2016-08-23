@@ -96,7 +96,7 @@
 
     resizeListener: ->
       self = @
-      $(window).resize ->
+      $(window).on 'resize', ->
         self.displayTabs()
 
 
