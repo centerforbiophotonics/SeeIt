@@ -162,8 +162,9 @@
             data[idx].x = -> x
             data[idx].y = -> y    
 
-
-            self.drawLeastSquares.call(self, xScale, yScale, min, max, tooltip, data)
+            squaresIdx = options.map((op) -> op.label).indexOf("Show Squares")
+            if squaresIdx > -1 && options[squaresIdx].value then squares = true else squares = false
+            self.drawLeastSquares.call(self, xScale, yScale, min, max, tooltip, squares, data)
         )  
         .on('dragend', (d) -> 
           element = d3.select(@)
@@ -223,11 +224,15 @@
           .call(drag)
 
       regressionIdx = options.map((op) -> op.label).indexOf("Show Least Squares Regression Line")
+      squaresIdx = options.map((op) -> op.label).indexOf("Show Squares")
+      squares = false
+      if squaresIdx > -1 && options[squaresIdx].value then squares = true
       if regressionIdx > -1 && options[regressionIdx].value
-        @drawLeastSquares(xScale, yScale, min, max, tooltip)
+        @drawLeastSquares(xScale, yScale, min, max, tooltip, squares)
 
 
-    drawLeastSquares: (xScale, yScale, min, max, tooltip, data) ->
+    drawLeastSquares: (xScale, yScale, min, max, tooltip, squares, data) ->
+      self = @
       if @regression_line then @regression_line.remove()
 
       least_squares = SeeIt.LeastSquares(data || @data)
@@ -280,6 +285,44 @@
 
               d3.select(@).attr('stroke-width', 3)
           )
+        if squares
+          squares = []
+          if data then myData = data else myData = self.data
+          myData.sort((a,b)-> a.x()-b.x())
+          myData = myData.map((d)->{"x":d.x(), "y":d.y()})
+          for datum in myData
+            sideLength = least_squares(datum.x) - datum.y
+            xAnchor = datum.x
+            yAnchor = least_squares(datum.x)
+            above = false
+            above = true if sideLength < 0
+            absLen = Math.abs(yScale(yAnchor - sideLength) - yScale(yAnchor))
+            squares.push({"x":xAnchor,"y":yAnchor,"len":absLen,"above":above})
+          @svg.selectAll("#leastSquare").remove()
+          @svg.selectAll("#leastSquare")
+            .data(squares)
+            .enter()
+            .append("rect")
+              .attr("x", (d)->
+                if (d.above && line.m>0)||(!d.above && line.m<0) 
+                  return xScale(d.x) - d.len
+                else
+                  return xScale(d.x)
+              )
+              .attr("width", (d)->d.len)
+              .attr("y", (d)->
+                if d.above 
+                  return yScale(d.y) - d.len 
+                else
+                  return yScale(d.y)
+              )
+              .attr("height", (d)->d.len)
+              .style("fill", "green")
+              .style("stroke", "green")
+              .style("stroke-width", 1)
+              .style("fill-opacity", .2)
+              .attr("id", "leastSquare")
+
     clearGraph: ->
       @container.html("")
       @rendered = false
@@ -295,7 +338,12 @@
         {
           label: "Show Least Squares Regression Line",
           type: "checkbox",
-          default: false
+          default: true
+        },
+        {
+          label: "Show Squares",
+          type: "checkbox",
+          default: true
         },
         {
           label: "Dot Radius",
