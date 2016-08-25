@@ -274,8 +274,7 @@
 }
 
 .SeeIt.Data .SeeIt.list-group{
-/*    max-height: 100%;*/
-    /*overflow-y: auto; */
+  min-height: 100%;
 }
 
 div.SeeIt.footer-row.row, div.SeeIt.footer-expanded-row.row {
@@ -556,7 +555,7 @@ td:not(.htNumeric).SeeIt-htCenter {
     opacity: 0.8;
 }
 
-#holder {
+.holder {
     width: inherit; 
     height: 100vh;
     text-align: center;
