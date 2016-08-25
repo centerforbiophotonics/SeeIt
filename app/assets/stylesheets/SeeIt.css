@@ -538,11 +538,7 @@ td:not(.htNumeric).SeeIt-htCenter {
   background-color: #ccffcc;
 }
 
-.SeeIt.dataset-container {
-  pointer-events: none;
-}
-
-.SeeIt.panel-heading {
+.ignore_events {
   pointer-events: none;
 }
 
@@ -550,6 +546,22 @@ td:not(.htNumeric).SeeIt-htCenter {
   border: 1px dashed #808080;
   background-color: #D3D3D3;
   opacity: 0.6;
+}
+
+.upload_icon {
+    width: 100%;
+    height: 80px;
+    fill: #808080;
+    display: block;
+    opacity: 0.8;
+}
+
+#holder {
+    width: inherit; 
+    height: 100vh;
+    text-align: center;
+    padding: 40vh 0;
+    z-index: 100;
 }
 
 .btn.active {
