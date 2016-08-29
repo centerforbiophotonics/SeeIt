@@ -23,12 +23,12 @@
     init: ->
       @container.html("""
         <ul class="SeeIt dataset-list list-group">
-          <div class="SeeIt panel-heading" style=" background-color: #f5f5f5">  
+          <div class="SeeIt panel-heading" style=" background-color: #f5f5f5">
             <label id="upload_modal" class="btn btn-primary btn-file SeeIt new-dataset-input">
               <span class='glyphicon glyphicon-upload' style=""></span>
                 Upload Data
             </label>
-            <button class="SeeIt hide_data btn btn-default"  title='Hide Data' style="float:right"><span class="glyphicon glyphicon-arrow-left"></span></button>  
+            <button class="SeeIt hide_data btn btn-default"  title='Hide Data' style="float:right"><span class="glyphicon glyphicon-arrow-left"></span></button>
           </div>
         </ul>
       """)
@@ -51,12 +51,12 @@
 
       @listenTo(@app, 'graph:destroyed', (graphId) ->
         self.datasetViewCollection.forEach (d) ->
-          d.trigger('graph:destroyed', graphId)   
+          d.trigger('graph:destroyed', graphId)
       )
 
       @listenTo(@app, 'graph:id:change', (oldId, newId) ->
         self.datasetViewCollection.forEach (d) ->
-          d.trigger('graph:id:change', oldId, newId)   
+          d.trigger('graph:id:change', oldId, newId)
       )
 
     initDatasetListeners: (datasetView) ->
@@ -94,7 +94,7 @@
     newDatasetMaker: ->
       @container.find('.dataset-list').append("""
         <div class='SeeIt dataset-container new-dataset'>
-        </div>  
+        </div>
       """)
 
       @container.find('.dataset-list').append("""
@@ -124,8 +124,8 @@
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                  <button type="button" class="SeeIt btn btn-primary" id="create-dataset" data-loading-text="<span class='SeeIt glyphicon glyphicon-refresh spin'></span>">  
-                    Create Dataset  
+                  <button type="button" class="SeeIt btn btn-primary" id="create-dataset" data-loading-text="<span class='SeeIt glyphicon glyphicon-refresh spin'></span>">
+                    Create Dataset
                   </button>
                   <label class="btn btn-primary btn-file SeeIt new-dataset-input dataset-json-file hidden json-file">
                     <span class='glyphicon glyphicon-upload'></span>
@@ -176,10 +176,10 @@
       self.container.find(".json-file input, .csv-file input").on 'change', (event) ->
         return self.handleDatasetCreate.call(self, self.container.find("#dataset-select").val(), {file: @files[0]})
 
-      self.container.find("#upload_modal").on 'click', (e) -> 
+      self.container.find("#upload_modal").on 'click', (e) ->
         $('#newdata_modal').modal('show')
-      
-      $(".json-file, .csv-file").on "click", () -> 
+
+      $(".json-file, .csv-file").on "click", () ->
         $('#newdata_modal').modal('hide')
 
       $('#newdata_modal').on('shown.bs.modal', () ->
@@ -212,7 +212,7 @@
 
                 setTimeout(->
                   self.container.find(".new-dataset-msg").removeClass("error").html("")
-                ,5000)  
+                ,5000)
             )
             googleSpreadsheet.getData()
 
@@ -229,7 +229,7 @@
           return false
         when "spreadsheet"
           title = self.container.find(".dataset-name").val()
-          if title.length && self.validateTitle.call(self, title) 
+          if title.length && self.validateTitle.call(self, title)
             self.container.find(".new-dataset-input").val("")
             self.container.find(".new-dataset-li").trigger('click')
             self.trigger("dataset:create", title)
@@ -247,7 +247,7 @@
           button = self.container.find("#create-dataset")[0]
           $(button).button('loading')
 
-          error_cb = -> 
+          error_cb = ->
             self.container.find(".new-dataset-msg").addClass("error").html("Error loading JSON")
             self.container.find(".new-dataset-input").val("")
 
@@ -256,10 +256,10 @@
             ,5000)
 
             $(button).button('reset')
-            
+
           try
-            json_manager.downloadFromServer(self.container.find(".json-endpoint").val(), 
-              ((data) -> 
+            json_manager.downloadFromServer(self.container.find(".json-endpoint").val(),
+              ((data) ->
                 self.trigger 'datasets:create', [data]
                 $(button).button('reset')
               ),
@@ -281,18 +281,18 @@
           button = self.container.find("#create-dataset")[0]
           $(button).button('loading')
 
-          error_cb = -> 
+          error_cb = ->
             self.container.find(".new-dataset-msg").addClass("error").html("Error loading CSV")
             self.container.find(".new-dataset-input").val("")
 
             setTimeout(->
               self.container.find(".new-dataset-msg").removeClass("error").html("")
-            ,5000)  
+            ,5000)
 
             $(button).button('reset')
 
           try
-            csv_manager.downloadFromServer(self.container.find(".csv-endpoint").val(), 
+            csv_manager.downloadFromServer(self.container.find(".csv-endpoint").val(),
               ((data) ->
 
                 csvData = SeeIt.CSVManager.parseCSV(data.data)

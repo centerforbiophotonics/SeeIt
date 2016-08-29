@@ -2,9 +2,19 @@
   class CSVManager
     _.extend(@prototype, Backbone.Events)
 
+    ###*
+     * [constructor description]
+     * @return {[type]} [description]
+    ###
     constructor: ->
 
-
+    ###*
+     * [downloadFromServer description]
+     * @param  {[type]} url     [description]
+     * @param  {[type]} success [description]
+     * @param  {[type]} error   [description]
+     * @return {[type]}         [description]
+    ###
     downloadFromServer: (url, success, error) ->
       self = @
 
@@ -34,6 +44,12 @@
           error: error
         });
 
+    ###*
+     * [handleUpload description]
+     * @param  {[type]}   file     [description]
+     * @param  {Function} callback [description]
+     * @return {[type]}            [description]
+    ###
     handleUpload: (file, callback) ->
       self = @
       data = []
@@ -58,7 +74,7 @@
             data = CSVManager.parseCSV(txtRes)
             callback data
           catch err
-          
+
 
         filereader.readAsText file
       else
