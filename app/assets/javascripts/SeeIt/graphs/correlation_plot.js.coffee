@@ -6,6 +6,7 @@
       super
       @rendered = false
       @data = []
+      @ellipsePts = []
       @initListeners()
 
     formatData: ->
@@ -230,6 +231,10 @@
       if regressionIdx > -1 && options[regressionIdx].value
         @drawLeastSquares(xScale, yScale, min, max, tooltip, squares)
 
+      ellipseIdx = options.map((op) -> op.label).indexOf("Show Ellipse")
+      if ellipseIdx > -1 && options[ellipseIdx].value
+        @drawEllipse(xScale, yScale, min, max)
+
 
     drawLeastSquares: (xScale, yScale, min, max, tooltip, squares, data) ->
       self = @
@@ -323,6 +328,83 @@
               .style("fill-opacity", .2)
               .attr("id", "leastSquare")
 
+    drawEllipse: (xScale, yScale, min, max) ->
+      if @ellipsePts.length == 0
+        xRange = xScale.range()
+        yRange = yScale.range()
+        xMid = (xRange[1]+xRange[0])/2
+        yMid = (yRange[1]+yRange[0])/2
+        xQtr = (xRange[0]+xMid)/2
+        yQtr = (yRange[0]+yMid)/2
+        x3Qt = (xRange[1]+xMid)/2
+        y3Qt = (yRange[1]+yMid)/2
+        @ellipsePts.push({"x":xScale.invert(xMid),"y":yScale.invert(y3Qt)}) #[0]Top
+        @ellipsePts.push({"x":xScale.invert(x3Qt),"y":yScale.invert(yMid)}) #[1]Right
+        @ellipsePts.push({"x":xScale.invert(xMid),"y":yScale.invert(yQtr)}) #[2]Bot
+        @ellipsePts.push({"x":xScale.invert(xQtr),"y":yScale.invert(yMid)}) #[3]Left
+        @ellipsePts.push({"x":xScale.invert(xMid),"y":yScale.invert(yMid)}) #[4]Ellipse Center
+
+
+        @svg.append("rect")
+          .attr("x", xQtr-5)
+          .attr("y", yMid-5)
+          .attr("width", 10)
+          .attr("height", 10)
+          .style("fill", "red")
+          .attr("id", "left")
+        @svg.append("rect")
+          .attr("x", x3Qt-5)
+          .attr("y", yMid-5)
+          .attr("width", 10)
+          .attr("height", 10)
+          .style("fill", "red")
+          .attr("id", "right")      
+        @svg.append("rect")
+          .attr("x", xMid-5)
+          .attr("y", yQtr-5)
+          .attr("width", 10)
+          .attr("height", 10)
+          .style("fill", "red")
+          .attr("id", "bottom")
+        @svg.append("rect")
+          .attr("x", xMid-5)
+          .attr("y", y3Qt-5)
+          .attr("width", 10)
+          .attr("height", 10)
+          .style("fill", "red")
+          .attr("id", "top")
+        @svg.append("ellipse")
+          .attr("cx", xMid)
+          .attr("cy", yMid)
+          .attr("rx", xMid-xQtr)
+          .attr("ry", yMid-y3Qt)
+          .style("stroke", "red")
+          .style("stroke-width", 2)
+          .style("fill", "none")
+#          .attr("transform", "rotate(15,#{xMid}, #{yMid})")  This transform should be how we rotate it as endpoints are dragged, 2nd and 3rd arguments need to be center of ellipse  
+        console.log @ellipsePts                              #First argument will be calculated as the foci change when a point is dragged.
+
+      else
+        y3Qt = yScale(@ellipsePts[0].y)
+        xQtr = xScale(@ellipsePts[3].x)
+        for pt, i in @ellipsePts
+          if i < 4
+            @svg.append("rect")
+              .attr("x", xScale(pt.x)-5)
+              .attr("y", yScale(pt.y)-5)
+              .attr("width", 10)
+              .attr("height", 10)
+              .style("fill", "red")
+          else
+            @svg.append("ellipse")
+              .attr("cx", xScale(pt.x))
+              .attr("cy", yScale(pt.y))
+              .attr("rx", xScale(pt.x)-xQtr)
+              .attr("ry", yScale(pt.y)-y3Qt)
+              .style("stroke", "red")
+              .style("stroke-width", 2)
+              .style("fill", "none")
+
     clearGraph: ->
       @container.html("")
       @rendered = false
@@ -338,10 +420,15 @@
         {
           label: "Show Least Squares Regression Line",
           type: "checkbox",
-          default: true
+          default: false
         },
         {
           label: "Show Squares",
+          type: "checkbox",
+          default: false
+        },
+        {
+          label: "Show Ellipse",
           type: "checkbox",
           default: true
         },
