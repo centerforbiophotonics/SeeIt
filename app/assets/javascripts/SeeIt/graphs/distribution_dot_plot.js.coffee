@@ -167,6 +167,10 @@
 
       if boxPlotIdx > -1 && options[boxPlotIdx].value then @drawBoxPlot()
 
+      divIdx = options.map((option) -> option.label).indexOf('Dividers')
+
+      if divIdx > -1 && options[divIdx].value != "None" then @drawDivs(options[divIdx].value)
+
       @svg.selectAll(".dot.SeeIt")
         .data(@graphData.dataArray)
         .enter().append("circle")
@@ -196,6 +200,46 @@
 
       @drawGraph(options)
       @drawLegend(options)
+
+    drawDivs: (choice) ->
+      self = @
+      values = @graphData.dataArray.map((arrayMem) -> arrayMem.data.value())
+      values.sort((a,b)-> a-b)
+      valLen = values.length
+      if choice == "Two Equal"
+        midIdx = Math.floor(values.length / 2) - 1
+        midVal = (values[midIdx]+values[midIdx+1])/2
+        breaks = [values[0], midVal, values[valLen-1]]
+        breakPopulations = [midIdx+1, valLen-midIdx-1]
+        @svg.selectAll("divTop")
+          .data(breaks)
+          .enter()
+          .append("rect")
+            .attr("x", (d) -> self.x(d) - 1.5)
+            .attr("y", 0)
+            .attr("width", 3)
+            .attr("height", 3)
+            .attr("fill", "green")
+        @svg.selectAll("divLine")
+          .data(breaks)
+          .enter()
+          .append("line")
+            .attr("x1", (d) -> self.x(d))
+            .attr("x2", (d) -> self.x(d))
+            .attr("y1", self.y(8))
+            .attr("y2", self.y(self.style.height - 3))
+            .attr("stroke-width", 1)
+            .attr("stroke", "black")
+        @svg.selectAll("divLabels")
+          .data(breakPopulations)
+          .enter()
+          .append("text")
+            .attr("x", (d,i) -> (self.x(breaks[i+1])+self.x(breaks[i]))/2)
+            .attr("y", 12)
+            .attr("text-anchor", "middle")
+            .text((d) -> d)
+            .attr("fill", "purple")
+
 
 
     drawStats: (options) ->
@@ -321,7 +365,7 @@
         )
         .whiskers(iqr(1.5))
         .width(@style.width)
-        .height(Math.min(@style.height, 270))
+        .height(Math.min(@style.height*.75, 270*.75))
         .domain(@minMaxWPadding(0))
 
       @svg.selectAll(".box-plot.SeeIt")
@@ -350,6 +394,12 @@
         type: "checkbox",
         default: ->
           self.dataset
+      },
+      {
+        label: "Dividers",
+        type: "select",
+        values: ['None', 'Two Equal'],
+        default: "None"
       },
       {
         label: "Show Median",
