@@ -550,6 +550,7 @@ td:not(.htNumeric).SeeIt-htCenter {
 
 .SeeIt .dropdown-submenu .dropdown-menu {
   top: 0;
-  left: 100%;
+  right: 100%;
+  left: auto;
   margin-top: -1px;
 }

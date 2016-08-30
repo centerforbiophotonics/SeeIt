@@ -29,7 +29,7 @@
     buildDropdownNav: ->
       htmlStr = '<ul class="nav navbar-nav navbar-right">'
       htmlStr += """ 
-        <li = class="dropdown">
+        <li class="dropdown">
           <a class="dropdown-toggle" type="button" data-toggle="dropdown" href="#">
             Menu<span class="caret"></span>
           </a>
@@ -70,12 +70,12 @@
             <li>
               <div class="icon_container SeeIt nav-el left" style="display: inline-block">#{icon}</div>
               <div class="SeeIt nav-el right"  id="#{el.title}_dropdown">
-                <a href="#myModal" data-toggle="modal" data-target="#myModal" style="color: #777">
+                <a href="#graph-modal" data-toggle="modal" data-target="#graph-modal" style="color: #777">
                   #{el.title}
                 </a>
               </div>
 
-              <div class="modal fade" id="myModal" role="dialog">
+              <div class="modal fade" id="graph-modal" role="dialog">
                 <div class="modal-dialog">
                   <div class="modal-content">
                     <div class="modal-header">
@@ -96,7 +96,7 @@
                     </div>
                     <div class="modal-footer">
                       <a href="#" data-dismiss="modal" class="btn">Close</a>
-                      <a href="#" class="btn btn-primary">Create</a>
+                      <a href="#" class="btn btn-primary" id="create-graph">Create</a>
                     </div>
                   </div>
                 </div>
@@ -109,25 +109,24 @@
               <li class="#{el.class}">#{icon}<a href="#">#{el.title}</a></li>         
           """
 
-
-
       return htmlStr+"</ul>"
 
     registerEvents: ->
       toolbar  = @
+        
       @navElements.forEach (el) ->
         if el.handler
           toolbar.container.find(".#{el.class}").off('click', el.handler).on('click', el.handler)
+
+      toolbar.container.find("#create-graph").on 'click', (event) ->
+        $('#graph-modal').modal('hide')
+        selectedGraph = toolbar.container.find("#dropdown-form").val()
+        $(".addGraph[data-id='"+selectedGraph+"']").trigger("click")
 
     resizeListener: ->
       self = @       
       $(window).on 'resize', ->
         self.init()
-
-      # mql = window.matchMedia("screen and (min-width: 800px)")
-      # if mql.matches
-      #   alert("800px")
-
 
   ToolbarView
 ).call(@)
