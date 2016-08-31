@@ -36,30 +36,64 @@
           <ul class="dropdown-menu">
       """
 
-      @navElements.forEach (el) ->
-        icon = if el.icon then "<div class='iconContainer'>#{el.icon}</div>" else ''
+      for i of @navElements
+        icon = if @navElements[i].icon then "<div class='iconContainer'>#{@navElements[i].icon}</div>" else ''
 
-        if el.type == "dropdown"
+        if @navElements[i].type == "dropdown"
           htmlStr += """
-            <li class="SeeIt dropdown-submenu" style="cursor: pointer;">
+            <li>
               <div class="icon_container SeeIt nav-el left" style="display: inline-block">#{icon}</div>
-              <div class="dropdown-toggle SeeIt nav-el right" data-toggle="dropdown" aria-haspopup="true" id="#{el.title}_dropdown">
-                <a style="color: #777">
-                  #{el.title}
+              <div class="SeeIt nav-el right" id="#{@navElements[i].title}_dropdown">
+                <a href="#graph-modal" data-toggle="modal" data-target="#graph-modal" style="color: #777">
+                  #{@navElements[i].title}
                 </a>
               </div>
-              <ul class="dropdown-menu text-center" aria-labelledby="#{el.title}_dropdown">
-                #{el.options.map((option) -> "<li class='#{el.class} toolbar_dropdown_option' data-id='#{option.name}'><a href='#' class='dropdown_child'>#{option.name}</a></li>")}
-              </ul>
             </li>
           """
+        else if @navElements[i].class == "downloadInitOptions"
+          htmlStr += """
+              <li class="#{@navElements[i].class}">#{icon}<a href="#" style="color: #777">#{@navElements[i].title}</a></li> 
+            </ul>
+            <div class="modal fade" id="graph-modal" role="dialog">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Graph Options</h4>
+                  </div>
+                  <div class="modal-body">
+                    <div class="form-group">
+                      <label for="dropdown-form">Graph Type</label>
+                      <select class="form-control" id="dropdown-form">
+                        #{@populateDropdownModal()}
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label for="dropdown-form">Graph Name</label>
+                      <input class="form-control" id="inputGraphName" placeholder="Enter name" type="text">
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <a href="#" data-dismiss="modal" class="btn">Close</a>
+                    <a href="#" class="btn btn-primary" id="create-graph">Create</a>
+                  </div>
+                </div>
+              </div>
+            </div>        
+          """ 
         else
           htmlStr += """
-              <li class="#{el.class}">#{icon}<a href="#" style="color: #777">#{el.title}</a></li>         
-          """ 
+            <li class="#{@navElements[i].class}">#{icon}<a href="#" style="color: #777">#{@navElements[i].title}</a></li> 
+          """
 
-      return htmlStr+"</ul>"+"</li>"+"</ul>"
+      return htmlStr+"</li>"+"</ul>"
 
+    populateDropdownModal: ->
+      navEl = @navElements[2]
+      graphNames = """#{navEl.options.map((option) -> "<option class='#{navEl.class}' data-id='#{option.name}'><a href='#'>#{option.name}</a></option>")}"""
+      
+      return graphNames
+    
     buildNav: ->
       htmlStr = '<ul class="nav navbar-nav" display="none">'
       @navElements.forEach (el) ->
@@ -69,7 +103,7 @@
           htmlStr += """
             <li>
               <div class="icon_container SeeIt nav-el left" style="display: inline-block">#{icon}</div>
-              <div class="SeeIt nav-el right"  id="#{el.title}_dropdown">
+              <div class="SeeIt nav-el right" id="#{el.title}_dropdown">
                 <a href="#graph-modal" data-toggle="modal" data-target="#graph-modal" style="color: #777">
                   #{el.title}
                 </a>
@@ -102,7 +136,6 @@
                 </div>
               </div>
             </li>
-
           """
         else
           htmlStr += """
