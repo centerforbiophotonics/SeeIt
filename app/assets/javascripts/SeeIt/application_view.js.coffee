@@ -1,4 +1,6 @@
 @SeeIt.ApplicationView = (->
+  TAB_TRIGGER = false
+
   class ApplicationView
     _.extend(@prototype, Backbone.Events)
 
@@ -17,7 +19,9 @@
 
         resizeGraphs: (event) ->
           event.preventDefault()
+          TAB_TRIGGER = true
           $(window).trigger 'resize'
+          TAB_TRIGGER = false
       }
 
     initLayout: ->
@@ -30,9 +34,9 @@
             </ul>
 
             <div class="tab-content">
-              <div role="tabpanel" class="tab-pane" id="data_tab"></div>
-              <div role="tabpanel" class="tab-pane" id="graphs_tab"></div>
               <div role="tabpanel" class="tab-pane" id="spreadsheets_tab"></div>
+              <div role="tabpanel" class="tab-pane active" id="data_tab"></div>
+              <div role="tabpanel" class="tab-pane" id="graphs_tab"></div>
             </div>
           </div>
         </div>
@@ -42,7 +46,7 @@
       @container.find('#data_tab').append("<div class='SeeIt Data'></div>")
       @layoutContainers['Data'] = @container.find(".Data")
         
-      @container.find('#spreadsheets_tab').append("<div class='SeeIt Spreadsheet col-md-9'></div>")
+      @container.find('#spreadsheets_tab').append("<div class='SeeIt Spreadsheet pull-right'></div>")
       @layoutContainers['Spreadsheet'] = @container.find(".Spreadsheet")
 
       @container.find('#graphs_tab').append("<div class='SeeIt Graphs'></div>")
@@ -52,7 +56,7 @@
         $(".SeeIt.Data").addClass("col-md-12")
         $(".SeeIt.Graphs").addClass("col-md-12")
         $(".SeeIt.Spreadsheet").addClass("col-md-12")
-        $("#data_tab").addClass("active")
+
       else
         $(".device-small").css("display","none")
         $(".tab-pane").addClass("active")
@@ -66,10 +70,12 @@
       return @layoutContainers
 
 
-    displayTabs: ->
-      if $("#left-region").width() < 1003
-        # Displaying tabs
+    displayTabs: (TAB_TRIGGER)->
+      console.log TAB_TRIGGER
+      if $("#left-region").width() < 1003 && !TAB_TRIGGER
         $(".device-small").css("display","block")
+        $(".tab-pane[id='graphs_tab']").removeClass("active")
+        $(".tab-pane[id='spreadsheets_tab']").removeClass("active")
         
         $(".SeeIt.Data").removeClass("col-md-3")
         $(".SeeIt.Graphs").removeClass("col-md-9")
@@ -78,12 +84,7 @@
         $(".SeeIt.Graphs").addClass("col-md-12")
         $(".SeeIt.Spreadsheet").addClass("col-md-12")
 
-        # if $("#id-graphs").hasClass("active")
-        #   console.log "what"
-        #   $("#id-graphs").removeClass("active")
-        #   $("#id-data").addClass("active")
-
-      else
+      else if $("#left-region").width() >= 1003 && !TAB_TRIGGER
         $(".device-small").css("display","none")
         $(".tab-pane").addClass("active")
 
@@ -92,12 +93,12 @@
         $(".SeeIt.Spreadsheet").removeClass("col-md-12")
         $(".SeeIt.Data").addClass("col-md-3")
         $(".SeeIt.Graphs").addClass("col-md-9")
-        $(".SeeIt.Spreadsheet").removeClass("col-md-9")
+        $(".SeeIt.Spreadsheet").addClass("col-md-9")
 
     resizeListener: ->
       self = @
       $(window).on 'resize', ->
-        self.displayTabs()
+        self.displayTabs(TAB_TRIGGER)
 
 
   ApplicationView
