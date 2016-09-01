@@ -339,13 +339,13 @@
           topNewX = oldX + d3.event.dx
           oldY = Number(d3.select(this).attr('y'))
           topNewY = oldY + d3.event.dy
-          d3.select(this).attr('x', topNewX).attr('y', topNewY)
+          d3.select(this).attr('x', topNewX-5).attr('y', topNewY)
 
           oldX = Number(self.svg.select("#bottom").attr('x'))
           botNewX = oldX - d3.event.dx
           oldY = Number(self.svg.select("#bottom").attr('y'))
           botNewY = oldY - d3.event.dy
-          self.svg.select("#bottom").attr('x', botNewX).attr('y', botNewY)
+          self.svg.select("#bottom").attr('x', botNewX+5).attr('y', botNewY)
 
           centerX = Number(self.svg.select("ellipse").attr('cx'))
           centerY = Number(self.svg.select("ellipse").attr('cy'))
