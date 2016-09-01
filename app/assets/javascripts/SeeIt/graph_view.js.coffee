@@ -92,19 +92,11 @@
 
               @addDataToFooter(new_data)
 
-            else
-              this_data = {}
-              this_data.data = @filter(new_data.data, new_data.name)
-              this_data.name = new_data.name
+              self = @
 
               @listenTo(this_data, 'label:changed', (idx) ->
                 self.graph.trigger('label:changed', self.options.getValues())
               )
-
-              @removeDataFromFooterMultiple( @dataset[datasetIdx].name, @dataset[datasetIdx].data[0].header, datasetIdx)
-            
-              @dataset[datasetIdx].data.push(new_data.data)
-              @filteredDataset[datasetIdx].data.push(this_data.data)
 
               @listenTo(this_data, 'header:changed', ->
                 self.updateFooterData.call(self)
