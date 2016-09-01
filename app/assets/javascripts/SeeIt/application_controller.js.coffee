@@ -16,7 +16,6 @@
       ui = if params.ui then params.ui else {}
 
       @loadGraphs()
-
       @view = new SeeIt.ApplicationView(@, @container)
       @layoutContainers = @view.initLayout()
       @initHandlers()
@@ -65,16 +64,6 @@
       # Container for graphs
       @graphCollectionView = new SeeIt.GraphCollectionView(@, @layoutContainers['Graphs'], @ui.graph_editable, @model)
 
-      ###if @ui.dataMenu
-        #Container for list of datasets
-        @dataCollectionView = new SeeIt.DataCollectionView(
-          @,
-          @layoutContainers['Data'],
-          @model
-        )
-      else
-        @layoutContainers['Data'].remove()###
-
       #Create CSV manager
       @csvManager = new SeeIt.CSVManager()
 
@@ -106,8 +95,6 @@
 
       @lastGraphId = null
 
-      #@registerListeners()
-      #@trigger('ready')
 
       if @graphGoAhead            #If no data was required from remote endpoints, graphs can now be initialized
         #console.log "we got a goAhead"
@@ -187,11 +174,13 @@
         toggleSpreadsheetVisible: ->
           self.toggleSpreadsheetVisible.call(self)
         addGraph: ->
+          inputGraphName = self.container.find("#inputGraphName").val()
           graphName = $(@).attr('data-id')
           graphType = self.graphTypes.filter((g) -> g.name == graphName)[0]
+          self.container.find("#inputGraphName").val("")
 
 
-          self.trigger('graph:create', graphType)
+          self.trigger('graph:create', graphType, inputGraphName)
           # app.graphCollectionView.addGraph()
           # #DEMO PATCH
           # app.dataCollectionView.datasetViewCollection.forEach (datasetView) ->

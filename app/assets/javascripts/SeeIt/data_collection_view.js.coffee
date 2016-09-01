@@ -23,12 +23,12 @@
     init: ->
       @container.html("""
         <ul class="SeeIt dataset-list list-group">
-          <div class="SeeIt panel-heading" style=" background-color: #f5f5f5">
+          <div class="SeeIt panel-heading">  
             <label id="upload_modal" class="btn btn-primary btn-file SeeIt new-dataset-input">
               <span class='glyphicon glyphicon-upload' style=""></span>
                 Upload Data
             </label>
-            <button class="SeeIt hide_data btn btn-default"  title='Hide Data' style="float:right"><span class="glyphicon glyphicon-arrow-left"></span></button>
+            <button class="SeeIt hide_data btn btn-default" title='Hide Data' style="float:right"><span class="glyphicon glyphicon-arrow-left"></span></button>  
           </div>
         </ul>
       """)
