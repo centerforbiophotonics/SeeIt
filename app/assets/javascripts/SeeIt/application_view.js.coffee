@@ -70,9 +70,8 @@
       return @layoutContainers
 
 
-    displayTabs: (TAB_TRIGGER)->
-      console.log TAB_TRIGGER
-      if $("#left-region").width() < 1003 && !TAB_TRIGGER
+    displayTabs: (tab_trigger)->
+      if $("#left-region").width() < 1003 && !tab_trigger
         $(".device-small").css("display","block")
         $(".tab-pane[id='graphs_tab']").removeClass("active")
         $(".tab-pane[id='spreadsheets_tab']").removeClass("active")
@@ -84,7 +83,7 @@
         $(".SeeIt.Graphs").addClass("col-md-12")
         $(".SeeIt.Spreadsheet").addClass("col-md-12")
 
-      else if $("#left-region").width() >= 1003 && !TAB_TRIGGER
+      else if $("#left-region").width() >= 1003 && !tab_trigger
         $(".device-small").css("display","none")
         $(".tab-pane").addClass("active")
 
