@@ -329,6 +329,33 @@
               .attr("id", "leastSquare")
 
     drawEllipse: (xScale, yScale, min, max) ->
+      self = @
+      drag = d3.behavior.drag()
+        .on('drag', ->
+          oldX = Number(d3.select(this).attr('x'))
+          topNewX = oldX + d3.event.dx
+          oldY = Number(d3.select(this).attr('y'))
+          topNewY = oldY + d3.event.dy
+          d3.select(this).attr('x', topNewX).attr('y', topNewY)
+
+          oldX = Number(self.svg.select("#bottom").attr('x'))
+          botNewX = oldX - d3.event.dx
+          oldY = Number(self.svg.select("#bottom").attr('y'))
+          botNewY = oldY - d3.event.dy
+          self.svg.select("#bottom").attr('x', botNewX).attr('y', botNewY)
+
+          centerX = Number(self.svg.select("ellipse").attr('cx'))
+          centerY = Number(self.svg.select("ellipse").attr('cy'))
+          v = {'x': topNewX - centerX, 'y': topNewY - centerY}
+          magV = Math.sqrt(v.x**2 + v.y**2)
+          normV = {'x': v.x/magV, 'y': v.y/magV}
+          perpV = {'x': -normV.y, 'y': normV.x}
+          console.log "v, normV, perpV", v, normV, perpV
+
+          rx = Number(self.svg.select("ellipse").attr('rx'))
+          self.svg.select("#left").attr("x", centerX + (perpV.x * rx) - 5).attr("y", centerY + (perpV.y * rx) - 5)
+          self.svg.select("#right").attr("x", centerX - (perpV.x * rx) - 5).attr("y", centerY - (perpV.y * rx) - 5)
+      )
       if @ellipsePts.length == 0
         xRange = xScale.range()
         yRange = yScale.range()
@@ -343,7 +370,6 @@
         @ellipsePts.push({"x":xScale.invert(xMid),"y":yScale.invert(yQtr)}) #[2]Bot
         @ellipsePts.push({"x":xScale.invert(xQtr),"y":yScale.invert(yMid)}) #[3]Left
         @ellipsePts.push({"x":xScale.invert(xMid),"y":yScale.invert(yMid)}) #[4]Ellipse Center
-
 
         @svg.append("rect")
           .attr("x", xQtr-5)
@@ -373,6 +399,7 @@
           .attr("height", 10)
           .style("fill", "red")
           .attr("id", "top")
+          .call(drag)
         @svg.append("ellipse")
           .attr("cx", xMid)
           .attr("cy", yMid)
@@ -395,6 +422,14 @@
               .attr("width", 10)
               .attr("height", 10)
               .style("fill", "red")
+              .attr("id", ->
+                switch i
+                  when 0 then return "top"
+                  when 1 then return "right"
+                  when 2 then return "bottom"
+                  when 3 then return "left"
+              )
+              .call(drag)
           else
             @svg.append("ellipse")
               .attr("cx", xScale(pt.x))
