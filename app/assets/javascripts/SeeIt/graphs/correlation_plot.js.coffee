@@ -336,28 +336,33 @@
       drag = d3.behavior.drag()
         .on('drag', ->
           oldX = Number(d3.select(this).attr('x'))
-          topNewX = oldX + d3.event.dx
+          topNewX = oldX + d3.event.dx + 5
           oldY = Number(d3.select(this).attr('y'))
-          topNewY = oldY + d3.event.dy
-          d3.select(this).attr('x', topNewX-5).attr('y', topNewY)
+          topNewY = oldY + d3.event.dy + 5
+          d3.select(this).attr('x', topNewX-5).attr('y', topNewY-5)
 
           oldX = Number(self.svg.select("#bottom").attr('x'))
-          botNewX = oldX - d3.event.dx
+          botNewX = oldX - d3.event.dx+5
           oldY = Number(self.svg.select("#bottom").attr('y'))
-          botNewY = oldY - d3.event.dy
-          self.svg.select("#bottom").attr('x', botNewX+5).attr('y', botNewY)
+          botNewY = oldY - d3.event.dy+5
+          self.svg.select("#bottom").attr('x', botNewX-5).attr('y', botNewY-5)
 
           centerX = Number(self.svg.select("ellipse").attr('cx'))
           centerY = Number(self.svg.select("ellipse").attr('cy'))
-          v = {'x': topNewX - centerX, 'y': topNewY - centerY}
+          v = {'x': topNewX - centerX, 'y': centerY - topNewY}
           magV = Math.sqrt(v.x**2 + v.y**2)
           normV = {'x': v.x/magV, 'y': v.y/magV}
           perpV = {'x': -normV.y, 'y': normV.x}
-          console.log "v, normV, perpV", v, normV, perpV
+          rotAngle = (Math.atan2(normV.y, normV.x) / (2*Math.PI)) * 360 
+          rotAngle = -(rotAngle - 90)
 
           rx = Number(self.svg.select("ellipse").attr('rx'))
-          self.svg.select("#left").attr("x", centerX + (perpV.x * rx) - 5).attr("y", centerY + (perpV.y * rx) - 5)
-          self.svg.select("#right").attr("x", centerX - (perpV.x * rx) - 5).attr("y", centerY - (perpV.y * rx) - 5)
+          self.svg.select("#left").attr("x", centerX + (perpV.x * rx) - 5).attr("y", centerY - (perpV.y * rx) - 5)
+          self.svg.select("#right").attr("x", centerX - (perpV.x * rx) - 5).attr("y", centerY + (perpV.y * rx) - 5)
+
+          self.svg.select("ellipse")
+            .attr("ry", magV)
+            .attr("transform", "rotate(#{rotAngle}, #{centerX}, #{centerY})")
       )
       if @ellipsePts.length == 0
         xRange = xScale.range()
@@ -411,8 +416,6 @@
           .style("stroke", "red")
           .style("stroke-width", 2)
           .style("fill", "none")
-#          .attr("transform", "rotate(15,#{xMid}, #{yMid})")  This transform should be how we rotate it as endpoints are dragged, 2nd and 3rd arguments need to be center of ellipse  
-        console.log @ellipsePts                              #First argument will be calculated as the foci change when a point is dragged.
 
       else
         y3Qt = yScale(@ellipsePts[0].y)
