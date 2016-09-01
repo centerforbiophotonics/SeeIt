@@ -171,7 +171,18 @@
 				else
 					@data[i].insertElement(row, label, null)
 
-			console.log @data + " @data"
+			@labels.splice(row, 0, label)
+			@trigger('row:created', row)
+
+		fillRow: (row, header) ->
+			label = @generateLabel(@labels)
+			for i in [0...@data.length]
+				if @data[i].header != header
+					if @data[i].type == 'numeric'
+						@data[i].insertElement(row, label, null)
+					else
+						@data[i].insertElement(row, label, null)
+
 
 			@labels.splice(row, 0, label)
 			@trigger('row:created', row)
@@ -195,6 +206,9 @@
 			@listenTo column, 'data:changed', (source, idx) ->
 				console.log 'data:changed triggered in dataset'
 				self.trigger('data:changed', source, idx)
+
+			@listenTo column, 'fill', (row, header) ->
+				self.fillRow(row, header)
 
 			@headers.splice(col, 0, header)
 			@trigger('dataColumn:created', col)
@@ -291,6 +305,10 @@
 						@listenTo column, 'data:changed', (source, idx) ->
 							console.log 'data:changed triggered in dataset'
 							self.trigger('data:changed', source, idx)
+						@listenTo column, 'fill', (row, header) ->
+							self.fillRow(row, header)
+
+
 
 
 				rawDataRows: ->
@@ -345,6 +363,8 @@
 						@listenTo column, 'data:changed', (source, idx) ->
 							console.log 'data:changed triggered in dataset'
 							self.trigger('data:changed', source, idx)
+						@listenTo column, 'fill', (row, header) ->
+							self.fillRow(row, header)
 
 			}
 

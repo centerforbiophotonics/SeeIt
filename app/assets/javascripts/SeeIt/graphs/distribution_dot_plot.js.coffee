@@ -5,6 +5,7 @@
     constructor: ->
       super
       @rendered = false
+      @customDivs = []
       @initListeners()
 
     initListeners: ->
@@ -84,7 +85,7 @@
       @container.html("")
       @draw(options)
 
-    setViewMembers: ->
+    setViewMembers: (options) ->
       @style = {}
         
       @style.margin = {top: 20, right: 20, bottom: 30, left: 40}
@@ -93,7 +94,11 @@
 
       @x = d3.scale.linear().range([0,@style.width])
       @y = d3.scale.linear().range([@style.height,0])
-      @x.domain(@minMaxWPadding(0))
+
+      minIdx = options.map((option) -> option.label).indexOf("Graph Scale Min")
+      maxIdx = options.map((option) -> option.label).indexOf("Graph Scale Max")
+      @x.domain([options[minIdx].value, options[maxIdx].value])
+#      @x.domain(@minMaxWPadding(0))
       @y.domain([0,@style.height])
 
     placeData: ->
@@ -144,11 +149,15 @@
         .attr("height", @style.height + @style.margin.top + @style.margin.bottom)
         .append("g")
         .attr("transform", "translate(" + @style.margin.left + "," + @style.margin.top + ")")
+        .on("click", -> 
+          d3.event.stopPropagation())
+
 
     drawGraph: (options) ->
       self = @
 
       @initSvg()
+      @addedByClick = 0
 
       @svg.append("g")
         .attr("class", "x axis SeeIt")
@@ -171,6 +180,42 @@
 
       if divIdx > -1 && options[divIdx].value != "None" then @drawDivs(options[divIdx].value)
 
+      fixDivIdx = options.map((option) -> option.label).indexOf('Fixed Size Dividers')
+
+      if fixDivIdx > -1 && options[fixDivIdx].value then @drawDivs(options[fixDivIdx].value, "size")
+
+      fixWidIdx = options.map((option) -> option.label).indexOf('Fixed Width Dividers')
+
+      if fixWidIdx > -1 && options[fixWidIdx].value then @drawDivs(options[fixWidIdx].value, "width")
+
+      mkeYrOwnIdx = options.map((option) -> option.label).indexOf('Make your own Groups')
+
+      if mkeYrOwnIdx > -1 && options[mkeYrOwnIdx].value then @makeYourOwn()
+
+      editableIdx = options.map((option) -> option.label).indexOf('Editable')
+
+      if editableIdx > -1 && options[editableIdx].value then @editable = true
+
+
+      dotDragStart = ->
+        d3.select(this).style("opacity", 0.5)
+
+      dotDragging = (d,i) ->
+        x = Number(d3.select(this).attr("cx")) + d3.event.dx
+        y = Number(d3.select(this).attr("cy")) + d3.event.dy
+        d3.select(this).attr("cx", x).attr("cy", y)
+
+      dotDragEnd = (d,i) ->
+        d3.select(this).style("opacity", 1)
+        newX = d3.select(this).attr("cx")
+        d.data.value(self.x.invert(newX))
+        
+
+      dotDrag = d3.behavior.drag()
+                  .on('dragstart', dotDragStart)
+                  .on('drag', dotDragging)
+                  .on('dragend', dotDragEnd)
+
       @svg.selectAll(".dot.SeeIt")
         .data(@graphData.dataArray)
         .enter().append("circle")
@@ -185,6 +230,35 @@
         .style("fill", (d) ->
           return d.color()
         )
+      if @editable
+        @svg.selectAll(".dot.SeeIt").call(dotDrag)
+      if @editable && @graphData._dataset[0].data.length==1
+        d3.select(@container[0]).select("svg")
+          .on("click", ->
+              position = self.x.invert(d3.mouse(this)[0]-40)
+              firstColumn = self.dataset[0].data[0]
+              firstColumn.newElement(firstColumn.length()+self.addedByClick, "click#{self.addedByClick++}", position)
+            )
+      else if @editable
+        d3.select(@container[0]).select("svg")
+          .on("click", ->
+            warningTip = new Opentip(
+              $(self.container), 'Clicking to add data points is disabled if two or more DataColumns are assigned to this graph', '',
+              {
+                showOn: "creation",
+                style:"alert",
+                stem: true,
+                target: null,
+                tipJoint: "top left",
+                targetJoint: "bottom right",
+                showEffectDuration: 0,
+                showEffect: "none"
+              }
+            )
+            window.setTimeout(-> 
+              warningTip.hide()
+            , 5000)
+          )
 
       @drawStats(options)
 
@@ -195,52 +269,332 @@
 
       if radiusIdx > -1 && options[radiusIdx].value then R = Math.max(options[radiusIdx].value, 1)
 
-      @setViewMembers()
+      @setViewMembers(options)
       @placeData()
 
       @drawGraph(options)
       @drawLegend(options)
 
-    drawDivs: (choice) ->
+    drawDivs: (choice, widthOrSize) ->
       self = @
       values = @graphData.dataArray.map((arrayMem) -> arrayMem.data.value())
       values.sort((a,b)-> a-b)
       valLen = values.length
-      if choice == "Two Equal"
-        midIdx = Math.floor(values.length / 2) - 1
-        midVal = (values[midIdx]+values[midIdx+1])/2
-        breaks = [values[0], midVal, values[valLen-1]]
-        breakPopulations = [midIdx+1, valLen-midIdx-1]
-        @svg.selectAll("divTop")
-          .data(breaks)
-          .enter()
-          .append("rect")
-            .attr("x", (d) -> self.x(d) - 1.5)
-            .attr("y", 0)
-            .attr("width", 3)
-            .attr("height", 3)
-            .attr("fill", "green")
-        @svg.selectAll("divLine")
-          .data(breaks)
-          .enter()
-          .append("line")
-            .attr("x1", (d) -> self.x(d))
-            .attr("x2", (d) -> self.x(d))
-            .attr("y1", self.y(8))
-            .attr("y2", self.y(self.style.height - 3))
-            .attr("stroke-width", 1)
-            .attr("stroke", "black")
-        @svg.selectAll("divLabels")
+     
+      if typeof(choice) == "string"
+        if choice == "Two Equal"
+          midIdx = Math.floor(valLen / 2) - 1
+          midVal = (values[midIdx]+values[midIdx+1])/2 
+          breaks = [values[0], midVal, values[valLen-1]]
+          breakPopulations = [midIdx+1, valLen-midIdx-1]
+
+        if choice == "Four Equal"
+          div = Math.floor((valLen)/4)
+          mod = valLen%4
+          breakIdxs = [0, div-1]
+          for i in [2...5]
+            if i > 4-mod then breakIdxs[i] = breakIdxs[i-1]+div+1 else breakIdxs[i] = breakIdxs[i-1]+div
+
+          breaks = [values[0]]
+          for i in [1...4]
+            breaks[i] = (values[breakIdxs[i]] + values[breakIdxs[i] + 1])/2
+          breaks[4] = values[breakIdxs[4]]
+
+          breakPopulations = [div]
+          for i in [1...4]
+            breakPopulations[i] = breakIdxs[i+1] - breakIdxs[i]
+
+      else if typeof(choice) == "number"
+        if widthOrSize == "size"
+          breakIdxs = [0]
+          breaks = [values[0]]
+          breakPopulations = [0]
+          i=0
+          for value, idx in values
+            if (idx+1)%choice == 0
+              if idx not in breakIdxs
+                breakIdxs.push(idx)
+                breakPopulations[i]++
+                i++
+              if idx+1 != values.length
+                breakPopulations[i] = 0
+            else
+              breakPopulations[i]++
+
+          if values.length-1 not in breakIdxs
+            breakIdxs.push(values.length-1)
+
+          for j in [1...breakIdxs.length-1]
+            breaks[j] = (values[breakIdxs[j]] + values[breakIdxs[j] + 1])/2
+
+          breaks.push( values[breakIdxs[breakIdxs.length-1]] )
+
+        else if widthOrSize == "width"
+          breaks = []
+          xDomain = self.x.domain()
+          spot = xDomain[0]
+          while spot <= xDomain[1]
+            breaks.push(spot)
+            spot += choice
+          breakPopulations = [0]
+
+          scanIdx = 0
+          for i in [0...breaks.length - 1]
+            breakPopulations[i] = 0
+            while (values[scanIdx] <= breaks[i+1] && scanIdx < values.length)
+              breakPopulations[i]++
+              scanIdx++
+
+          if scanIdx < values.length
+            runoff = values.length - scanIdx
+            self.svg.append("text")
+              .attr("x", -> ((self.x(breaks[breaks.length-1]) + self.x(xDomain[1]))/2))
+              .attr("y", 12)
+              .attr("text-anchor", "middle")
+              .text(runoff)
+              .attr("fill", if runoff == 0 then "red" else "green")
+              .style("font-weight", "bold")
+
+      @svg.selectAll("divTop")
+        .data(breaks)
+        .enter()
+        .append("rect")
+          .attr("x", (d) -> self.x(d) - 1.5)
+          .attr("y", 0)
+          .attr("width", 3)
+          .attr("height", 3)
+          .attr("fill", "orange")
+      @svg.selectAll("divLine")
+        .data(breaks)
+        .enter()
+        .append("line")
+          .attr("x1", (d) -> self.x(d))
+          .attr("x2", (d) -> self.x(d))
+          .attr("y1", self.y(8))
+          .attr("y2", self.y(self.style.height - 3))
+          .attr("stroke-width", 1)
+          .attr("stroke", "black")
+      @svg.selectAll("divLabels")
+        .data(breakPopulations)
+        .enter()
+        .append("text")
+          .attr("x", (d,i) -> (self.x(breaks[i+1])+self.x(breaks[i]))/2)
+          .attr("y", 12)
+          .attr("text-anchor", "middle")
+          .text((d) -> d)
+          .attr("fill", (d) -> if d == 0 then "red" else "green")
+          .style("font-weight", "bold")
+        
+    makeYourOwn: () ->
+      self = @
+      xDomain = @x.domain()
+      xRange = @x.range()
+      values = @graphData.dataArray.map((arrayMem) -> arrayMem.data.value())
+      values.sort((a,b)-> a-b)
+      @customDivNum = @customDivs.length
+
+      displayPops = (breaks) ->
+        sortedBreaks = breaks.slice(0).sort((a,b)->a-b)
+        idx = 0
+        while idx < sortedBreaks.length
+          if sortedBreaks[idx] == -Infinity
+            sortedBreaks.splice(idx,1)
+          else
+            idx++
+        scanIdx = 0
+        breakPopulations = []
+        for i in [0...sortedBreaks.length]
+          breakPopulations[i] = 0
+          while (values[scanIdx] <= sortedBreaks[i] && scanIdx < values.length)
+            breakPopulations[i]++
+            scanIdx++
+        breakPopulations.push(values.length - scanIdx)
+        sortedBreaks.push(xDomain[1])
+        sortedBreaks.push(xDomain[0])
+        sortedBreaks.sort((a,b)->a-b)
+        self.svg.selectAll("#populationTag").remove()
+        self.svg.selectAll("#populationTag")
           .data(breakPopulations)
           .enter()
           .append("text")
-            .attr("x", (d,i) -> (self.x(breaks[i+1])+self.x(breaks[i]))/2)
+            .text((d,i) -> d)
+            .attr("x", (d,i) -> self.x((sortedBreaks[i]+sortedBreaks[i+1])/2))
+            .attr("id", "populationTag")
             .attr("y", 12)
             .attr("text-anchor", "middle")
-            .text((d) -> d)
-            .attr("fill", "purple")
+            .attr("fill", (d,i) ->  if d == 0 then "red" else "green" )
+            .style("font-weight", "bold")
+
+      dragStart = (d,i) ->
+        d3.event.sourceEvent.stopPropagation()
+        maskCirc = self.svg.append("circle")
+          .attr("id", "mask")
+          .attr("fill", "red")
+          .style("opacity", 0)
+          .attr("r", 3)
+          .attr("transform", "translate(#{d3.mouse(self.svg.node())[0]},#{d3.mouse(self.svg.node())[1]})")
+        d3.select(this).select("rect").attr("fill", "yellow")
+      dragging = (d,i) ->
+        self.svg.select("#mask")
+          .attr("transform", "translate(#{d3.mouse(self.svg.node())[0]},#{d3.mouse(self.svg.node())[1]})")        
+        if d.x + d3.event.dx >= xRange[0] && d.x+d3.event.dx <= xRange[1]+20
+          self.svg.select("#deleteWarning").remove()
+          d.x += d3.event.dx
+          d3.select(this).attr("transform", "translate(#{d.x},0)")
+          datum = d3.select(this).datum()
+          id = datum["id"]
+          self.customDivs[id] = self.x.invert(datum["x"])
+          displayPops(self.customDivs)
+        if d.x > xRange[1]
+          self.svg.select("#deleteWarning").remove()
+          self.svg.append("text")
+            .attr("id", "deleteWarning")
+            .attr("x", d.x)
+            .attr("y", -5)
+            .attr("text-anchor", "end")
+            .attr("fill", "red")
+            .text("Drop here to delete this flag")
+
+      dragEnd = (d,i) ->
+        self.svg.select("#mask").remove()
+        d3.event.sourceEvent.stopPropagation()
+        d3.select(this).select("rect").attr("fill", "green")
+        if d.x > xRange[1]
+          d3.select(this).remove()
+          self.svg.select("#deleteWarning").remove()
+          datum = d3.select(this).datum()
+          id = datum["id"]
+          self.customDivs[id] = -Infinity
+          displayPops(self.customDivs)
+
+      drag = d3.behavior.drag()
+              .on("dragstart", dragStart)
+              .on("drag", dragging)
+              .on("dragend", dragEnd)
 
 
+      dragStart2 =  (d,i) ->                              #All drag2 handlers are specifically for the creator flag at the leftmost point on the x-axis since it makes a new flag when dragged
+        self.customDivs.push(self.x(d3.mouse(this)[0]))   #Instead of it itself being dragged about
+        d3.event.sourceEvent.stopPropagation()
+        maskCirc = self.svg.append("circle")
+          .attr("id", "mask")
+          .attr("fill", "red")
+          .style("opacity", 0)
+          .attr("r", 3)
+          .attr("transform", "translate(#{d3.mouse(this)[0]},#{d3.mouse(this)[1]})")
+        newDiv = self.svg.append("svg:g")
+          .data([{"x":d3.mouse(this)[0]}])  
+          .attr("id", "divLine#{self.customDivNum}")
+          .attr("transform","translate(#{d3.mouse(this)[0]}, 0)")
+          .on("click", -> 
+            d3.event.stopPropagation())
+          .call(drag)
+
+        newDiv.append("line")
+          .attr("x1", 0)
+          .attr("x2", 0)
+          .attr("y1", self.y(8))
+          .attr("y2", 0)
+          .attr("stroke-width", 1)
+          .attr("stroke", "black")
+        newDiv.append("rect")
+          .attr("x", self.x(xDomain[0]))
+          .attr("y", 0)
+          .attr("width", 10)
+          .attr("height", 10)
+          .attr("fill", "yellow")
+          .attr("stroke", "green")
+          .attr("stroke-width", 1.5)
+      dragging2 = (d,i) ->
+        self.svg.select("#mask")
+          .attr("transform", "translate(#{d3.mouse(this)[0]},#{d3.mouse(this)[1]})")
+        if d.x + d3.event.dx >= xRange[0] && d.x+d3.event.dx <= xRange[1] + 20
+          self.svg.select("#deleteWarning").remove()
+          d.x += d3.event.dx
+          self.svg.select("#divLine#{self.customDivNum}").attr("transform", "translate(#{d.x},0)")
+          self.customDivs[self.customDivNum] = self.x.invert(d.x)
+          displayPops(self.customDivs)
+        if d.x > xRange[1]
+          self.svg.select("#deleteWarning").remove()
+          self.svg.append("text")
+            .attr("id", "deleteWarning")
+            .attr("x", d.x)
+            .attr("y", -5)
+            .attr("text-anchor", "end")
+            .attr("fill", "red")
+            .text("Drop here to delete this flag")  
+      dragEnd2 = (d,i) ->
+        self.svg.select("#mask").remove()
+        d3.event.sourceEvent.stopPropagation()
+        self.svg.select("#divLine#{self.customDivNum}").datum({"x":d.x,"id":self.customDivNum}).select("rect").attr("fill", "green")
+        if d.x > xRange[1]
+          self.svg.select("#divLine#{self.customDivNum}").remove()
+          self.svg.select("#deleteWarning").remove()
+          self.customDivs[self.customDivNum] = -Infinity
+          displayPops(self.customDivs)
+        self.customDivNum++
+        d.x = self.x(xDomain[0])
+
+      drag2 = d3.behavior.drag()
+              .on("dragstart", dragStart2)
+              .on("drag", dragging2) 
+              .on("dragend", dragEnd2)
+
+      start = @svg.append("svg:g")
+                .data([ { "x":self.x(xDomain[0]) } ])
+                .attr("class", "startLine")
+                .attr("transform","translate(#{self.x(xDomain[0])}, 0)")
+                .on("click", -> 
+                  d3.event.sourceEvent.stopPropagation())
+                .call(drag2)
+
+      start.append("line")
+        .attr("x1", (d) -> d.x)
+        .attr("x2", (d) -> d.x)
+        .attr("y1", self.y(8))
+        .attr("y2", 0)
+        .attr("stroke-width", 1)
+        .attr("stroke", "black")
+      start.append("rect")
+        .attr("x", self.x(xDomain[0]))
+        .attr("y", 0)
+        .attr("width", 10)
+        .attr("height", 10)
+        .attr("fill", "green")
+        .attr("stroke", "green")
+        .attr("stroke-width", 1.5)
+      @svg.append("line")
+        .attr("x1", self.x(xDomain[1]))
+        .attr("x2", self.x(xDomain[1]))
+        .attr("y1", self.y(8))
+        .attr("y2", 0)
+        .attr("stroke-width", 1)
+        .attr("stroke", "black")
+
+      if @customDivs.length
+        @customDivs.forEach (divCoord, i) ->
+          if divCoord != -Infinity
+            newGuy = self.svg.append("svg:g")
+                      .data([{"x":self.x(divCoord), "id":i}])
+                      .attr("class", "divLine")
+                      .attr("transform","translate(#{self.x(divCoord)},0)")
+                      .call(drag)
+            newGuy.append("line")
+              .attr("x1", 0)
+              .attr("x2", 0)
+              .attr("y1", self.y(8))
+              .attr("y2", 0)
+              .attr("stroke-width", 1)
+              .attr("stroke", "black")
+            newGuy.append("rect")
+              .attr("x", 0)
+              .attr("y", 0)
+              .attr("width", 10)
+              .attr("height", 10)
+              .attr("fill", "green")
+              .attr("stroke", "green")
+              .attr("stroke-width", 1.5)
+      displayPops(@customDivs)
 
     drawStats: (options) ->
       self = @
@@ -366,7 +720,7 @@
         .whiskers(iqr(1.5))
         .width(@style.width)
         .height(Math.min(@style.height*.75, 270*.75))
-        .domain(@minMaxWPadding(0))
+        .domain(@x.domain())
 
       @svg.selectAll(".box-plot.SeeIt")
         .data([@graphData.dataArray])
@@ -389,7 +743,25 @@
 
 
     options: ->
+      self = @
       [{
+        label: "Editable",
+        type: "checkbox",
+        default: false
+      },
+      {
+        label: "Graph Scale Min"
+        type: "numeric"
+        default: ->
+          self.minMaxWPadding(0)[0]
+      },
+      {
+        label: "Graph Scale Max"
+        type: "numeric"
+        default: ->
+          self.minMaxWPadding(0)[1]
+      },
+      {
         label: "Box Plot",
         type: "checkbox",
         default: ->
@@ -398,8 +770,23 @@
       {
         label: "Dividers",
         type: "select",
-        values: ['None', 'Two Equal'],
+        values: ['None', 'Two Equal', 'Four Equal'],
         default: "None"
+      },
+      {
+        label: "Fixed Size Dividers",
+        type: "numeric",
+        default: 0
+      },
+      {
+        label: "Fixed Width Dividers",
+        type: "numeric",
+        default: 0
+      },
+      {
+        label: "Make your own Groups",
+        type: "checkbox",
+        default: false
       },
       {
         label: "Show Median",
