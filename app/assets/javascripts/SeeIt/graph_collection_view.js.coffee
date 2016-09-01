@@ -40,8 +40,8 @@
           self.graphs[graphData.graph].updateFilters(graphData.filters)
       )
 
-      @listenTo(@app, 'graph:create', (graphType) ->
-        self.addGraph.call(self, graphType)
+      @listenTo(@app, 'graph:create', (graphType, inputGraphName) ->
+        self.addGraph.call(self, graphType, inputGraphName)
       )
 
       @listenTo(@app, 'graphs:requestIDs', (cb) ->
@@ -67,14 +67,17 @@
           graph.trigger('size:change')
       )
 
-    findValidId: ->
-      @graphId = "Graph 1"
-      idx = 1
+    findValidId: (inputGraphName) ->
+      if inputGraphName == undefined || inputGraphName == ""
+        @graphId = "Graph 1"
+        idx = 1
+        keys = Object.keys(@graphs)
 
-      keys = Object.keys(@graphs)
+        while keys.indexOf(@graphId) != -1
+          @graphId = "Graph #{++idx}"
+      else
+        @graphId = inputGraphName
 
-      while keys.indexOf(@graphId) != -1
-        @graphId = "Graph #{++idx}"
 
     changeGraphId: (oldId, newId) ->
       graph = @graphs[oldId]
@@ -121,10 +124,10 @@
 
       return filters
 
-    addGraph: (graphType) ->
+    addGraph: (graphType, inputGraphName) ->
       self = @
 
-      @findValidId()
+      @findValidId(inputGraphName)
 
       @container.find(".graph-list").append("""
         <li class="SeeIt graph list-group-item">

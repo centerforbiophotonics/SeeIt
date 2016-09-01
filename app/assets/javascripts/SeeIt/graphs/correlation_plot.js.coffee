@@ -134,6 +134,9 @@
 
       drag = d3.behavior.drag()
         .on('drag', (d) ->
+
+          console.log d
+          
           d3.select(@)
             .attr('cx', Math.min(xScale(max.x),Math.max(xScale(min.x), d3.event.x)))
             .attr('cy', Math.min(yScale(min.y),Math.max(yScale(max.y), d3.event.y)))
@@ -158,10 +161,10 @@
 
             element = d3.select(@)
             x = xScale.invert(element.attr('cx'))
-            y = yScale.invert(element.attr('cy'))              
+            y = yScale.invert(element.attr('cy'))
 
             data[idx].x = -> x
-            data[idx].y = -> y    
+            data[idx].y = -> y
 
             squaresIdx = options.map((op) -> op.label).indexOf("Show Squares")
             if squaresIdx > -1 && options[squaresIdx].value then squares = true else squares = false
@@ -202,7 +205,7 @@
           .attr("r", R)
           .attr("cx", xMap)
           .attr("cy", yMap)
-          .style("fill", (d) ->  color(cValue(d))) 
+          .style("fill", (d) ->  color(cValue(d)))
           .style("opacity", opacity)
           .style('cursor', 'move')
           .on("mouseover", (d) ->

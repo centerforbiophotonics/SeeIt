@@ -186,6 +186,8 @@
             $(li).find('a:first').addClass('disabled')
 
 
+
+
     populateGraphSelectBox: ->
       self = @
 

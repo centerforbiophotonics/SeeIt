@@ -1,7 +1,7 @@
 @SeeIt.DataColumn = (->
   class DataColumn
     _.extend(@prototype, Backbone.Events)
-    
+
     constructor: (@app, @header, data, @datasetTitle, @type, @color, editable = true) ->
       if !@color then @color = SeeIt.Utils.getRandomColor()
 
@@ -39,7 +39,9 @@
 
       @setValue = (idx, value, context) ->
         if !context then context = @
-        
+
+        console.log value
+
         if editable && @typeIsCorrect(value)
           data[idx].value = value
           @trigger('data:changed',context, idx)
@@ -135,7 +137,7 @@
     setDatasetTitle: (title) ->
       @datasetTitle = title
 
-    getColor: -> 
+    getColor: ->
       @color
 
     setColor: (color) ->
