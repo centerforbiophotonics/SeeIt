@@ -335,17 +335,37 @@
       self = @
       drag = d3.behavior.drag()
         .on('drag', ->
+          thisId = d3.select(this).attr("id")
+          switch thisId
+            when "top"
+              oppId = "bottom"
+              leftId = "left"
+              rightId = "right"
+            when "right"
+              oppId = "left"
+              leftId = "top"
+              rightId = "bottom"
+            when "bottom"
+              oppId = "top"
+              leftId = "right"
+              rightId = "left"
+            when "left"
+              oppId = "right"
+              leftId = "bottom"
+              rightId = "top"
+
+
           oldX = Number(d3.select(this).attr('x'))
           topNewX = oldX + d3.event.dx + 5
           oldY = Number(d3.select(this).attr('y'))
           topNewY = oldY + d3.event.dy + 5
           d3.select(this).attr('x', topNewX-5).attr('y', topNewY-5)
 
-          oldX = Number(self.svg.select("#bottom").attr('x'))
+          oldX = Number(self.svg.select("##{oppId}").attr('x'))
           botNewX = oldX - d3.event.dx+5
-          oldY = Number(self.svg.select("#bottom").attr('y'))
+          oldY = Number(self.svg.select("##{oppId}").attr('y'))
           botNewY = oldY - d3.event.dy+5
-          self.svg.select("#bottom").attr('x', botNewX-5).attr('y', botNewY-5)
+          self.svg.select("##{oppId}").attr('x', botNewX-5).attr('y', botNewY-5)
 
           centerX = Number(self.svg.select("ellipse").attr('cx'))
           centerY = Number(self.svg.select("ellipse").attr('cy'))
@@ -354,15 +374,23 @@
           normV = {'x': v.x/magV, 'y': v.y/magV}
           perpV = {'x': -normV.y, 'y': normV.x}
           rotAngle = (Math.atan2(normV.y, normV.x) / (2*Math.PI)) * 360 
-          rotAngle = -(rotAngle - 90)
+          if thisId == "top" || thisId == "bottom"
+            rotAngle -= 90
 
-          rx = Number(self.svg.select("ellipse").attr('rx'))
-          self.svg.select("#left").attr("x", centerX + (perpV.x * rx) - 5).attr("y", centerY - (perpV.y * rx) - 5)
-          self.svg.select("#right").attr("x", centerX - (perpV.x * rx) - 5).attr("y", centerY + (perpV.y * rx) - 5)
+          switch thisId
+            when "top", "bottom"
+              stableRadius = Number(self.svg.select("ellipse").attr('rx'))
+              radiusLabel = "ry"
+            when "right", "left"
+              stableRadius = Number(self.svg.select("ellipse").attr('ry'))
+              radiusLabel = "rx"
+
+          self.svg.select("##{leftId}").attr("x", centerX + (perpV.x * stableRadius) - 5).attr("y", centerY - (perpV.y * stableRadius) - 5)
+          self.svg.select("##{rightId}").attr("x", centerX - (perpV.x * stableRadius) - 5).attr("y", centerY + (perpV.y * stableRadius) - 5)
 
           self.svg.select("ellipse")
-            .attr("ry", magV)
-            .attr("transform", "rotate(#{rotAngle}, #{centerX}, #{centerY})")
+            .attr(radiusLabel, magV)
+            .attr("transform", "rotate(#{-rotAngle}, #{centerX}, #{centerY})")
       )
       if @ellipsePts.length == 0
         xRange = xScale.range()
@@ -373,41 +401,12 @@
         yQtr = (yRange[0]+yMid)/2
         x3Qt = (xRange[1]+xMid)/2
         y3Qt = (yRange[1]+yMid)/2
-        @ellipsePts.push({"x":xScale.invert(xMid),"y":yScale.invert(y3Qt)}) #[0]Top
-        @ellipsePts.push({"x":xScale.invert(x3Qt),"y":yScale.invert(yMid)}) #[1]Right
-        @ellipsePts.push({"x":xScale.invert(xMid),"y":yScale.invert(yQtr)}) #[2]Bot
-        @ellipsePts.push({"x":xScale.invert(xQtr),"y":yScale.invert(yMid)}) #[3]Left
-        @ellipsePts.push({"x":xScale.invert(xMid),"y":yScale.invert(yMid)}) #[4]Ellipse Center
+        @ellipsePts.push({"x":xScale.invert(xMid),"y":yScale.invert(yMid)}) #[0]Ellipse Center
+        @ellipsePts.push({"x":xScale.invert(xMid),"y":yScale.invert(y3Qt)}) #[1]Top
+        @ellipsePts.push({"x":xScale.invert(x3Qt),"y":yScale.invert(yMid)}) #[2]Right
+        @ellipsePts.push({"x":xScale.invert(xMid),"y":yScale.invert(yQtr)}) #[3]Bot
+        @ellipsePts.push({"x":xScale.invert(xQtr),"y":yScale.invert(yMid)}) #[4]Left
 
-        @svg.append("rect")
-          .attr("x", xQtr-5)
-          .attr("y", yMid-5)
-          .attr("width", 10)
-          .attr("height", 10)
-          .style("fill", "red")
-          .attr("id", "left")
-        @svg.append("rect")
-          .attr("x", x3Qt-5)
-          .attr("y", yMid-5)
-          .attr("width", 10)
-          .attr("height", 10)
-          .style("fill", "red")
-          .attr("id", "right")      
-        @svg.append("rect")
-          .attr("x", xMid-5)
-          .attr("y", yQtr-5)
-          .attr("width", 10)
-          .attr("height", 10)
-          .style("fill", "red")
-          .attr("id", "bottom")
-        @svg.append("rect")
-          .attr("x", xMid-5)
-          .attr("y", y3Qt-5)
-          .attr("width", 10)
-          .attr("height", 10)
-          .style("fill", "red")
-          .attr("id", "top")
-          .call(drag)
         @svg.append("ellipse")
           .attr("cx", xMid)
           .attr("cy", yMid)
@@ -416,12 +415,44 @@
           .style("stroke", "red")
           .style("stroke-width", 2)
           .style("fill", "none")
+        @svg.append("rect")
+          .attr("x", xQtr-5)
+          .attr("y", yMid-5)
+          .attr("width", 10)
+          .attr("height", 10)
+          .style("fill", "red")
+          .attr("id", "left")
+          .call(drag)
+        @svg.append("rect")
+          .attr("x", x3Qt-5)
+          .attr("y", yMid-5)
+          .attr("width", 10)
+          .attr("height", 10)
+          .style("fill", "red")
+          .attr("id", "right")      
+          .call(drag)
+        @svg.append("rect")
+          .attr("x", xMid-5)
+          .attr("y", yQtr-5)
+          .attr("width", 10)
+          .attr("height", 10)
+          .style("fill", "red")
+          .attr("id", "bottom")
+          .call(drag)
+        @svg.append("rect")
+          .attr("x", xMid-5)
+          .attr("y", y3Qt-5)
+          .attr("width", 10)
+          .attr("height", 10)
+          .style("fill", "red")
+          .attr("id", "top")
+          .call(drag)
 
       else
         y3Qt = yScale(@ellipsePts[0].y)
         xQtr = xScale(@ellipsePts[3].x)
         for pt, i in @ellipsePts
-          if i < 4
+          if i > 0
             @svg.append("rect")
               .attr("x", xScale(pt.x)-5)
               .attr("y", yScale(pt.y)-5)
