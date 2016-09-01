@@ -131,18 +131,18 @@
   left: 0;
 }
 
-@media (min-width: 992px) {
+.SeeIt.options-wrapper {
+  min-height: 270px;
+  overflow-y: auto;
+}
+
+/*@media (min-width: 992px) {
   .SeeIt.row .SeeIt.Data {
     height: 100%;
   }
 
   .SeeIt.Graphs .SeeIt.graph-buttons {
     float: right;
-  }
-
-  .SeeIt.options-wrapper {
-    min-height: 270px;
-    overflow-y: auto;
   }
 
   .SeeIt.Graphs {
@@ -197,7 +197,7 @@
 /*  .SeeIt.graph-title .glyphicon {
     float: right;
   }*/
-}
+}*/
 
 .SeeIt.row {
   height: 100%;

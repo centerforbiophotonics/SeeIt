@@ -98,9 +98,6 @@
       minIdx = options.map((option) -> option.label).indexOf("Graph Scale Min")
       maxIdx = options.map((option) -> option.label).indexOf("Graph Scale Max")
 
-      console.log(options);
-
-
       @x.domain([options[minIdx].value, options[maxIdx].value])
 #      @x.domain(@minMaxWPadding(0))
       @y.domain([0,@style.height])

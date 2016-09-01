@@ -376,7 +376,7 @@
       @container.html("""
         <div class="SeeIt graph-panel panel panel-default">
           <div class="SeeIt panel-heading">
-            <div class="btn-group SeeIt graph-buttons" role="group">
+            <div class="btn-group SeeIt graph-buttons pull-right" role="group">
               <button role="button" class="SeeIt options-button btn btn-default" title="Graph Options"><span class="glyphicon glyphicon-wrench"></span></button>
               <button class="SeeIt collapse-footer btn btn-default" title='Show/Hide Footer'><span class="glyphicon glyphicon-chevron-up"></span></button>
               <button class="SeeIt collapse-btn btn btn-default" title='Show/Hide Graph'><span class="glyphicon glyphicon-collapse-down"></span></ button>

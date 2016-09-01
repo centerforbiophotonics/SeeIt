@@ -41,7 +41,7 @@
             <ul class="nav nav-tabs device-small" role="tablist">
               <li class="tab active" id="id-data"role="presentation"><a href="#data_tab" aria-controls="data" role="tab" data-toggle="tab">Data</a></li>
               <li class="tab" id="id-graphs"role="presentation"><a href="#graphs_tab" aria-controls="data" role="tab" data-toggle="tab">Graphs</a></li>
-              <li class="tab" id="id-graphs"role="presentation"><a href="#spreadsheets_tab" aria-controls="data" role="tab" data-toggle="tab">Spreadsheet</a></li>
+              <li class="tab" id="id-spreadsheets"role="presentation"><a href="#spreadsheets_tab" aria-controls="data" role="tab" data-toggle="tab">Spreadsheet</a></li>
             </ul>
 
             <div class="tab-content">
@@ -84,9 +84,15 @@
     displayTabs: (tab_trigger)->
       if $("#left-region").width() < 1003 && !tab_trigger
         $(".device-small").css("display","block")
+
+        $(".tab-pane[id='data_tab']").addClass("active")
         $(".tab-pane[id='graphs_tab']").removeClass("active")
         $(".tab-pane[id='spreadsheets_tab']").removeClass("active")
-        
+
+        $(".tab[id='id-data']").addClass("active")
+        $(".tab[id='id-graphs']").removeClass("active")
+        $(".tab[id='id-spreadsheets']").removeClass("active")
+
         $(".SeeIt.Data").removeClass("col-md-3")
         $(".SeeIt.Graphs").removeClass("col-md-9")
         $(".SeeIt.Spreadsheet").removeClass("col-md-9")
@@ -96,6 +102,7 @@
 
       else if $("#left-region").width() >= 1003 && !tab_trigger
         $(".device-small").css("display","none")
+        
         $(".tab-pane").addClass("active")
 
         $(".SeeIt.Data").removeClass("col-md-12")
