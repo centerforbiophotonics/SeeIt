@@ -333,6 +333,49 @@
 
     drawEllipse: (xScale, yScale, min, max) ->
       self = @
+      midDrag = d3.behavior.drag()
+        .on('drag', ->
+            deltX = d3.event.dx
+            deltY = d3.event.dy
+            oldX = Number(d3.select(this).attr('x'))
+            oldY = Number(d3.select(this).attr('y'))
+            d3.select(this).attr('x', oldX+deltX).attr('y', oldY+deltY)
+            self.ellipsePts[0] = {"x":xScale.invert(oldX+deltX+5), "y":yScale.invert(oldY+deltY+5)}
+
+            top = self.svg.select("#top")
+            right = self.svg.select("#right")
+            bot = self.svg.select("#bottom")
+            left = self.svg.select("#left")
+            ellipse = self.svg.select("ellipse")
+
+            oldX = Number(top.attr('x'))
+            oldY = Number(top.attr('y'))
+            top.attr('x', oldX+deltX).attr('y', oldY+deltY)
+            self.ellipsePts[1] = {"x":xScale.invert(oldX+deltX+5), "y":yScale.invert(oldY+deltY+5)}
+
+            oldX = Number(right.attr('x'))
+            oldY = Number(right.attr('y'))
+            right.attr('x', oldX+deltX).attr('y', oldY+deltY)
+            self.ellipsePts[2] = {"x":xScale.invert(oldX+deltX+5), "y":yScale.invert(oldY+deltY+5)}
+
+            oldX = Number(bot.attr('x'))
+            oldY = Number(bot.attr('y'))
+            bot.attr('x', oldX+deltX).attr('y', oldY+deltY) 
+            self.ellipsePts[3] = {"x":xScale.invert(oldX+deltX+5), "y":yScale.invert(oldY+deltY+5)}
+
+            oldX = Number(left.attr('x'))
+            oldY = Number(left.attr('y'))
+            left.attr('x', oldX+deltX).attr('y', oldY+deltY) 
+            self.ellipsePts[4] = {"x":xScale.invert(oldX+deltX+5), "y":yScale.invert(oldY+deltY+5)}
+
+            oldX = Number(ellipse.attr('cx'))
+            oldY = Number(ellipse.attr('cy'))
+            angle = self.ellipsePts[5].angle
+            ellipse.attr('transform', null)
+            ellipse.attr('cx', oldX+deltX).attr('cy', oldY+deltY)
+            ellipse.attr('transform', "rotate(#{angle},#{oldX+deltX},#{oldY+deltY})")
+          )
+
       drag = d3.behavior.drag()
         .on('drag', ->
           thisId = d3.select(this).attr("id")
@@ -354,18 +397,19 @@
               leftId = "bottom"
               rightId = "top"
 
-
           oldX = Number(d3.select(this).attr('x'))
           topNewX = oldX + d3.event.dx + 5
           oldY = Number(d3.select(this).attr('y'))
           topNewY = oldY + d3.event.dy + 5
           d3.select(this).attr('x', topNewX-5).attr('y', topNewY-5)
+          self.ellipsePts[1] = {"x":xScale.invert(topNewX), "y":yScale.invert(topNewY)}
 
           oldX = Number(self.svg.select("##{oppId}").attr('x'))
           botNewX = oldX - d3.event.dx+5
           oldY = Number(self.svg.select("##{oppId}").attr('y'))
           botNewY = oldY - d3.event.dy+5
           self.svg.select("##{oppId}").attr('x', botNewX-5).attr('y', botNewY-5)
+          self.ellipsePts[3] = {"x":xScale.invert(botNewX), "y":yScale.invert(botNewY)}
 
           centerX = Number(self.svg.select("ellipse").attr('cx'))
           centerY = Number(self.svg.select("ellipse").attr('cy'))
@@ -386,11 +430,16 @@
               radiusLabel = "rx"
 
           self.svg.select("##{leftId}").attr("x", centerX + (perpV.x * stableRadius) - 5).attr("y", centerY - (perpV.y * stableRadius) - 5)
+          self.ellipsePts[4] = {"x": xScale.invert(centerX + (perpV.x*stableRadius)), "y": yScale.invert(centerY - (perpV.y * stableRadius))}
           self.svg.select("##{rightId}").attr("x", centerX - (perpV.x * stableRadius) - 5).attr("y", centerY + (perpV.y * stableRadius) - 5)
+          self.ellipsePts[2] = {"x": xScale.invert(centerX - (perpV.x * stableRadius)), "y": yScale.invert(centerY + (perpV.y * stableRadius))}
+
 
           self.svg.select("ellipse")
             .attr(radiusLabel, magV)
             .attr("transform", "rotate(#{-rotAngle}, #{centerX}, #{centerY})")
+          self.ellipsePts[5][radiusLabel] = magV
+          self.ellipsePts[5].angle = -rotAngle
       )
       if @ellipsePts.length == 0
         xRange = xScale.range()
@@ -406,6 +455,7 @@
         @ellipsePts.push({"x":xScale.invert(x3Qt),"y":yScale.invert(yMid)}) #[2]Right
         @ellipsePts.push({"x":xScale.invert(xMid),"y":yScale.invert(yQtr)}) #[3]Bot
         @ellipsePts.push({"x":xScale.invert(xQtr),"y":yScale.invert(yMid)}) #[4]Left
+        @ellipsePts.push({"angle":0, "rx":xMid-xQtr, "ry":yMid-y3Qt})       #[5]ExtraData
 
         @svg.append("ellipse")
           .attr("cx", xMid)
@@ -447,12 +497,23 @@
           .style("fill", "red")
           .attr("id", "top")
           .call(drag)
+        @svg.append("rect")
+          .attr("x", xMid-5)
+          .attr("y", yMid-5)
+          .attr("width", 10)
+          .attr("height", 10)
+          .style("fill", "red")
+          .style("fill-opacity", 0.3)
+          .style("stroke", "red")
+          .style("stroke-width", 1)
+          .attr("id", "anchor")
+          .call(midDrag)
 
       else
-        y3Qt = yScale(@ellipsePts[0].y)
-        xQtr = xScale(@ellipsePts[3].x)
+        y3Qt = yScale(@ellipsePts[1].y)
+        xQtr = xScale(@ellipsePts[4].x)
         for pt, i in @ellipsePts
-          if i > 0
+          if i > 0 && i < 5
             @svg.append("rect")
               .attr("x", xScale(pt.x)-5)
               .attr("y", yScale(pt.y)-5)
@@ -461,21 +522,55 @@
               .style("fill", "red")
               .attr("id", ->
                 switch i
-                  when 0 then return "top"
-                  when 1 then return "right"
-                  when 2 then return "bottom"
-                  when 3 then return "left"
+                  when 1 
+                    console.log "top", xScale(pt.x), yScale(pt.y) 
+                    return "top"
+                  when 2 
+                    console.log "right", xScale(pt.x), yScale(pt.y)
+                    return "right"
+                  when 3  
+                    return "bottom"
+                  when 4  
+                    return "left"
               )
               .call(drag)
-          else
+          else if i==0
+            console.log "center", xScale(pt.x), yScale(pt.y)
+            topPt = @ellipsePts[1]
+            rightPt = @ellipsePts[2]
+            ry = Math.sqrt((xScale(topPt.x) - xScale(pt.x))**2 + (yScale(topPt.y) - yScale(pt.y))**2)
+            rx = Math.sqrt((xScale(rightPt.x) - xScale(pt.x))**2 + (yScale(rightPt.y) - yScale(pt.y))**2)
+
+            ydiff = yScale(pt.y) - yScale(rightPt.y)
+            xdiff = xScale(rightPt.x) - xScale(pt.x)
+            console.log "x and y diffs", xdiff, ydiff
+            console.log "atan is", Math.atan2(ydiff, xdiff)
+            console.log "then divided by 2pi", Math.atan2(ydiff, xdiff) / (2*Math.PI)
+            angle = (Math.atan2(ydiff, xdiff) / (2*Math.PI)) * 360
+            angle = -angle
+            @ellipsePts[5].angle = angle
+
             @svg.append("ellipse")
               .attr("cx", xScale(pt.x))
               .attr("cy", yScale(pt.y))
-              .attr("rx", xScale(pt.x)-xQtr)
-              .attr("ry", yScale(pt.y)-y3Qt)
+              .attr("rx", rx)
+              .attr("ry", ry)
               .style("stroke", "red")
               .style("stroke-width", 2)
               .style("fill", "none")
+              .attr("transform", "rotate(#{angle},#{xScale(pt.x)},#{yScale(pt.y)})")
+            @svg.append("rect")
+              .attr("x", xScale(pt.x)-5)
+              .attr("y", yScale(pt.y)-5)
+              .attr("width", 10)
+              .attr("height", 10)
+              .style("fill", "red")
+              .style("fill", "red")
+              .style("fill-opacity", 0.3)
+              .style("stroke", "red")
+              .style("stroke-width", 1)
+              .attr("id", "anchor")
+              .call(midDrag)              
 
     clearGraph: ->
       @container.html("")
