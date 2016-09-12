@@ -71,6 +71,29 @@
     updateColors: (options) ->
       @svg.selectAll('.dot.SeeIt').style('fill', (d) -> d.color())
 
+
+    minMaxPadded: () ->
+      xmin = Infinity
+      xmax = -Infinity
+      ymin = Infinity
+      ymax = -Infinity
+
+      xColumn = @dataset[0].data[0]
+      xColumn.data().forEach (d) ->
+        xmax = if d.value() then Math.max(xmax, d.value()) else xmax
+        xmin = if d.value() then Math.min(xmin, d.value()) else xmin 
+      yColumn = @dataset[1].data[0]
+      yColumn.data().forEach (d) ->
+        ymax = if d.value() then Math.max(ymax, d.value()) else ymax 
+        ymin = if d.value() then Math.min(ymin, d.value()) else ymin
+
+      x = [Math.floor(xmin) - 1, Math.ceil(xmax) + 1]
+      y = [Math.floor(ymin) - 1, Math.ceil(ymax) + 1]
+      if x[0] == x[1] then x[1] += 1
+      if y[0] == y[1] then y[1] += 1
+
+      return [x, y]
+
     draw: (options = []) ->
       self = @
 
@@ -107,14 +130,19 @@
       cValue = (d) -> d.label()
       color = d3.scale.category10()
 
+      xMinIdx = options.map((op)->op.label).indexOf('X Axis Min')
+      xMaxIdx = options.map((op)->op.label).indexOf('X Axis Max')
+      yMinIdx = options.map((op)->op.label).indexOf('Y Axis Min')
+      yMaxIdx = options.map((op)->op.label).indexOf('Y Axis Max')
+
       min = {
-        x: d3.min(@data, xValue)-1
-        y: d3.min(@data, yValue)-1
+        x: options[xMinIdx].value
+        y: options[yMinIdx].value
       }
 
       max = {
-        x: d3.max(@data, xValue)+1
-        y: d3.max(@data, yValue)+1
+        x: options[xMaxIdx].value
+        y: options[yMaxIdx].value
       }
 
       xScale.domain([min.x, max.x])
@@ -638,6 +666,7 @@
     destroy: ->
 
     options: ->
+      self = @
       [
         {
           label: "Show Least Squares Regression Line",
@@ -659,6 +688,30 @@
           type: "checkbox",
           default: true
         },
+        {
+          label: "X Axis Min",
+          type: "numeric",
+          default: ->
+            self.minMaxPadded()[0][0]
+        },
+        {
+          label: "X Axis Max",
+          type: "numeric",
+          default: ->
+            self.minMaxPadded()[0][1]
+        },
+        {
+          label: "Y Axis Min",
+          type: "numeric",
+          default: ->
+            self.minMaxPadded()[1][0]
+        },
+        {
+          label: "Y Axis Max",
+          type: "numeric",
+          default: ->
+            self.minMaxPadded()[1][1]
+        },        
         {
           label: "Dot Radius",
           type: "numeric",
