@@ -72,7 +72,7 @@
       @svg.selectAll('.dot.SeeIt').style('fill', (d) -> d.color())
 
 
-    minMaxPadded: () ->
+    minMaxPadded: (noPad = false) ->
       xmin = Infinity
       xmax = -Infinity
       ymin = Infinity
@@ -87,12 +87,19 @@
         ymax = if d.value() then Math.max(ymax, d.value()) else ymax 
         ymin = if d.value() then Math.min(ymin, d.value()) else ymin
 
-      x = [Math.floor(xmin) - 1, Math.ceil(xmax) + 1]
-      y = [Math.floor(ymin) - 1, Math.ceil(ymax) + 1]
-      if x[0] == x[1] then x[1] += 1
-      if y[0] == y[1] then y[1] += 1
+      if !noPad
+        x = [Math.floor(xmin) - 1, Math.ceil(xmax) + 1]
+        y = [Math.floor(ymin) - 1, Math.ceil(ymax) + 1]
+        if x[0] == x[1] then x[1] += 1
+        if y[0] == y[1] then y[1] += 1
 
-      return [x, y]
+        return [x, y]
+
+      else
+        x = [xmin, xmax]
+        y = [ymin, ymax]
+
+        return[x, y]
 
     draw: (options = []) ->
       self = @
@@ -266,6 +273,10 @@
       if medMedIdx > -1 && options[medMedIdx].value
         @drawMedianMedian(xScale, yScale)
 
+      dyoLstSqrIdx = options.map((op) -> op.label).indexOf("Draw Your Least Squares Line")
+      if dyoLstSqrIdx > -1 && options[dyoLstSqrIdx].value
+        @drawYourOwnLeastSquares(xScale, yScale)
+
       ellipseIdx = options.map((op) -> op.label).indexOf("Show Ellipse")
       if ellipseIdx > -1 && options[ellipseIdx].value
         @drawEllipse(xScale, yScale, min, max)
@@ -361,6 +372,38 @@
               .style("stroke-width", 1)
               .style("fill-opacity", .2)
               .attr("id", "leastSquare")
+
+    drawYourOwnLeastSquares: (xScale, yScale) ->
+      self = @
+
+      minMax = self.minMaxPadded(true) #minMax[0] = [xMin, xMax], [1] = [yMin, yMax]
+      yRange = yScale.range()          #             [0]   [1]           [0]   [1]
+      yMid = (yRange[0]+yRange[1])/2
+
+      console.log minMax, yRange, yMid
+
+      @svg.append("line")
+        .attr("x1", xScale(minMax[0][0]))
+        .attr("x2", xScale(minMax[0][1]))
+        .attr("y1", yMid)
+        .attr("y2", yMid)
+        .attr("stroke", "red")
+        .attr("stroke-width", 2)
+        
+      @svg.append("rect")
+        .attr("x", xScale(minMax[0][0]) - 5)
+        .attr("y", yMid - 5)
+        .attr("width", 10)
+        .attr("height", 10)
+        .attr("fill", "red")
+
+      @svg.append("rect")
+        .attr("x", xScale(minMax[0][1]) - 5)
+        .attr("y", yMid - 5)
+        .attr("width", 10)
+        .attr("height", 10)
+        .attr("fill", "red")
+
 
     drawEllipse: (xScale, yScale, min, max) ->
       self = @
@@ -587,13 +630,13 @@
         else 
           groups[2].push(d)
 
+      console.log groups
       medians = [{},{},{}]
       groups.forEach (grp, i) ->
         middle = Math.floor(grp.length/2)
         exes = grp.map((pt) -> pt.x).sort((a,b)->a-b)
         whys = grp.map((pt) -> pt.y).sort((a,b)->a-b)
-        console.log exes
-        console.log whys
+
         if grp.length % 2
           medians[i]['x'] = exes[middle]
           medians[i]['y'] = whys[middle]
@@ -618,7 +661,14 @@
       minY = medMedLine(minX)
       maxX = medians[2].maxX
       maxY = medMedLine(maxX)
-#      @svg.remove("#medMedLine")
+
+      @svg.append("text")
+        .text("Median-Median Line: y = #{medMedSlope.toFixed(5)}x + #{medMedB.toFixed(5)}")
+        .attr("x", 15)
+        .attr("y", 0)
+        .attr("fill", "blue")
+        .attr("font-weight", "bold")
+
       @svg.append("line")
         .attr("x1", xScale(minX))
         .attr("x2", xScale(maxX))
@@ -686,6 +736,11 @@
         {
           label: "Median-Median",
           type: "checkbox",
+          default: false
+        },
+        {
+          label: "Draw Your Least Squares Line",
+          type:"checkbox",
           default: true
         },
         {
