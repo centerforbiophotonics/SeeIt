@@ -234,10 +234,13 @@
       if regressionIdx > -1 && options[regressionIdx].value
         @drawLeastSquares(xScale, yScale, min, max, tooltip, squares)
 
+      medMedIdx = options.map((op) -> op.label).indexOf("Median-Median")
+      if medMedIdx > -1 && options[medMedIdx].value
+        @drawMedianMedian(xScale, yScale)
+
       ellipseIdx = options.map((op) -> op.label).indexOf("Show Ellipse")
       if ellipseIdx > -1 && options[ellipseIdx].value
         @drawEllipse(xScale, yScale, min, max)
-
 
     drawLeastSquares: (xScale, yScale, min, max, tooltip, squares, data) ->
       self = @
@@ -541,6 +544,89 @@
         .attr("text-anchor", "middle")
         .style("font-weight", "bold") 
 
+    drawMedianMedian: (xScale, yScale) ->
+      data = @data.map((d)->{'x':d.x(), 'y':d.y()})
+      data.sort((a,b)->a.x-b.x)
+
+      groups = [[],[],[]]
+      div = data.length / 3
+      
+      data.forEach (d, i) ->
+        if i < Math.round(div)
+          groups[0].push(d)
+        else if i < Math.round(div*2)
+          groups[1].push(d)
+        else 
+          groups[2].push(d)
+
+      medians = [{},{},{}]
+      groups.forEach (grp, i) ->
+        middle = Math.floor(grp.length/2)
+        exes = grp.map((pt) -> pt.x).sort((a,b)->a-b)
+        whys = grp.map((pt) -> pt.y).sort((a,b)->a-b)
+        console.log exes
+        console.log whys
+        if grp.length % 2
+          medians[i]['x'] = exes[middle]
+          medians[i]['y'] = whys[middle]
+        else
+          medians[i]['x'] = (exes[middle-1] + exes[middle]) / 2
+          medians[i]['y'] = (whys[middle-1] + whys[middle]) / 2
+
+        medians[i]['minX'] = Math.min.apply(null,exes)
+        medians[i]['maxX'] = Math.max.apply(null,exes)
+        medians[i]['minY'] = Math.min.apply(null,whys)
+        medians[i]['maxY'] = Math.max.apply(null,whys)
+
+      console.log medians
+
+      medMedSlope = (medians[2].y-medians[0].y)/(medians[2].x - medians[0].x)
+      medXSum = medians[0].x + medians[1].x + medians[2].x
+      medYSum = medians[0].y + medians[1].y + medians[2].y
+      medMedB = (medYSum - (medMedSlope * medXSum)) / 3
+
+      medMedLine = (x) -> (medMedSlope*x) + medMedB
+      minX = medians[0].minX
+      minY = medMedLine(minX)
+      maxX = medians[2].maxX
+      maxY = medMedLine(maxX)
+#      @svg.remove("#medMedLine")
+      @svg.append("line")
+        .attr("x1", xScale(minX))
+        .attr("x2", xScale(maxX))
+        .attr("y1", yScale(minY))
+        .attr("y2", yScale(maxY))
+        .attr("stroke", "blue")
+        .attr("stroke-width", 2)
+        .attr("id", "#medMedLine")
+
+      @svg.selectAll("#medianPt")
+        .data(medians)
+        .enter()
+        .append("path")
+          .attr("d","M-10,-10L10,10M10,-10,L-10,10")
+          .attr("transform",(d)->"translate(#{xScale(d.x)},#{yScale(d.y)}) rotate(45)")
+          .attr("stroke","blue")
+          .attr("stroke-width",1)
+
+      @svg.selectAll("#medianGrp")
+        .data(medians)
+        .enter()
+        .append("rect")
+          .attr("x", (d)->xScale(d.minX))
+          .attr("y", (d)->yScale(d.maxY))
+          .attr("width", (d)->xScale(d.maxX)-xScale(d.minX))
+          .attr("height", (d)->yScale(d.minY)-yScale(d.maxY))
+          .attr("id", "medianGrp")
+          .attr("fill", "blue")
+          .attr("fill-opacity", 0.05)
+          .attr("stroke", "blue")
+          .attr("stroke-width", .5)
+
+
+      
+
+
     clearGraph: ->
       @container.html("")
       @rendered = false
@@ -565,6 +651,11 @@
         },
         {
           label: "Show Ellipse",
+          type: "checkbox",
+          default: false
+        },
+        {
+          label: "Median-Median",
           type: "checkbox",
           default: true
         },
