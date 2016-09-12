@@ -389,7 +389,7 @@
             </div>
           </div>
           <div class="SeeIt graph-panel-content panel-collapse collapse in">
-            <div class="SeeIt panel-body" style='min-height: 300px'>
+            <div class="SeeIt panel-body">
               <div class="SeeIt options-wrapper hidden col-md-3"></div>
               <div class="SeeIt graph-wrapper"></div>
             </div>

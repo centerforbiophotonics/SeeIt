@@ -134,6 +134,7 @@
 .SeeIt.options-wrapper {
   min-height: 270px;
   overflow-y: auto;
+  width: 300px;
 }
 
 /*@media (min-width: 992px) {
@@ -555,4 +556,18 @@ td:not(.htNumeric).SeeIt-htCenter {
 
 .spinner {
   -webkit-animation: rotateFullCircle 1s infinite;
+}
+
+.SeeIt.form-group-checkbox {
+  display: inline;
+}
+
+.SeeIt.checkbox-label {
+  float: left;
+  width: 120px;
+}
+
+.bootstrap-switch {
+  float: right;
+  width: 50px;
 }
