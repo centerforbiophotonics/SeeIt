@@ -47,8 +47,6 @@
 			self = @
 			self.container.find('.panel-body').html('')
 			
-			console.log @options
-			
 			@options.forEach (d) ->
 				if d.type() == "checkbox"
 					self.container.find('.panel-body').append(self.generateOption.call(self, d))
