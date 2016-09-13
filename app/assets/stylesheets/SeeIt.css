@@ -39,11 +39,9 @@
 }
 
 .SeeIt.graph-panel-content .panel-body,
-.SeeIt.graph-panel-content .graph-wrapper
- {
+.SeeIt.graph-panel-content .graph-wrapper {
   height: 100%;
 }
-
 
 .SeeIt.nav-el.left {
   padding-left: 10px;

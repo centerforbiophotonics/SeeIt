@@ -238,11 +238,13 @@
         self.listenTo self.options, 'options:show', ->
           self.container.find('.graph-wrapper').addClass('col-md-9')
           self.container.find('.options-wrapper').removeClass('hidden')
+          self.container.find('.graph-wrapper').css('width', 'calc(100% - 300px)')
           self.graph.trigger('size:change', self.options.getValues())
 
         self.listenTo self.options, 'options:hide', ->
           self.container.find('.graph-wrapper').removeClass('col-md-9')
           self.container.find('.options-wrapper').addClass('hidden')
+          self.container.find('.graph-wrapper').css('width', '')
           self.graph.trigger('size:change', self.options.getValues())
 
         self.listenTo self.options, 'graph:update', ->
