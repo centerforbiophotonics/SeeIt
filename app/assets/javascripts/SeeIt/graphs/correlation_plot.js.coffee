@@ -369,8 +369,8 @@
               .attr("height", (d)->d.len)
               .style("fill", "green")
               .style("stroke", "green")
-              .style("stroke-width", 1)
-              .style("fill-opacity", .2)
+              .style("stroke-width", .5)
+              .style("fill-opacity", .05)
               .attr("id", "leastSquare")
 
     drawYourOwnLeastSquares: (xScale, yScale) ->
@@ -381,7 +381,102 @@
       yMid = (yRange[0]+yRange[1])/2
 
       console.log minMax, yRange, yMid
+      line = {"m":0, "b":yScale.invert(yMid)}
 
+      drag = d3.behavior.drag()
+        .on('drag', ->
+          deltX = d3.event.dx
+          deltY = d3.event.dy
+          thisEnd = d3.select(this)
+          id = thisEnd.attr('id')
+          otherEndTag = if id == "startSquare" then "endSquare" else "startSquare"
+          otherEnd = d3.select("##{otherEndTag}")
+          otherX = Number(otherEnd.attr('x'))
+          otherY = Number(otherEnd.attr('y'))
+
+          oldX = Number(thisEnd.attr('x'))
+          oldY = Number(thisEnd.attr('y'))
+          newX = oldX + deltX + 5
+          newY = oldY + deltY + 5
+          thisEnd.attr("x", newX-5).attr("y", newY-5)
+
+          ourLine = d3.select("#userLine")
+          if id == "startSquare"
+            ourLine.attr("x1", newX).attr("y1", newY)
+          else
+            ourLine.attr("x2", newX).attr("y2", newY)
+
+          line.m = (yScale.invert(newY)-yScale.invert(otherY+5))/(xScale.invert(newX)-xScale.invert(otherX+5))
+          line.b =  yScale.invert(newY) - (line.m * xScale.invert(newX))
+          self.svg.select("#dyoLstSqrEq").text("Y = #{line.m.toFixed(5)}X + #{line.b.toFixed(5)}")
+          newLine = (x) -> (x*line.m) + line.b
+
+          #drawSquares()
+          self.svg.selectAll("#userLeastSquare")
+            .attr("width", (d)->
+              Math.abs(yScale(newLine(d.x))-yScale(d.ptY))
+            )
+            .attr("height", (d)->
+              Math.abs(yScale(newLine(d.x))-yScale(d.ptY))
+            )
+            .attr("x", (d)->
+              tempAbove = newLine(d.x) <= d.ptY
+              tempLen = Math.abs(yScale(newLine(d.x))-yScale(d.ptY))
+              if (tempAbove && line.m>0)||(!tempAbove && line.m<0)
+                return xScale(d.x) - tempLen
+              else
+                return xScale(d.x)
+            )
+            .attr("y", (d)->
+              tempAbove = newLine(d.x) <= d.ptY
+              tempLen = Math.abs(yScale(newLine(d.x))-yScale(d.ptY))
+              if tempAbove
+                return yScale(newLine(d.x)) - tempLen
+              else
+                return yScale(newLine(d.x))
+            )
+        )      
+
+      drawSquares = ->
+        console.log "#{line.m}X + #{line.b}"
+        myData = self.data.map((d)->{'x':d.x(), 'y':d.y()})
+        your_line = (x) ->
+          (x*line.m) + line.b
+        squares = []
+        for datum in myData
+          sideLength = your_line(datum.x) - datum.y
+          xAnchor = datum.x
+          yAnchor = your_line(datum.x)
+          above = if sideLength <= 0 then true else false
+          absLen = Math.abs(yScale(yAnchor - sideLength) - yScale(yAnchor))
+          squares.push {"x":xAnchor,"y":yAnchor,"ptY":datum.y,"len":absLen,"above":above}
+
+        self.svg.selectAll("#userLeastSquare").remove()
+        self.svg.selectAll("#userLeastSquare")
+          .data(squares)
+          .enter()
+          .append("rect")
+            .attr("x", (d)->
+              if (d.above && line.m>0)||(!d.above && line.m<0) 
+                return xScale(d.x) - d.len
+              else
+                return xScale(d.x)
+            )
+            .attr("width", (d)->d.len)
+            .attr("y", (d)->
+              if d.above 
+                return yScale(d.y) - d.len 
+              else
+                return yScale(d.y)
+            )
+            .attr("height", (d)->d.len)
+            .style("fill", "red")
+            .style("stroke", "red")
+            .style("stroke-width", .5)
+            .style("fill-opacity", .05)
+            .attr("id", "userLeastSquare")
+
+      drawSquares()
       @svg.append("line")
         .attr("x1", xScale(minMax[0][0]))
         .attr("x2", xScale(minMax[0][1]))
@@ -389,13 +484,17 @@
         .attr("y2", yMid)
         .attr("stroke", "red")
         .attr("stroke-width", 2)
-        
+        .attr("id", "userLine")
+
       @svg.append("rect")
         .attr("x", xScale(minMax[0][0]) - 5)
         .attr("y", yMid - 5)
         .attr("width", 10)
         .attr("height", 10)
         .attr("fill", "red")
+        .attr("id", "startSquare")
+        .style("cursor", "move")
+        .call(drag)
 
       @svg.append("rect")
         .attr("x", xScale(minMax[0][1]) - 5)
@@ -403,6 +502,17 @@
         .attr("width", 10)
         .attr("height", 10)
         .attr("fill", "red")
+        .attr("id", "endSquare")
+        .style("cursor", "move")
+        .call(drag)
+
+      @svg.append("text")
+        .attr("x", 15)
+        .attr("y", 0)
+        .attr("fill", "red")
+        .text("Y = #{line.m}X + #{line.b}") 
+        .attr("font-weight", "bold")
+        .attr("id", "dyoLstSqrEq")     
 
 
     drawEllipse: (xScale, yScale, min, max) ->
