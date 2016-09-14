@@ -85,10 +85,12 @@
           event.originalEvent.dataTransfer.setData("text", event.target.id)
           event.originalEvent.dataTransfer.setData("datasetName", $(this).attr('name'))
           $(".data-drop-zone").css("background-color", "#FFAFAF")
+          $("#id-graphs").css("background-color", "#FFAFAF")
 
         dragEndListener: (event) ->
           event.preventDefault()
           $(".data-drop-zone").css("background-color", "")
+          $("#id-graphs").css("background-color", "")
       }
 
     newDatasetMaker: ->

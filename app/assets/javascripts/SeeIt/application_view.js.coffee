@@ -26,6 +26,7 @@
         dragEnterListener: (event) ->
           event.preventDefault()
           $(event.target).click()
+          $("#id-graphs").css("background-color", "")
 
         triggerResize: (event) ->
           event.preventDefault()
@@ -72,6 +73,7 @@
         $(".SeeIt.Spreadsheet").addClass("col-md-9")
         
       @container.find('.tab-button').off('dragenter').on('dragenter', @handlers.dragEnterListener)
+      
       @container.find('#id-graphs').off('shown.bs.tab').on('shown.bs.tab', @handlers.triggerResize)
       @container.find('#id-spreadsheets').off('shown.bs.tab').on('shown.bs.tab', @handlers.triggerResize)
       @container.find('#id-data').off('shown.bs.tab').on('shown.bs.tab', @handlers.triggerResize)
@@ -80,7 +82,6 @@
 
 
     displayTabs: ->
-      # console.log $('<rect>').width()
       if $(".Globals").width() < 1003
         $(".device-small").css("display", "block")
         $(".tab-pane").css("display", "")
@@ -91,7 +92,6 @@
         $(".SeeIt.Data").addClass("col-md-12")
         $(".SeeIt.Graphs").addClass("col-md-12")
         $(".SeeIt.Spreadsheet").addClass("col-md-12")
-
 
       else if $(".Globals").width() >= 1003
         $(".device-small").css("display", "none")
@@ -108,7 +108,6 @@
       self = @
       $(window).on 'resize', ->
         self.displayTabs()
-
 
   ApplicationView
 ).call(@)

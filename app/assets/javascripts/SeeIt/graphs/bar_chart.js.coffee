@@ -61,7 +61,7 @@
 
     draw: (options) ->
       self = @
-      console.log "hello"
+
       @container.html("<svg class='SeeIt graph-svg' style='width: 100%; min-height: 270px'></svg>")
           
       nv.addGraph ->
