@@ -57,7 +57,7 @@
             htmlStr += """
                 <li class="#{@navElements[i].class}">#{icon}<a href="#" style="color: #777">#{@navElements[i].title}</a></li> 
               </ul>
-              <div class="modal fade" id="graph-modal" role="dialog">
+              <div class="modal" id="graph-modal" role="dialog">
                 <div class="modal-dialog">
                   <div class="modal-content">
                     <div class="modal-header">
@@ -112,7 +112,7 @@
                 </a>
               </div>
 
-              <div class="modal fade" id="graph-modal" role="dialog">
+              <div class="modal" id="graph-modal" role="dialog">
                 <div class="modal-dialog">
                   <div class="modal-content">
                     <div class="modal-header">
@@ -158,6 +158,7 @@
         $('#graph-modal').modal('hide')
         selectedGraph = toolbar.container.find("#dropdown-form").val()
         $(".addGraph[data-id='"+selectedGraph+"']").trigger("click")
+        $('a[href="#graphs_tab"]').tab('show')
 
     resizeListener: ->
       self = @       
