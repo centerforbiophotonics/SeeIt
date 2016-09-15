@@ -39,11 +39,9 @@
 }
 
 .SeeIt.graph-panel-content .panel-body,
-.SeeIt.graph-panel-content .graph-wrapper
- {
+.SeeIt.graph-panel-content .graph-wrapper {
   height: 100%;
 }
-
 
 .SeeIt.nav-el.left {
   padding-left: 10px;
@@ -131,18 +129,19 @@
   left: 0;
 }
 
-@media (min-width: 992px) {
+.SeeIt.options-wrapper {
+  min-height: 270px;
+  overflow-y: auto;
+  width: 300px;
+}
+
+/*@media (min-width: 992px) {
   .SeeIt.row .SeeIt.Data {
     height: 100%;
   }
 
   .SeeIt.Graphs .SeeIt.graph-buttons {
     float: right;
-  }
-
-  .SeeIt.options-wrapper {
-    min-height: 270px;
-    overflow-y: auto;
   }
 
   .SeeIt.Graphs {
@@ -197,7 +196,7 @@
 /*  .SeeIt.graph-title .glyphicon {
     float: right;
   }*/
-}
+}*/
 
 .SeeIt.row {
   height: 100%;
@@ -555,4 +554,18 @@ td:not(.htNumeric).SeeIt-htCenter {
 
 .spinner {
   -webkit-animation: rotateFullCircle 1s infinite;
+}
+
+.SeeIt.form-group-checkbox {
+  display: inline;
+}
+
+.SeeIt.checkbox-label {
+  float: left;
+  width: 120px;
+}
+
+.bootstrap-switch {
+  float: right;
+  width: 50px;
 }

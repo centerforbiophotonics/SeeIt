@@ -48,8 +48,14 @@
 			self.container.find('.panel-body').html('')
 			
 			@options.forEach (d) ->
-				self.container.find('.panel-body').append(self.generateOption.call(self, d))
-				self.setDefaultValue.call(self, d)
+				if d.type() == "checkbox"
+					self.container.find('.panel-body').append(self.generateOption.call(self, d))
+					self.setDefaultValue.call(self, d)
+
+			@options.forEach (d) ->
+				if d.type() != "checkbox"
+					self.container.find('.panel-body').append(self.generateOption.call(self, d))
+					self.setDefaultValue.call(self, d)
 
 
 			@container.find('.SeeIt.switch').bootstrapSwitch()
@@ -106,7 +112,7 @@
 			switch option.type()
 				when "checkbox"
 					#Generate checkbox
-					checkBoxStr = "<div class='form-group #{if is_disabled then 'hidden' else ''}'><label for='#{id}'>#{option.label()}</label><br><input type='checkbox' class='SeeIt form-control switch' id='#{id}'></div>"
+					checkBoxStr = "<div class='form-group-checkbox #{if is_disabled then 'hidden' else ''}'><div style='display:inline-block; width:150px;'><label class='checkbox-label' for='#{id}'>#{option.label()}</label></div><input type='checkbox' class='SeeIt form-control switch' data-size='mini' id='#{id}'></div>"
 					option.id = id
 					return checkBoxStr
 				when "select"
@@ -133,10 +139,7 @@
 			self = @
 
 			@button.on 'click', ->
-				if $(window).width() >= 992 
-					self.container.css('max-height', self.container.next().height())
-				else
-					self.container.css('max-height', "")
+				self.container.css('max-height', self.container.next().height())
 					
 				self.visible = !self.visible
 
@@ -150,16 +153,10 @@
 				self.trigger('options:hide')
 
 			@on 'graph:maximize', (maximize) ->
-				if $(window).width() >= 992 
-					self.container.css('max-height', self.container.next().height())
-				else
-					self.container.css('max-height', "")
+				self.container.css('max-height', self.container.next().height())
 
 			$(window).on 'resize', ->
-				if $(window).width() >= 992 
-					self.container.css('max-height', self.container.next().height())
-				else
-					self.container.css('max-height', "")
+				self.container.css('max-height', self.container.next().height())
 
 		@randString: (x) ->
 			s = ""

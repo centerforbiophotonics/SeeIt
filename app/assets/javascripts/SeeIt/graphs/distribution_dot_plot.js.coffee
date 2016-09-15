@@ -207,7 +207,7 @@
 
       if fixWidIdx > -1 && options[fixWidIdx].value then @drawDivs(options[fixWidIdx].value, "width")
 
-      mkeYrOwnIdx = options.map((option) -> option.label).indexOf('Make your own Groups')
+      mkeYrOwnIdx = options.map((option) -> option.label).indexOf('Make your own groups')
 
       if mkeYrOwnIdx > -1 && options[mkeYrOwnIdx].value then @makeYourOwn()
 
@@ -803,7 +803,7 @@
         default: 0
       },
       {
-        label: "Make your own Groups",
+        label: "Make your own groups",
         type: "checkbox",
         default: false
       },

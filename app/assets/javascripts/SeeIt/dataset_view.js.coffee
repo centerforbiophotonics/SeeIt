@@ -34,6 +34,7 @@
 
       @on 'spreadsheet:unloaded', ->
         if self.inSpreadsheet then self.container.find('.show-in-spreadsheet').trigger('click')
+        console.log "here"
 
       @listenTo @dataset, 'dataset:title:changed', ->
         self.updateTitle.call(self)

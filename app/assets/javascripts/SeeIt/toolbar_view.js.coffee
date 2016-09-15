@@ -37,54 +37,57 @@
       """
 
       for i of @navElements
-        icon = if @navElements[i].icon then "<div class='iconContainer'>#{@navElements[i].icon}</div>" else ''
+        if i == '0' || i == '1'
+          continue
+        else
+          icon = if @navElements[i].icon then "<div class='iconContainer'>#{@navElements[i].icon}</div>" else ''
 
-        if @navElements[i].type == "dropdown"
-          htmlStr += """
-            <li>
-              <div class="icon_container SeeIt nav-el left" style="display: inline-block">#{icon}</div>
-              <div class="SeeIt nav-el right" id="#{@navElements[i].title}_dropdown">
-                <a href="#graph-modal" data-toggle="modal" data-target="#graph-modal" style="color: #777">
-                  #{@navElements[i].title}
-                </a>
-              </div>
-            </li>
-          """
-        else if @navElements[i].class == "downloadInitOptions"
-          htmlStr += """
-              <li class="#{@navElements[i].class}">#{icon}<a href="#" style="color: #777">#{@navElements[i].title}</a></li> 
-            </ul>
-            <div class="modal fade" id="graph-modal" role="dialog">
-              <div class="modal-dialog">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title">Graph Options</h4>
-                  </div>
-                  <div class="modal-body">
-                    <div class="form-group">
-                      <label for="dropdown-form">Graph Type</label>
-                      <select class="form-control" id="dropdown-form">
-                        #{@populateDropdownModal()}
-                      </select>
+          if @navElements[i].type == "dropdown"
+            htmlStr += """
+              <li>
+                <div class="icon_container SeeIt nav-el left" style="display: inline-block">#{icon}</div>
+                <div class="SeeIt nav-el right" id="#{@navElements[i].title}_dropdown">
+                  <a href="#graph-modal" data-toggle="modal" data-target="#graph-modal" style="color: #777">
+                    #{@navElements[i].title}
+                  </a>
+                </div>
+              </li>
+            """
+          else if @navElements[i].class == "downloadInitOptions"
+            htmlStr += """
+                <li class="#{@navElements[i].class}">#{icon}<a href="#" style="color: #777">#{@navElements[i].title}</a></li> 
+              </ul>
+              <div class="modal fade" id="graph-modal" role="dialog">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal">&times;</button>
+                      <h4 class="modal-title">Graph Options</h4>
                     </div>
-                    <div class="form-group">
-                      <label for="dropdown-form">Graph Name</label>
-                      <input class="form-control" id="inputGraphName" placeholder="Enter name" type="text">
+                    <div class="modal-body">
+                      <div class="form-group">
+                        <label for="dropdown-form">Graph Type</label>
+                        <select class="form-control" id="dropdown-form">
+                          #{@populateDropdownModal()}
+                        </select>
+                      </div>
+                      <div class="form-group">
+                        <label for="dropdown-form">Graph Name</label>
+                        <input class="form-control" id="inputGraphName" placeholder="Enter name" type="text">
+                      </div>
                     </div>
-                  </div>
-                  <div class="modal-footer">
-                    <a href="#" data-dismiss="modal" class="btn">Close</a>
-                    <a href="#" class="btn btn-primary" id="create-graph">Create</a>
+                    <div class="modal-footer">
+                      <a href="#" data-dismiss="modal" class="btn">Close</a>
+                      <a href="#" class="btn btn-primary" id="create-graph">Create</a>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>        
-          """ 
-        else
-          htmlStr += """
-            <li class="#{@navElements[i].class}">#{icon}<a href="#" style="color: #777">#{@navElements[i].title}</a></li> 
-          """
+              </div>        
+            """ 
+          else
+            htmlStr += """
+              <li class="#{@navElements[i].class}">#{icon}<a href="#" style="color: #777">#{@navElements[i].title}</a></li> 
+            """
 
       return htmlStr+"</li>"+"</ul>"
 

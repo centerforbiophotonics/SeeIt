@@ -241,11 +241,13 @@
         self.listenTo self.options, 'options:show', ->
           self.container.find('.graph-wrapper').addClass('col-md-9')
           self.container.find('.options-wrapper').removeClass('hidden')
+          self.container.find('.graph-wrapper').css('width', 'calc(100% - 300px)')
           self.graph.trigger('size:change', self.options.getValues())
 
         self.listenTo self.options, 'options:hide', ->
           self.container.find('.graph-wrapper').removeClass('col-md-9')
           self.container.find('.options-wrapper').addClass('hidden')
+          self.container.find('.graph-wrapper').css('width', '')
           self.graph.trigger('size:change', self.options.getValues())
 
         self.listenTo self.options, 'graph:update', ->
@@ -379,7 +381,7 @@
       @container.html("""
         <div class="SeeIt graph-panel panel panel-default">
           <div class="SeeIt panel-heading">
-            <div class="btn-group SeeIt graph-buttons" role="group">
+            <div class="btn-group SeeIt graph-buttons pull-right" role="group">
               <button role="button" class="SeeIt options-button btn btn-default" title="Graph Options"><span class="glyphicon glyphicon-wrench"></span></button>
               <button class="SeeIt collapse-footer btn btn-default" title='Show/Hide Footer'><span class="glyphicon glyphicon-chevron-up"></span></button>
               <button class="SeeIt collapse-btn btn btn-default" title='Show/Hide Graph'><span class="glyphicon glyphicon-collapse-down"></span></ button>
@@ -392,7 +394,7 @@
             </div>
           </div>
           <div class="SeeIt graph-panel-content panel-collapse collapse in">
-            <div class="SeeIt panel-body" style='min-height: 300px'>
+            <div class="SeeIt panel-body">
               <div class="SeeIt options-wrapper hidden col-md-3"></div>
               <div class="SeeIt graph-wrapper"></div>
             </div>
