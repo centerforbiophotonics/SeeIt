@@ -56,7 +56,7 @@
       return data
 
     refresh: (options) ->
-      d3.select(@container.find('.graph-svg')[0]).datum(@formatData()).transition().duration(500).call(@chartObject);
+      d3.select(@container.find('.graph-svg')[0]).datum(@formatData()).call(@chartObject);
       nv.utils.windowResize(@chartObject.update);
 
     draw: (options) ->

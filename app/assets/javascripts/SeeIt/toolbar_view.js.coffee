@@ -159,6 +159,7 @@
         selectedGraph = toolbar.container.find("#dropdown-form").val()
         $(".addGraph[data-id='"+selectedGraph+"']").trigger("click")
         $('a[href="#graphs_tab"]').tab('show')
+        $("html, body").animate({ scrollTop: $(document).height() - $(window).height() })
 
     resizeListener: ->
       self = @       

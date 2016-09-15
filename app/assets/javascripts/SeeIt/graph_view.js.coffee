@@ -386,7 +386,7 @@
               #{if @graph_editable then '<button class="SeeIt remove btn btn-default" title="Remove Graph"><span class="glyphicon glyphicon-remove"></span></button>' else ''}
             </div>
             <div class="SeeIt graph-title">
-              <div class="SeeIt graph-title-content" id="graph-name">#{@id}</div>
+              <div class="SeeIt graph-title-content" id="#{@stringId(@id)}">#{@id}</div>
               <span class="SeeIt graph-title-edit-icon glyphicon glyphicon-pencil" title='Edit Title'></span>
             </div>
           </div>
@@ -464,6 +464,9 @@
       @container.find(".expanded-data-container .save-filters-all").on 'click', (event) ->
         if self.validateFilters.call(self)
           self.trigger('filter:save-all', self.filterGroups, self.id)
+
+    stringId: (id) ->
+      return id.replace(/\s+/g, '')
 
     validateFilters: ->
       valid = true

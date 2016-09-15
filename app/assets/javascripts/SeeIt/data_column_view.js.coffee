@@ -94,6 +94,9 @@
             self.trigger('graph:addData', {graph: $(@).find('.dropdown_child').attr('data-id'), data: [{name: dataRoles[0].name, data: self.data}]})
             $('a[href="#graphs_tab"]').tab('show')
 
+            foundId = $($(@).html()).attr('data-id').replace(/\s+/g, '')
+            $('html, body').animate({ scrollTop: $("#"+foundId).offset().top })
+
         @container.find('.add_to_graph').off('click', selectGraph).on('click', selectGraph)
       else
         appendRoles = ->
@@ -123,7 +126,10 @@
           if $(@).find('.disabled').length == 0
             self.trigger('graph:addData', {graph: $(@).attr('data-graph'), data: [{name: $(@).attr('data-id'), data: self.data}]})
             $('a[href="#graphs_tab"]').tab('show')
-        
+
+            foundId = $($($(@).parent()).parent().html()).attr('data-id').replace(/\s+/g, '')
+            $('html, body').animate({ scrollTop: $("#"+foundId).offset().top })
+
         @container.find('.add_to_data_role').off('click', selectGraphDataRole).on('click', selectGraphDataRole)
 
 
