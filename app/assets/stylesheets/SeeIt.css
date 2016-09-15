@@ -276,6 +276,10 @@
   min-height: 100%;
 }
 
+.SeeIt.dataset-list {
+  height: 100vh;
+}
+
 div.SeeIt.footer-row.row, div.SeeIt.footer-expanded-row.row {
   margin-right: -5px;
   margin-left: -5px;

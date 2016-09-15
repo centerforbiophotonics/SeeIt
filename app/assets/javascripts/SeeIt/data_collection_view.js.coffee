@@ -140,12 +140,17 @@
 
           dragOverListener: (event) ->
             event.preventDefault()
-            # $('.dataset-list').addClass('hover')
+            data = event.originalEvent.dataTransfer.items
+            if data[0].kind == 'file'
+              $('.dataset-list').addClass('hover')
             return false
 
           dragEnterListener: (event) ->
             event.preventDefault()
-            $('.dataset-list').addClass('hover')
+
+            data = event.originalEvent.dataTransfer.items
+            console.log data[0].kind
+
             $(".dataset-container").addClass('ignore_events')
             $('.panel-heading').addClass('ignore_events')
             return false
@@ -158,9 +163,10 @@
             return false
 
           dragLeaveListener: (event) ->
-            event.stopPropagation()
             event.preventDefault()
             $('.dataset-list').removeClass('hover')
+            $(".dataset-container").removeClass('ignore_events')
+            $('.panel-heading').removeClass('ignore_events')
             return false
 
           dropListener: (event) ->

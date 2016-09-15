@@ -323,12 +323,10 @@
           event.preventDefault()
 
         dragEnterListener: (event) ->
-          event.preventDefault()
-          # event.target.style.background = '#BAEA65'    
+          event.preventDefault()   
 
         dragLeaveListener: (event) ->
           event.preventDefault()
-          # event.target.style.background = '#FFAFAF'
           
         dragEndListener: (event) ->
           event.preventDefault()
@@ -570,7 +568,7 @@
       @container.find(".graph-panel-content").toggleClass('in')
       @container.find('.collapse-btn .glyphicon').toggleClass('glyphicon-collapse-down glyphicon-collapse-up')
       if @collapsed
-        @graph.trigger('data:created')
+        @graph.trigger('data:created', @options.getValues())
       @collapsed = !@collapsed
 
     collapseFooter: ->
