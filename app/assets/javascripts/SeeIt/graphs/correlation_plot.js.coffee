@@ -72,7 +72,7 @@
       @svg.selectAll('.dot.SeeIt').style('fill', (d) -> d.color())
 
 
-    minMaxPadded: (noPad = false) ->
+    minMaxPadded: (padded = true) ->
       xmin = Infinity
       xmax = -Infinity
       ymin = Infinity
@@ -87,7 +87,7 @@
         ymax = if d.value() then Math.max(ymax, d.value()) else ymax 
         ymin = if d.value() then Math.min(ymin, d.value()) else ymin
 
-      if !noPad
+      if padded
         x = [Math.floor(xmin) - 1, Math.ceil(xmax) + 1]
         y = [Math.floor(ymin) - 1, Math.ceil(ymax) + 1]
         if x[0] == x[1] then x[1] += 1
@@ -137,20 +137,20 @@
       cValue = (d) -> d.label()
       color = d3.scale.category10()
 
+      minMax = @minMaxPadded()
+
       xMinIdx = options.map((op)->op.label).indexOf('X Axis Min')
       xMaxIdx = options.map((op)->op.label).indexOf('X Axis Max')
       yMinIdx = options.map((op)->op.label).indexOf('Y Axis Min')
       yMaxIdx = options.map((op)->op.label).indexOf('Y Axis Max')
 
-      min = {
-        x: options[xMinIdx].value
-        y: options[yMinIdx].value
-      }
+      min={}
+      max={}
 
-      max = {
-        x: options[xMaxIdx].value
-        y: options[yMaxIdx].value
-      }
+      min['x'] = options[xMinIdx].value
+      min['y'] = options[yMinIdx].value
+      max['x'] = options[xMaxIdx].value
+      max['y'] = options[yMaxIdx].value
 
       xScale.domain([min.x, max.x])
       yScale.domain([min.y, max.y])
@@ -376,8 +376,8 @@
     drawYourOwnLeastSquares: (xScale, yScale) ->
       self = @
 
-      minMax = self.minMaxPadded(true) #minMax[0] = [xMin, xMax], [1] = [yMin, yMax]
-      yRange = yScale.range()          #             [0]   [1]           [0]   [1]
+      minMax = self.minMaxPadded(false) #minMax[0] = [xMin, xMax], [1] = [yMin, yMax]
+      yRange = yScale.range()           #             [0]   [1]           [0]   [1]
       yMid = (yRange[0]+yRange[1])/2
 
       console.log minMax, yRange, yMid
@@ -390,15 +390,19 @@
           thisEnd = d3.select(this)
           id = thisEnd.attr('id')
           otherEndTag = if id == "startSquare" then "endSquare" else "startSquare"
-          otherEnd = d3.select("##{otherEndTag}")
+          otherEnd = self.svg.select("##{otherEndTag}")
           otherX = Number(otherEnd.attr('x'))
           otherY = Number(otherEnd.attr('y'))
+
+          middle = self.svg.select("#midSquare")
 
           oldX = Number(thisEnd.attr('x'))
           oldY = Number(thisEnd.attr('y'))
           newX = oldX + deltX + 5
           newY = oldY + deltY + 5
           thisEnd.attr("x", newX-5).attr("y", newY-5)
+
+          middle.attr("x", (newX-5 + otherX)/2).attr("y", (newY-5 + otherY)/2)
 
           ourLine = d3.select("#userLine")
           if id == "startSquare"
@@ -408,10 +412,10 @@
 
           line.m = (yScale.invert(newY)-yScale.invert(otherY+5))/(xScale.invert(newX)-xScale.invert(otherX+5))
           line.b =  yScale.invert(newY) - (line.m * xScale.invert(newX))
-          self.svg.select("#dyoLstSqrEq").text("Y = #{line.m.toFixed(5)}X + #{line.b.toFixed(5)}")
+          sum = sumOfSquares(line)
+          self.svg.select("#dyoLstSqrEq").text("Y = #{line.m.toFixed(5)}X + #{line.b.toFixed(5)}, Sum of Squares = #{sum.toFixed(2)}")
           newLine = (x) -> (x*line.m) + line.b
 
-          #drawSquares()
           self.svg.selectAll("#userLeastSquare")
             .attr("width", (d)->
               Math.abs(yScale(newLine(d.x))-yScale(d.ptY))
@@ -435,7 +439,64 @@
               else
                 return yScale(newLine(d.x))
             )
-        )      
+        )
+
+      midDrag = d3.behavior.drag()
+        .on('drag', ->
+          midSqr = d3.select(this)
+          strtSqr = self.svg.select("#startSquare")
+          endSqr = self.svg.select("#endSquare")
+          usrLine = self.svg.select("#userLine")
+          deltX = d3.event.dx
+          deltY = d3.event.dy
+
+          midNewX = Number(midSqr.attr('x')) + deltX
+          midNewY = Number(midSqr.attr('y')) + deltY
+          midSqr.attr('x', midNewX).attr('y', midNewY)
+          strtNewX = Number(strtSqr.attr('x')) + deltX + 5
+          strtNewY = Number(strtSqr.attr('y')) + deltY + 5
+          strtSqr.attr('x', strtNewX - 5).attr('y', strtNewY - 5)
+          endNewX = Number(endSqr.attr('x')) + deltX + 5
+          endNewY = Number(endSqr.attr('y')) + deltY + 5
+          endSqr.attr('x', endNewX - 5).attr('y', endNewY - 5)
+          usrX1 = Number(usrLine.attr('x1')) + deltX
+          usrX2 = Number(usrLine.attr('x2')) + deltX
+          usrY1 = Number(usrLine.attr('y1')) + deltY
+          usrY2 = Number(usrLine.attr('y2')) + deltY
+          usrLine.attr('x1', usrX1).attr('x2', usrX2).attr('y1', usrY1).attr('y2', usrY2)
+
+          line.m = (yScale.invert(endNewY)-yScale.invert(strtNewY))/(xScale.invert(endNewX)-xScale.invert(strtNewX))
+          line.b = yScale.invert(endNewY) - (line.m * xScale.invert(endNewX))
+          sum = sumOfSquares(line)
+
+          self.svg.select("#dyoLstSqrEq").text("Y = #{line.m.toFixed(5)}X + #{line.b.toFixed(5)}, Sum of Squares = #{sum.toFixed(2)}")
+          newLine = (x) -> (x*line.m) + line.b
+
+          self.svg.selectAll("#userLeastSquare")
+            .attr("width", (d)->
+              Math.abs(yScale(newLine(d.x))-yScale(d.ptY))
+            )
+            .attr("height", (d)->
+              Math.abs(yScale(newLine(d.x))-yScale(d.ptY))
+            )
+            .attr("x", (d)->
+              tempAbove = newLine(d.x) <= d.ptY
+              tempLen = Math.abs(yScale(newLine(d.x))-yScale(d.ptY))
+              if (tempAbove && line.m>0)||(!tempAbove && line.m<0)
+                return xScale(d.x) - tempLen
+              else
+                return xScale(d.x)
+            )
+            .attr("y", (d)->
+              tempAbove = newLine(d.x) <= d.ptY
+              tempLen = Math.abs(yScale(newLine(d.x))-yScale(d.ptY))
+              if tempAbove
+                return yScale(newLine(d.x)) - tempLen
+              else
+                return yScale(newLine(d.x))
+            )
+
+        )   
 
       drawSquares = ->
         console.log "#{line.m}X + #{line.b}"
@@ -477,6 +538,19 @@
             .attr("id", "userLeastSquare")
 
       drawSquares()
+
+      sumOfSquares = (myLine) ->
+        myData = self.data.map((d)->{'x':d.x(), 'y':d.y()})
+        your_line = (x) ->
+          (x*myLine.m) + myLine.b
+        squareSum = 0
+        for datum in myData
+          squareSum += (datum.y - your_line(datum.x))**2
+
+        return squareSum
+
+      sum = sumOfSquares(line)
+
       @svg.append("line")
         .attr("x1", xScale(minMax[0][0]))
         .attr("x2", xScale(minMax[0][1]))
@@ -506,11 +580,23 @@
         .style("cursor", "move")
         .call(drag)
 
+      @svg.append("rect")
+        .attr("x", xScale((minMax[0][0]+minMax[0][1]) / 2) - 5)
+        .attr("y", yMid - 5)
+        .attr("width", 10)
+        .attr("height", 10)
+        .attr("fill", "red")
+        .attr("stroke", "red")
+        .attr("fill-opacity", 0.2)
+        .attr("id", "midSquare")
+        .style("cursor", "move")
+        .call(midDrag)
+
       @svg.append("text")
         .attr("x", 15)
         .attr("y", 0)
         .attr("fill", "red")
-        .text("Y = #{line.m}X + #{line.b}") 
+        .text("Y = #{line.m.toFixed(5)}X + #{line.b.toFixed(5)}, Sum of Squares = #{sum.toFixed(2)}") 
         .attr("font-weight", "bold")
         .attr("id", "dyoLstSqrEq")     
 
