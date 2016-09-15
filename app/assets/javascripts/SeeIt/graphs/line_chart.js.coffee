@@ -20,8 +20,6 @@
             self.draw.call(self, options)
           else
             self.refresh.call(self, options)
-        else
-          @container.html("")
 
       @eventCallbacks['data:assigned'] = @eventCallbacks['data:created']
       @eventCallbacks['data:destroyed'] = @eventCallbacks['data:created']

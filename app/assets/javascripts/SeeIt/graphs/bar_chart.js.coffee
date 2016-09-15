@@ -14,12 +14,12 @@
       
       @eventCallbacks['data:created'] =  (options) ->
         prevOptions = options
-        
+    
         if self.allRolesFilled()
           if !self.rendered
             self.rendered = true
             self.draw.call(self, options)
-          else
+          else if self.chartObject != null
             self.refresh.call(self, options)
         else
           self.clearGraph.call(self)
@@ -56,12 +56,11 @@
       return data
 
     refresh: (options) ->
-      d3.select(@container.find('.graph-svg')[0]).datum(@formatData()).call(@chartObject);
+      d3.select(@container.find('.graph-svg')[0]).datum(@formatData()).transition().duration(0).call(@chartObject);
       nv.utils.windowResize(@chartObject.update);
 
     draw: (options) ->
       self = @
-
       @container.html("<svg class='SeeIt graph-svg' style='width: 100%; min-height: 270px'></svg>")
           
       nv.addGraph ->
