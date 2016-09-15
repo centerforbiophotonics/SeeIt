@@ -9,13 +9,13 @@
       # @param {Object} container - jQuery object referencing container SeeIt will live in
     ###
     constructor: (params = {}) ->
+      self = @
       @params = params
       @container = if params.container then $(params.container) else $("body")
 
       ui = if params.ui then params.ui else {}
 
       @loadGraphs()
-
       @view = new SeeIt.ApplicationView(@, @container)
       @layoutContainers = @view.initLayout()
       @initHandlers()
@@ -33,29 +33,36 @@
         graph_editable:     if ui.graph_editable != undefined then ui.graph_editable else true,
         dataset_add_remove: if ui.dataset_add_remove != undefined then ui.dataset_add_remove else true
       }
-      
+
       graph_init_data = if params.graphs then params.graphs else []
 
       @graph_settings = if params.graph_settings then params.graph_settings else []
 
       #Data model
+      @graphGoAhead = false       #This variable lets the app know if it can initialize graphs immediately because all data is locally passed to the app. Will be set to true if none of the datsets in data require downloading from remote urls
       @model = new SeeIt.DataCollection(@, data, @ui.editable)
+      if !@graphGoAhead then @listenTo(@model, 'datasets:loaded', ->    #This event is triggered once all datasets from remote urls are downloaded, if they exist
+        #console.log "THE ApplicationController KNOWS WE ARE LOADED"
+        if self.ui.dataMenu
+          #Container for list of datasets
+          self.dataCollectionView = new SeeIt.DataCollectionView(
+            self,
+            self.layoutContainers['Data'],
+            self.model
+          )
+        else
+          self.layoutContainers['Data'].remove()
+
+        self.registerListeners()
+        self.trigger('ready')
+        self.initGraphs(graph_init_data)
+      )
 
       @dataVisible = true
       @spreadsheetVisible = false
 
       # Container for graphs
       @graphCollectionView = new SeeIt.GraphCollectionView(@, @layoutContainers['Graphs'], @ui.graph_editable, @model)
-
-      if @ui.dataMenu
-        #Container for list of datasets
-        @dataCollectionView = new SeeIt.DataCollectionView(
-          @,
-          @layoutContainers['Data'],
-          @model
-        )
-      else
-        @layoutContainers['Data'].remove()
 
       #Create CSV manager
       @csvManager = new SeeIt.CSVManager()
@@ -84,13 +91,33 @@
 
       if !@ui.dataMenu
         if @ui.spreadsheet then @spreadsheetView.toggleFullscreen()
-        @graphCollectionView.toggleFullscreen()  
+        @graphCollectionView.toggleFullscreen()
 
       @lastGraphId = null
 
-      @registerListeners()
-      @trigger('ready')
 
+      if @graphGoAhead            #If no data was required from remote endpoints, graphs can now be initialized
+        #console.log "we got a goAhead"
+        if @ui.dataMenu
+          #Container for list of datasets
+          @dataCollectionView = new SeeIt.DataCollectionView(
+            @,
+            @layoutContainers['Data'],
+            @model
+          )
+        else
+          @layoutContainers['Data'].remove()
+
+        @registerListeners()
+        @trigger('ready')
+        @initGraphs(graph_init_data)
+
+    ###*
+     * [initGraphs description]
+     * @param  {[type]} graph_init_data [description]
+     * @return {[type]}                 [description]
+    ###
+    initGraphs: (graph_init_data) ->   #This code used to sit at the end of the constructor. It was moved to this function so that it could be called under multiple circumstances depending on the initialization params
       self = @
       graph_init_data.forEach (d) ->
         graph_types = self.graphTypes.filter((g) -> g.name == d.type)
@@ -118,7 +145,10 @@
               50)
             )(self.lastGraphId)
 
-
+    ###*
+     * [loadGraphs description]
+     * @return {[type]} [description]
+    ###
     loadGraphs: ->
       @graphTypes = []
 
@@ -144,11 +174,13 @@
         toggleSpreadsheetVisible: ->
           self.toggleSpreadsheetVisible.call(self)
         addGraph: ->
+          inputGraphName = self.container.find("#inputGraphName").val()
           graphName = $(@).attr('data-id')
           graphType = self.graphTypes.filter((g) -> g.name == graphName)[0]
+          self.container.find("#inputGraphName").val("")
 
 
-          self.trigger('graph:create', graphType)
+          self.trigger('graph:create', graphType, inputGraphName)
           # app.graphCollectionView.addGraph()
           # #DEMO PATCH
           # app.dataCollectionView.datasetViewCollection.forEach (datasetView) ->
@@ -175,7 +207,7 @@
 
           $("#hidden-csv-upload").off('change', self.handlers.saveCSVData).on('change', self.handlers.saveCSVData)
           $("#hidden-csv-upload").click()
-    
+
         uploadJson: ->
           if !$("#hidden-json-upload").length
             self.container.append "<input id='hidden-json-upload' type='file' style='display: none'>"
@@ -200,6 +232,10 @@
           self.jsonManager.handleDownload(self.model)
       }
 
+    ###*
+     * [addDataset description]
+     * @param {[type]} dataset [description]
+    ###
     addDataset: (dataset) ->
       self = @
       data = @model.addDataset(dataset)
@@ -299,7 +335,7 @@
         if @spreadsheetVisible then @spreadsheetView.updateView()
 
         @trigger('height:toggle')
-      
+
 
     ###*
       # Toggles visibility of DataCollectionView
@@ -314,19 +350,22 @@
       @dataVisible = !@dataVisible
       @trigger('width:toggle')
 
-
+    ###*
+     * [saveInitOptions description]
+     * @return {[type]} [description]
+    ###
     saveInitOptions: ->
       @params.container = @container.selector
       @params.data = @model.toJson()
       @params.graphs = @graphCollectionView.getGraphSettings()
-      
+
       blob = new Blob([JSON.stringify(@params)]);
       filename = prompt("Please enter the name of the file you want to save to (will save with .json extension)");
 
       if filename == "" || (filename != null && filename.trim() == "")
         alert('Filename cannot be blank');
-      else if filename && filename != "null" 
-        saveAs(blob, filename+".json");      
+      else if filename && filename != "null"
+        saveAs(blob, filename+".json");
 
   ApplicationController
 ).call(@)

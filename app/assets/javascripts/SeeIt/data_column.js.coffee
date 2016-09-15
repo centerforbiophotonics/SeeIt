@@ -1,14 +1,13 @@
 @SeeIt.DataColumn = (->
   class DataColumn
     _.extend(@prototype, Backbone.Events)
-    
+
     constructor: (@app, @header, data, @datasetTitle, @type, @color, editable = true) ->
       if !@color then @color = SeeIt.Utils.getRandomColor()
 
       dataArray = []
 
       self = @
-
       setDataArray = ->
         dataArray = []
         data.forEach (d, i) ->
@@ -40,7 +39,9 @@
 
       @setValue = (idx, value, context) ->
         if !context then context = @
-        
+
+        console.log value
+
         if editable && @typeIsCorrect(value)
           data[idx].value = value
           @trigger('data:changed',context, idx)
@@ -98,6 +99,15 @@
 
         @trigger('data:created', idx)
 
+      @newElement = (idx, label, value) ->
+        @staleData = true
+        data.splice(idx, 0, {
+          label: label,
+          value: value
+        })
+        @trigger('fill', idx, self.header)
+        @trigger('data:created', idx)
+
       @toJson = ->
         {
           header: @header,
@@ -127,7 +137,7 @@
     setDatasetTitle: (title) ->
       @datasetTitle = title
 
-    getColor: -> 
+    getColor: ->
       @color
 
     setColor: (color) ->

@@ -10,8 +10,11 @@
 
     initListeners: ->
       self = @
-
+      prevOptions = []
+      
       @eventCallbacks['data:created'] = (options) ->
+        prevOptions = options
+        
         if self.allRolesFilled()
           if !self.rendered
             self.rendered = true
@@ -19,7 +22,7 @@
           else
             self.refresh.call(self, options)
         else
-          @container.html("")
+          self.container.html("")
 
       @eventCallbacks['data:assigned'] = @eventCallbacks['data:created']
       @eventCallbacks['data:destroyed'] = @eventCallbacks['data:created']
@@ -34,6 +37,11 @@
 
       for e, cb of @eventCallbacks
         @on e, cb
+
+      $(window).on('resize', (event) ->
+        self.eventCallbacks['data:created'](prevOptions)
+      )
+
 
     formatData: ->
       data = []

@@ -50,6 +50,10 @@
   #   One or more data point in a DataColumn referenced in
   #   the graph has been changed
 
+  # 'filter:changed' -
+  #   One or more filters were changed or assigned to the
+  #   FilteredColumns referenced by the graph
+
   # ^EACH HANDLER IS PASSED THE CURRENT GRAPH OPTIONS AS AN ARGUMENT
   # The only event that a graph may need to handle on its own is 
   # window resize
@@ -62,7 +66,9 @@
       # assigned to particular data-roles.  Name is the role name,
       # type defines the data to be numeric or categorical, multiple
       # specifies whether mutiple DataColumns can be assigned to the
-      # role at a time, and data is an array of DataColumns
+      # role at a time, and data is an array of FilteredColumns.
+      # FilteredColumns should behave the same as DataColumns,
+      # only differing in data contents when filters are assigned to a graph.
       if !@dataset.length
         @dataFormat().forEach (d) ->
           self.dataset.push({
@@ -83,7 +89,8 @@
         'size:change': null,
         'options:update': null,
         'data:assigned': null,
-        'data:changed': null
+        'data:changed': null,
+        'filter:changed': null
       }
 
 

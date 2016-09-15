@@ -13,8 +13,10 @@
 
     initListeners: ->
       self = @
+      prevOptions = []
 
       @eventCallbacks['data:created'] = (options) ->
+        prevOptions = options
         if self.allRolesFilled()
           if !self.rendered
             self.rendered = true

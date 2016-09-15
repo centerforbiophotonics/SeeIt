@@ -261,6 +261,15 @@
 
           $(TH).off('dblclick').on('dblclick', headerDblclick)
 
+      cellRenderer = (instance, td, row, col, prop, value, cellProperties) ->
+        Handsontable.renderers.TextRenderer.apply(this, arguments)
+
+        if !value || value == 'null' || value == ''
+          td.style.background = '#f5f5f5'
+
+        else if self.dataset.data[col].type == 'numeric'
+          td.style.background = '#ffedcc'
+
       settings = {
         rowHeaders: @dataset.labels,
         colHeaders: @dataset.headers,
@@ -273,6 +282,8 @@
             (self.container.find('.SeeIt.Handsontable-Container').parent().width() - 50) / self.dataset.headers.length,
             50
           )
+        cells: (row, col, prop) ->
+          return {'renderer':cellRenderer}
         stretchH: "all",
         renderAllRows: SeeIt.Utils.isMobile(),
         afterGetRowHeader: headerCallbackFactory("label"),

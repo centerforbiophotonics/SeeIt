@@ -45,19 +45,22 @@ SeeIt.FilteredColumn = ( ->
     insertElement: (idx, label, value) ->         #inserts an element into @column's dataArray at the specified idx with the label and value that is passed in
       @column.insertElement(idx, label, value)
 
-    toJson: ->                            #FOR THIS FUNCTION AND UNIQUEDATA,
-      {                                   #THE 'ORIGINAL' FUNCTION WILL RETURN BASED ON THE FULL DATA IN THE COLUMN
-        header: @header                   #THE OTHER ONES WILL RETURN BASED ON THE FILTERED DATA RETURNED BY THIS CLASS' DATA()
-        type: @type
-        data: @data().map (d) ->
-          d.value()                       #the toJson functions will return a json object detailing the header, type, and data values of the column
-      }                                   #toJson does it based off filtered data and the originalToJson is based off the full unfilitered data, though both objects should have the same header and type
+    newElement: (idx, label, value) ->
+      @column.newElement(idx, label, value)     #like insertElement but results in some manipulation on the datasets, this call is coming from the column to the set instead of the other way around
 
-    originalToJson: ->
+    filteredToJson: ->                            #FOR THIS FUNCTION AND UNIQUEDATA,
+      {                                   #THE FILTERED VERSION ONLY RETURNS WITH DATA THAT EXISTS IN THE COLUMN AFTER FILTERS ARE APPLIED
+        header: @header                   #THE NORMAL CALL WILL RETURN USING ALL DATA THAT EXISTS IN THE DATACOLUMN
+        type: @type                       #THIS NAMING CONVENTION IS MEANT TO NOT MAINTAIN CONSISTENCY WITH OTHER PARTS OF THE CODE WHERE toJson OR uniqueData ARE CALLED
+        data: @data().map (d) ->          #ON REGULAR DATACOLUMNS, SO THE SAME BEHAVIOR SHOULD BE EXPECTED WHEN THOSE CALLS ARE MADE USING A FILTEREDCOLUMN
+          d.value()                       
+      }                                   #the toJson functions will return a json object detailing the header, type, and data values of the column
+                                          #toJson does it based off filtered data and the originalToJson is based off the full unfilitered data, though both objects should have the same header and type
+    toJson: ->
       @column.toJson()
 
-    uniqueData: ->                        #uniqueData will return an array of each unique data value in the dataArray
-      unique_data = []                    #again, uniqueData will only include filtered data and originalUniqueData includes all unfilitered data in the column.
+    filteredUniqueData: ->                #uniqueData will return an array of each unique data value in the dataArray
+      unique_data = []                    #again, filteredUniqueData will only include filtered data and uniqueData includes all unfilitered data in the column.
       data = @data()
 
       for i in [0...data.length]
@@ -66,17 +69,17 @@ SeeIt.FilteredColumn = ( ->
 
       return unique_data
 
-    originalUniqueData: ->
+    uniqueData: ->
       @column.uniqueData()
 
     typeIsCorrect: (value) ->           #checks if the given value is of the same type as the Column
       @column.typeIsCorrect(value)
 
-    length: ->                          #returns the number of data entries in the filtered data
+    filteredLength: ->                          #returns the number of data entries in the filtered data
       data = @data()
       return data.length
 
-    originalLength: ->                  #returns the number of data entries in the full unfiltered column
+    length: ->                  #returns the number of data entries in the full unfiltered column
       @column.length()
 
     compact: ->                         #returns the same thing as data(), but removes all values that are null, undefined, or NaN

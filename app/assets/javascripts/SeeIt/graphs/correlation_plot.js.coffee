@@ -133,6 +133,9 @@
 
       drag = d3.behavior.drag()
         .on('drag', (d) ->
+
+          console.log d
+          
           d3.select(@)
             .attr('cx', Math.min(xScale(max.x),Math.max(xScale(min.x), d3.event.x)))
             .attr('cy', Math.min(yScale(min.y),Math.max(yScale(max.y), d3.event.y)))
@@ -157,15 +160,15 @@
 
             element = d3.select(@)
             x = xScale.invert(element.attr('cx'))
-            y = yScale.invert(element.attr('cy'))              
+            y = yScale.invert(element.attr('cy'))
 
             data[idx].x = -> x
-            data[idx].y = -> y    
+            data[idx].y = -> y
 
 
             self.drawLeastSquares.call(self, xScale, yScale, min, max, tooltip, data)
-        )  
-        .on('dragend', (d) -> 
+        )
+        .on('dragend', (d) ->
           element = d3.select(@)
           d.x(xScale.invert(element.attr('cx')))
           d.y(yScale.invert(element.attr('cy')))
@@ -200,7 +203,7 @@
           .attr("r", R)
           .attr("cx", xMap)
           .attr("cy", yMap)
-          .style("fill", (d) ->  color(cValue(d))) 
+          .style("fill", (d) ->  color(cValue(d)))
           .style("opacity", opacity)
           .style('cursor', 'move')
           .on("mouseover", (d) ->

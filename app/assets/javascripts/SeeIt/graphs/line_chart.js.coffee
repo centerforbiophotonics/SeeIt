@@ -10,8 +10,10 @@
 
     initListeners: ->
       self = @
+      prevOptions = []
 
       @eventCallbacks['data:created'] = (options) ->
+        prevOptions = options
         if self.allRolesFilled()
           if !self.rendered
             self.rendered = true
@@ -34,6 +36,11 @@
 
       for e, cb of @eventCallbacks
         @on e, cb
+
+      $(window).on('resize', (event) ->
+        self.eventCallbacks['data:created'](prevOptions)
+      )
+
 
     formatData: ->
       retdata = []

@@ -21,7 +21,6 @@
       @initHandlers()
       @initLayout()
 
-
       @graph = new @graphType.class(@container.find('.graph-wrapper'),@filteredDataset)
 
       if !@graph.options().length then @container.find('.options-button').hide()
@@ -97,10 +96,6 @@
 
               @listenTo(this_data, 'label:changed', (idx) ->
                 self.graph.trigger('label:changed', self.options.getValues())
-              )
-
-              @listenTo(this_data, 'color:changed', ->
-                self.graph.trigger('color:changed', self.options.getValues())
               )
 
               @listenTo(this_data, 'header:changed', ->
@@ -199,7 +194,7 @@
           <br>
           <b>Data Type:</b> #{data.data.type}
           <br>
-          <b>Filters:</b> #{data.data.length()} out of #{data.data.originalLength()} selected by filter
+          <b>Filters:</b> #{data.data.filteredLength()} out of #{data.data.length()} selected by filter
         """
 
         tip = new Opentip($(context), msg, {target: $(context), showOn: "creation"})
@@ -243,11 +238,13 @@
         self.listenTo self.options, 'options:show', ->
           self.container.find('.graph-wrapper').addClass('col-md-9')
           self.container.find('.options-wrapper').removeClass('hidden')
+          self.container.find('.graph-wrapper').css('width', 'calc(100% - 300px)')
           self.graph.trigger('size:change', self.options.getValues())
 
         self.listenTo self.options, 'options:hide', ->
           self.container.find('.graph-wrapper').removeClass('col-md-9')
           self.container.find('.options-wrapper').addClass('hidden')
+          self.container.find('.graph-wrapper').css('width', '')
           self.graph.trigger('size:change', self.options.getValues())
 
         self.listenTo self.options, 'graph:update', ->
@@ -268,16 +265,6 @@
 
         @saveFilters()
 
-    findDataSet: (datasetName, buttonName, setOfData) ->
-      match = null
-      setOfData.datasets.forEach (value, index) ->
-        if value.title == datasetName
-          value.data.forEach (i) ->
-            if i.header == buttonName
-              match = i
-
-      return match
-
     initHandlers: ->
       self = @
 
@@ -285,7 +272,6 @@
         cb(self.graph.dataFormat())
 
       @on 'size:change', ->
-        # graph.setGraphHeight.call(graph)
         if self.initialized then self.graph.trigger('size:change', self.options.getValues())
 
       @on 'filter', (filterData) ->
@@ -346,22 +332,51 @@
           
         dragEndListener: (event) ->
           event.preventDefault()
-          event.target.style.background = ''
-          $('.btn-group').css('background-color', '')
+          $('div.data-drop-zone-container > div').css('background-color', '')
 
         dropListener: (event) ->
           event.preventDefault()
-          $(".data-drop-zone").css("background-color", '')
+          $("div.data-drop-zone-container > div").css("background-color", '')
           btnName = event.originalEvent.dataTransfer.getData("text")
           dataSetName = event.originalEvent.dataTransfer.getData("datasetName")
-          self.trigger('graph:addData', {graph: $(this).attr('id'), data:[{name: $(this).attr('data-id'), data: self.findDataSet(dataSetName, btnName, self.data)}]})
+          dataFromButton = self.findDataSet(dataSetName, btnName, self.data)
+          validType = self.findType(self.graph.dataset, $(this).attr('data-id'))
+
+          if validType == dataFromButton.type || validType == "any"
+            self.trigger('graph:addData', {graph: $(this).attr('id'), data:[{name: $(this).attr('data-id'), data: dataFromButton}]})
+          else
+            msg = "Invalid data type. Type must be " + validType
+            tip = new Opentip(self.container.find(this), msg, {style: "alert", target: self.container.find(this), showOn: "creation"})
+            tip.setTimeout(->
+              tip.hide.call(tip)
+              return
+            , 5)
       }
+
+    findDataSet: (datasetName, buttonName, setOfData) ->
+      match = null
+      setOfData.datasets.forEach (value, index) ->
+        if value.title == datasetName
+          value.data.forEach (i) ->
+            if i.header == buttonName
+              match = i
+
+      return match
+
+    findType: (graphSet, dataId) ->
+      match = null
+      graphSet.forEach (i) ->
+        # match container name with dataset name and button type with dataset type 
+        if dataId == i.name
+          match = i.type
+
+      return match
 
     initLayout: ->
       @container.html("""
         <div class="SeeIt graph-panel panel panel-default">
           <div class="SeeIt panel-heading">
-            <div class="btn-group SeeIt graph-buttons" role="group">
+            <div class="btn-group SeeIt graph-buttons pull-right" role="group">
               <button role="button" class="SeeIt options-button btn btn-default" title="Graph Options"><span class="glyphicon glyphicon-wrench"></span></button>
               <button class="SeeIt collapse-footer btn btn-default" title='Show/Hide Footer'><span class="glyphicon glyphicon-chevron-up"></span></button>
               <button class="SeeIt collapse-btn btn btn-default" title='Show/Hide Graph'><span class="glyphicon glyphicon-collapse-down"></span></ button>
@@ -374,7 +389,7 @@
             </div>
           </div>
           <div class="SeeIt graph-panel-content panel-collapse collapse in">
-            <div class="SeeIt panel-body" style='min-height: 300px'>
+            <div class="SeeIt panel-body">
               <div class="SeeIt options-wrapper hidden col-md-3"></div>
               <div class="SeeIt graph-wrapper"></div>
             </div>
@@ -393,7 +408,6 @@
       @container.find(".graph-title-edit-icon").on('click', @handlers.editTitle)
       @container.find(".collapse-footer").on('click', @handlers.collapseFooter)
 
-
     initDataContainers: ->
       self = @
       dataFormat = @graph.dataFormat()
@@ -402,7 +416,7 @@
 
       dataFormat.forEach (role) ->
         self.container.find('.footer-row').append("""
-          <div class='SeeIt data-drop-zone-container col-lg-#{cols}'>
+          <div class='SeeIt data-drop-zone-container col-sm-#{cols}'>
             <h3 class='SeeIt role-name text-center'>#{if dataFormat.length > 1 then role.name else "Data"}</h3>
             <div id="#{self.id}" class='SeeIt data-drop-zone' data-id="#{role.name}">
             </div>
@@ -444,7 +458,7 @@
       @container.find('.data-drop-zone').off('dragover').on('dragover', @handlers.dragOverListener)
       @container.find('.data-drop-zone').off('dragleave').on('dragleave', @handlers.dragLeaveListener)
       @container.find('.data-drop-zone').off('dragend').on('dragend', @handlers.dragEndListener)
-
+      
       @container.find(".expanded-data-container .save-filters-all").on 'click', (event) ->
         if self.validateFilters.call(self)
           self.trigger('filter:save-all', self.filterGroups, self.id)

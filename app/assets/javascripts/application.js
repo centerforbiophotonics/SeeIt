@@ -14,7 +14,6 @@
 //= require papaparse.min.js
 //= require turbolinks
 //= require handsontable.full.min
-//= require twitter/bootstrap
 //= require bootstrap.js
 //= require bootstrap-switch.min
 //= require dropdowns-enhancement.js
@@ -36,7 +35,6 @@
 //= require SeeIt/data_column
 //= require SeeIt/dataset
 //= require SeeIt/data_collection
-//= require SeeIt/filtered_column_factory
 //= require SeeIt/toolbar_view
 //= require SeeIt/data_column_view
 //= require SeeIt/dataset_view
@@ -49,10 +47,10 @@
 //= require_tree ./SeeIt/graphs
 //= require SeeIt/filter
 //= require SeeIt/filter_group
-//= require SeeIt/filter_decorator
+//= require SeeIt/filtered_column
 //= require SeeIt/graph_view
 //= require SeeIt/graph_collection_view
 //= require SeeIt/application_view
 //= require SeeIt/spreadsheet_contextmenu_view
-//= require SeeIt/jquery_extensions.js
 //= require SeeIt/application_controller
+//= require SeeIt/jquery_extensions.js
