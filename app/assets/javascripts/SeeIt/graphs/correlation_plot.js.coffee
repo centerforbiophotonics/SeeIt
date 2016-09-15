@@ -6,7 +6,6 @@
       super
       @rendered = false
       @data = []
-      @ellipsePts = []
       @initListeners()
 
     formatData: ->
@@ -44,7 +43,33 @@
         else
           self.clearGraph.call(self)
 
-      @eventCallbacks['data:assigned'] = @eventCallbacks['data:created']
+      @eventCallbacks['data:assigned'] = (options) ->
+        if self.allRolesFilled()
+          ops = options.map((op)->op.label)
+          xMinIdx = ops.indexOf('X Axis Min')
+          xMaxIdx = ops.indexOf('X Axis Max')
+          yMinIdx = ops.indexOf('Y Axis Min')
+          yMaxIdx = ops.indexOf('Y Axis Max')
+          minMax = self.minMaxPadded()
+          updates = []
+          console.log minMax
+
+          if options[xMinIdx].value != minMax[0][0]
+            updates.push {label: 'X Axis Min', value:minMax[0][0]}
+
+          if options[xMaxIdx].value != minMax[0][1]
+            updates.push {label: 'X Axis Max', value:minMax[0][1]}
+
+          if options[yMinIdx].value != minMax[1][0]
+            updates.push {label: 'Y Axis Min', value:minMax[1][0]}
+
+          if options[yMaxIdx].value != minMax[1][1]
+            updates.push {label: 'Y Axis Max', value:minMax[1][1]}
+
+          if updates.length
+            self.trigger 'option:update', updates
+          else
+            self.eventCallbacks['data:created'](options)
       @eventCallbacks['data:destroyed'] = @eventCallbacks['data:created']
       @eventCallbacks['column:destroyed'] = @eventCallbacks['data:created']
       @eventCallbacks['size:change'] = @eventCallbacks['data:created']
@@ -380,7 +405,6 @@
       yRange = yScale.range()           #             [0]   [1]           [0]   [1]
       yMid = (yRange[0]+yRange[1])/2
 
-      console.log minMax, yRange, yMid
       line = {"m":0, "b":yScale.invert(yMid)}
 
       drag = d3.behavior.drag()
@@ -499,7 +523,6 @@
         )   
 
       drawSquares = ->
-        console.log "#{line.m}X + #{line.b}"
         myData = self.data.map((d)->{'x':d.x(), 'y':d.y()})
         your_line = (x) ->
           (x*line.m) + line.b
@@ -585,9 +608,9 @@
         .attr("y", yMid - 5)
         .attr("width", 10)
         .attr("height", 10)
-        .attr("fill", "red")
-        .attr("stroke", "red")
-        .attr("fill-opacity", 0.2)
+        .attr("fill", "lime")
+        .attr("stroke", "lime")
+        .attr("fill-opacity", 0.5)
         .attr("id", "midSquare")
         .style("cursor", "move")
         .call(midDrag)
@@ -826,7 +849,6 @@
         else 
           groups[2].push(d)
 
-      console.log groups
       medians = [{},{},{}]
       groups.forEach (grp, i) ->
         middle = Math.floor(grp.length/2)
@@ -844,8 +866,6 @@
         medians[i]['maxX'] = Math.max.apply(null,exes)
         medians[i]['minY'] = Math.min.apply(null,whys)
         medians[i]['maxY'] = Math.max.apply(null,whys)
-
-      console.log medians
 
       medMedSlope = (medians[2].y-medians[0].y)/(medians[2].x - medians[0].x)
       medXSum = medians[0].x + medians[1].x + medians[2].x

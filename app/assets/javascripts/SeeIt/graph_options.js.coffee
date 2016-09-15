@@ -72,6 +72,16 @@
 				when "numeric"
 					@container.find("##{option.id}").val(default_value)
 
+		updateOption: (updates) ->
+			console.log "Updating some options"
+			for update in updates
+				thisId = ''
+				for option in @options
+					if option.label() == update.label then thisId = option.id
+
+				$("##{thisId}").val(update.value)
+
+			@trigger('graph:update')
 		getValues: ->
 			values = []
 

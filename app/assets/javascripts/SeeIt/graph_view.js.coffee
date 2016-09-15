@@ -23,6 +23,9 @@
 
       @graph = new @graphType.class(@container.find('.graph-wrapper'),@filteredDataset)
 
+      @listenTo @graph, 'option:update', (updates) ->
+        self.options.updateOption(updates)
+
       if !@graph.options().length then @container.find('.options-button').hide()
 
       @initDataContainers()
@@ -570,7 +573,7 @@
       @container.find(".graph-panel-content").toggleClass('in')
       @container.find('.collapse-btn .glyphicon').toggleClass('glyphicon-collapse-down glyphicon-collapse-up')
       if @collapsed
-        @graph.trigger('data:created')
+        @graph.trigger('data:created', @options.getValues())
       @collapsed = !@collapsed
 
     collapseFooter: ->
