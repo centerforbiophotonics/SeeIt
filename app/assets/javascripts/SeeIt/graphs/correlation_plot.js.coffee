@@ -52,7 +52,6 @@
           yMaxIdx = ops.indexOf('Y Axis Max')
           minMax = self.minMaxPadded()
           updates = []
-          console.log minMax
 
           if options[xMinIdx].value != minMax[0][0]
             updates.push {label: 'X Axis Min', value:minMax[0][0]}
@@ -589,6 +588,7 @@
         .attr("width", 10)
         .attr("height", 10)
         .attr("fill", "red")
+        .attr("stroke", "black")
         .attr("id", "startSquare")
         .style("cursor", "move")
         .call(drag)
@@ -599,6 +599,7 @@
         .attr("width", 10)
         .attr("height", 10)
         .attr("fill", "red")
+        .attr("stroke", "black")
         .attr("id", "endSquare")
         .style("cursor", "move")
         .call(drag)
@@ -609,7 +610,7 @@
         .attr("width", 10)
         .attr("height", 10)
         .attr("fill", "lime")
-        .attr("stroke", "lime")
+        .attr("stroke", "black")
         .attr("fill-opacity", 0.5)
         .attr("id", "midSquare")
         .style("cursor", "move")
@@ -764,6 +765,7 @@
         .attr("width", 10)
         .attr("height", 10)
         .style("fill", "red")
+        .style("cursor", "move")
         .attr("id", "left")
         .call(drag)
       @svg.append("rect")
@@ -772,6 +774,7 @@
         .attr("width", 10)
         .attr("height", 10)
         .style("fill", "red")
+        .style("cursor", "move")
         .attr("id", "right")      
         .call(drag)
       @svg.append("rect")
@@ -780,6 +783,7 @@
         .attr("width", 10)
         .attr("height", 10)
         .style("fill", "red")
+        .style("cursor", "move")
         .attr("id", "bottom")
         .call(drag)
       @svg.append("rect")
@@ -788,6 +792,7 @@
         .attr("width", 10)
         .attr("height", 10)
         .style("fill", "red")
+        .style("cursor", "move")
         .attr("id", "top")
         .call(drag)
       @svg.append("rect")
@@ -799,6 +804,7 @@
         .style("fill-opacity", 0.3)
         .style("stroke", "red")
         .style("stroke-width", 1)
+        .style("cursor", "move")
         .attr("id", "anchor")
         .call(midDrag)
 
