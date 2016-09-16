@@ -35,7 +35,7 @@
 
     initLayout: ->
       @container.html('<div class="SeeIt Globals"></div><div class="SeeIt container-fluid"><div class="SeeIt row">
-          <div class="thisdiv">
+          <div>
             <ul class="nav nav-tabs device-small" role="tablist">
               <li class="tab-button active" id="id-data" role="presentation"><a href="#data_tab" aria-controls="data_tab" role="tab" data-toggle="tab">Data</a></li>
               <li class="tab-button" id="id-graphs" role="presentation"><a href="#graphs_tab" aria-controls="graphs_tab" role="tab" data-toggle="tab">Graphs</a></li>

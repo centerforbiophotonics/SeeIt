@@ -95,7 +95,7 @@
       width = @container.width() - margin.left - margin.right
       widthOfSvg = width + margin.left + margin.right
 
-      if widthOfSvg != 0
+      if widthOfSvg > 0
         @formatData()
 
         graph = @
