@@ -19,8 +19,22 @@
           showEffect: "none"
         }
       )
-      @ErrorMsg = new Opentip(  
+      @ErrorMsg = new Opentip(
         @container, "Title is already in use", "",  
+        { 
+          showOn: null,  
+          style:"glass",  
+          stem: false,  
+          target: true,  
+          tipJoint: "center",  
+          targetJoint: "center",  
+          showEffectDuration: 0,  
+          showEffect: "none",
+          hideDelay: 0.5
+        }  
+      )
+      @DatasetErrorMsg = new Opentip(
+        @container, "Invalid file", "",  
         { 
           showOn: null,  
           style:"glass",  
@@ -173,18 +187,18 @@
             $('.panel-heading').removeClass('ignore_events')
 
             data = event.originalEvent.dataTransfer.files
-
-            console.log data
-
+            
             for i, current_file of data
-              console.log i, current_file
+              fileType = current_file.name.split('.')[1]
+              console.log current_file.name.split('.')[1]
 
-              if current_file.type == 'application/vnd.ms-excel'
-                console.log 'csv-file'
+              if fileType == 'csv'
                 self.handleDatasetCreate.call(self, 'csv-file', {file: current_file})
-              else
-                console.log 'json-file'
+              else if fileType == 'json'
                 self.handleDatasetCreate.call(self, 'json-file', {file: current_file})
+              else
+                self.DatasetErrorMsg.show()
+                return false
 
             return false
         }
