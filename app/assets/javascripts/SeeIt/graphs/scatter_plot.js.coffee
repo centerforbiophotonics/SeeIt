@@ -2,6 +2,7 @@
 	class ScatterPlot extends SeeIt.Graph
 		constructor: ->
 			super
+			@chartObject = null
 			@listenerInitialized = false
 			@rendered = false
 			@initListeners()
@@ -41,11 +42,12 @@
 			
 			@eventCallbacks['data:created'] =  (options) ->
 				prevOptions = options
+
 				if self.allRolesFilled()
 					if !self.rendered
 						self.rendered = true
 						self.draw.call(self, options)
-					else
+					else if self.chartObject != null
 						self.refresh.call(self, options)
 
 			@eventCallbacks['data:assigned'] = @eventCallbacks['data:created']
@@ -76,8 +78,8 @@
 
 
 		refresh: (options) ->
-	      d3.select(@container.find('.graph-svg')[0]).datum(@formatData()).transition().duration(350).call(@chartObject);
-	      nv.utils.windowResize(@chartObject.update);
+			d3.select(@container.find('.graph-svg')[0]).datum(@formatData()).transition().duration(350).call(@chartObject);
+			nv.utils.windowResize(@chartObject.update);
 
 		draw: (options) ->
 			graph = @

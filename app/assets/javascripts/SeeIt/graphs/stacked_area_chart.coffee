@@ -42,8 +42,6 @@
 
     formatData: ->
       data = []
-      console.log "formatData:"
-      console.log @dataset[0]
 
       @dataset[0].data.forEach (dataColumn) ->
         each1 = []
@@ -65,7 +63,6 @@
 
       nv.addGraph ->
         data = self.formatData.call(self)
-        console.log data
 
         chart = nv.models.stackedAreaChart()
                   .margin({right: 100})

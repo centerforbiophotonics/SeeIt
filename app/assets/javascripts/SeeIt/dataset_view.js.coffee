@@ -34,7 +34,6 @@
 
       @on 'spreadsheet:unloaded', ->
         if self.inSpreadsheet then self.container.find('.show-in-spreadsheet').trigger('click')
-        console.log "here"
 
       @listenTo @dataset, 'dataset:title:changed', ->
         self.updateTitle.call(self)
@@ -115,6 +114,7 @@
 
         if !self.inSpreadsheet
           self.trigger('spreadsheet:load', self.dataset)
+          $("a[href='#spreadsheets_tab']").tab('show')
           self.inSpreadsheet = true
           $(@).html("""
             Remove from Spreadsheet

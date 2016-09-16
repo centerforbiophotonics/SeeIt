@@ -148,9 +148,6 @@
           dragEnterListener: (event) ->
             event.preventDefault()
 
-            data = event.originalEvent.dataTransfer.items
-            console.log data[0].kind
-
             $(".dataset-container").addClass('ignore_events')
             $('.panel-heading').addClass('ignore_events')
             return false
@@ -175,12 +172,19 @@
             $(".dataset-container").removeClass('ignore_events')
             $('.panel-heading').removeClass('ignore_events')
 
-            uploaded_file = event.originalEvent.dataTransfer.files[0]
+            data = event.originalEvent.dataTransfer.files
 
-            if uploaded_file.type == 'application/vnd.ms-excel'
-              return self.handleDatasetCreate.call(self, 'csv-file', {file: uploaded_file})
-            else
-              return self.handleDatasetCreate.call(self, 'json-file', {file: uploaded_file})
+            console.log data
+
+            for i, current_file of data
+              console.log i, current_file
+
+              if current_file.type == 'application/vnd.ms-excel'
+                console.log 'csv-file'
+                self.handleDatasetCreate.call(self, 'csv-file', {file: current_file})
+              else
+                console.log 'json-file'
+                self.handleDatasetCreate.call(self, 'json-file', {file: current_file})
 
             return false
         }

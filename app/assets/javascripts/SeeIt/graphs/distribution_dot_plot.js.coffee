@@ -154,114 +154,118 @@
           d3.event.stopPropagation())
 
 
+
     drawGraph: (options) ->
       self = @
 
-      @initSvg()
-      @addedByClick = 0
+      widthOfSvg = @style.width + @style.margin.left + @style.margin.right
 
-      @svg.append("g")
-        .attr("class", "x axis SeeIt")
-        .attr("transform", "translate(0," + (@style.height - 8) + ")")
-        .call(@xAxis)
+      if widthOfSvg > 0
+        @initSvg()
+        @addedByClick = 0
 
-      histIdx = options.map((option) -> option.label).indexOf('Show Histogram')
-      binIdx = options.map((option) -> option.label).indexOf('Number of bins in histogram')
+        @svg.append("g")
+          .attr("class", "x axis SeeIt")
+          .attr("transform", "translate(0," + (@style.height - 8) + ")")
+          .call(@xAxis)
 
-      if histIdx > -1 && options[histIdx].value
-        hist = new HistogramBuilder(@dataset, @style, @svg, 
-          if binIdx > -1 && options[binIdx].value then options[binIdx].value else 10
-        )
+        histIdx = options.map((option) -> option.label).indexOf('Show Histogram')
+        binIdx = options.map((option) -> option.label).indexOf('Number of bins in histogram')
 
-      boxPlotIdx = options.map((option) -> option.label).indexOf('Box Plot')
-
-      if boxPlotIdx > -1 && options[boxPlotIdx].value then @drawBoxPlot()
-
-      divIdx = options.map((option) -> option.label).indexOf('Dividers')
-
-      if divIdx > -1 && options[divIdx].value != "None" then @drawDivs(options[divIdx].value)
-
-      fixDivIdx = options.map((option) -> option.label).indexOf('Fixed Size Dividers')
-
-      if fixDivIdx > -1 && options[fixDivIdx].value then @drawDivs(options[fixDivIdx].value, "size")
-
-      fixWidIdx = options.map((option) -> option.label).indexOf('Fixed Width Dividers')
-
-      if fixWidIdx > -1 && options[fixWidIdx].value then @drawDivs(options[fixWidIdx].value, "width")
-
-      mkeYrOwnIdx = options.map((option) -> option.label).indexOf('Make your own groups')
-
-      if mkeYrOwnIdx > -1 && options[mkeYrOwnIdx].value then @makeYourOwn()
-
-      editableIdx = options.map((option) -> option.label).indexOf('Editable')
-
-      if editableIdx > -1 && options[editableIdx].value then @editable = true
-
-
-      dotDragStart = ->
-        d3.select(this).style("opacity", 0.5)
-
-      dotDragging = (d,i) ->
-        x = Number(d3.select(this).attr("cx")) + d3.event.dx
-        y = Number(d3.select(this).attr("cy")) + d3.event.dy
-        d3.select(this).attr("cx", x).attr("cy", y)
-
-      dotDragEnd = (d,i) ->
-        d3.select(this).style("opacity", 1)
-        newX = d3.select(this).attr("cx")
-        d.data.value(self.x.invert(newX))
-        
-
-      dotDrag = d3.behavior.drag()
-                  .on('dragstart', dotDragStart)
-                  .on('drag', dotDragging)
-                  .on('dragend', dotDragEnd)
-
-      @svg.selectAll(".dot.SeeIt")
-        .data(@graphData.dataArray)
-        .enter().append("circle")
-        .attr("class", "dot SeeIt")
-        .attr("r", R)
-        .attr("cx", (d) ->
-          return self.x(d.data.value())
-        )
-        .attr("cy", (d) ->
-          return self.y(d.y + 8)
-        )
-        .style("fill", (d) ->
-          return d.color()
-        )
-      if @editable
-        @svg.selectAll(".dot.SeeIt").call(dotDrag)
-      if @editable && @graphData._dataset[0].data.length==1
-        d3.select(@container[0]).select("svg")
-          .on("click", ->
-              position = self.x.invert(d3.mouse(this)[0]-40)
-              firstColumn = self.dataset[0].data[0]
-              firstColumn.newElement(firstColumn.length()+self.addedByClick, "click#{self.addedByClick++}", position)
-            )
-      else if @editable
-        d3.select(@container[0]).select("svg")
-          .on("click", ->
-            warningTip = new Opentip(
-              $(self.container), 'Clicking to add data points is disabled if two or more DataColumns are assigned to this graph', '',
-              {
-                showOn: "creation",
-                style:"alert",
-                stem: true,
-                target: null,
-                tipJoint: "top left",
-                targetJoint: "bottom right",
-                showEffectDuration: 0,
-                showEffect: "none"
-              }
-            )
-            window.setTimeout(-> 
-              warningTip.hide()
-            , 5000)
+        if histIdx > -1 && options[histIdx].value
+          hist = new HistogramBuilder(@dataset, @style, @svg, 
+            if binIdx > -1 && options[binIdx].value then options[binIdx].value else 10
           )
 
-      @drawStats(options)
+        boxPlotIdx = options.map((option) -> option.label).indexOf('Box Plot')
+
+        if boxPlotIdx > -1 && options[boxPlotIdx].value then @drawBoxPlot()
+
+        divIdx = options.map((option) -> option.label).indexOf('Dividers')
+
+        if divIdx > -1 && options[divIdx].value != "None" then @drawDivs(options[divIdx].value)
+
+        fixDivIdx = options.map((option) -> option.label).indexOf('Fixed Size Dividers')
+
+        if fixDivIdx > -1 && options[fixDivIdx].value then @drawDivs(options[fixDivIdx].value, "size")
+
+        fixWidIdx = options.map((option) -> option.label).indexOf('Fixed Width Dividers')
+
+        if fixWidIdx > -1 && options[fixWidIdx].value then @drawDivs(options[fixWidIdx].value, "width")
+
+        mkeYrOwnIdx = options.map((option) -> option.label).indexOf('Make your own groups')
+
+        if mkeYrOwnIdx > -1 && options[mkeYrOwnIdx].value then @makeYourOwn()
+
+        editableIdx = options.map((option) -> option.label).indexOf('Editable')
+
+        if editableIdx > -1 && options[editableIdx].value then @editable = true
+
+
+        dotDragStart = ->
+          d3.select(this).style("opacity", 0.5)
+
+        dotDragging = (d,i) ->
+          x = Number(d3.select(this).attr("cx")) + d3.event.dx
+          y = Number(d3.select(this).attr("cy")) + d3.event.dy
+          d3.select(this).attr("cx", x).attr("cy", y)
+
+        dotDragEnd = (d,i) ->
+          d3.select(this).style("opacity", 1)
+          newX = d3.select(this).attr("cx")
+          d.data.value(self.x.invert(newX))
+          
+
+        dotDrag = d3.behavior.drag()
+                    .on('dragstart', dotDragStart)
+                    .on('drag', dotDragging)
+                    .on('dragend', dotDragEnd)
+
+        @svg.selectAll(".dot.SeeIt")
+          .data(@graphData.dataArray)
+          .enter().append("circle")
+          .attr("class", "dot SeeIt")
+          .attr("r", R)
+          .attr("cx", (d) ->
+            return self.x(d.data.value())
+          )
+          .attr("cy", (d) ->
+            return self.y(d.y + 8)
+          )
+          .style("fill", (d) ->
+            return d.color()
+          )
+        if @editable
+          @svg.selectAll(".dot.SeeIt").call(dotDrag)
+        if @editable && @graphData._dataset[0].data.length==1
+          d3.select(@container[0]).select("svg")
+            .on("click", ->
+                position = self.x.invert(d3.mouse(this)[0]-40)
+                firstColumn = self.dataset[0].data[0]
+                firstColumn.newElement(firstColumn.length()+self.addedByClick, "click#{self.addedByClick++}", position)
+              )
+        else if @editable
+          d3.select(@container[0]).select("svg")
+            .on("click", ->
+              warningTip = new Opentip(
+                $(self.container), 'Clicking to add data points is disabled if two or more DataColumns are assigned to this graph', '',
+                {
+                  showOn: "creation",
+                  style:"alert",
+                  stem: true,
+                  target: null,
+                  tipJoint: "top left",
+                  targetJoint: "bottom right",
+                  showEffectDuration: 0,
+                  showEffect: "none"
+                }
+              )
+              window.setTimeout(-> 
+                warningTip.hide()
+              , 5000)
+            )
+
+        @drawStats(options)
 
     draw: (options = []) ->
       self = @
