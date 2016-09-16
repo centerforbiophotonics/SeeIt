@@ -1,0 +1,58 @@
+Making a Graph Module for SeeIt
+
+Getting Started
+	All graphs initialized in SeeIt share the same initialization objects, the Container that the graph lives in, and the Dataset that it visualizes.
+
+	The Container is a jquery DOM element of the class '.graph-wrapper'. Most graphs begin by adding an svg element within this DOM element, then creating the graph through the svg.
+	Using svg allows for easy management of the graph since you can create indiviudal g elements for different parts of the graph, e.g. axes, legends, the visualization, etc.
+	Selecting and modifying parts of a graph should always be done using jquery/d3/etc. select methods using the Container as the base, so that there are no accidental selections/modifications of elements in a different graph that share similar tags/ids/classes.
+
+	The Dataset is a little more complicated than the container and can vary from graph to graph. It relies on one the mandatory methods of every graph class, the dataFormat method.
+	This method describes what data is necessary for the graph to display by returning an array of objects that describe the data roles in the class like so:
+
+		[
+      {
+        name: "x-axis",
+        type: "numeric",
+        multiple: true
+      },
+      {
+        name: "y-axis",
+        type: "numeric",
+        multiple: true
+      }
+   	]	
+
+  The name of each data role is arbitrary and up to the graph maker on how they will be used.
+  The type value describes what kind of data can fill the role. These can be numeric(numbers), categorical(strings), or specified as any, which will accept eiither option. Again, this is up to the graph maker to decide how they will be used within the graph, but the specification will be enforced in other parts of the app outside of just the graph.
+  The multiple value can be either true or false, and specifies whether multiple columns of data are allowed to be assigned to the role at the same time. Once again, up to the creator to decide if/how their graph can or should handle the multiple columns at a time.
+
+  With that established, the Dataset that is passed in will have its structure based on that dataFormat. It will be an array of objects as followed, with one object for each data role:
+
+  	[
+  		{
+  			data: [ <--FilteredColumns Go Here --> ]
+  			name: ...
+  			type: ...
+  			multiple: ...
+  		},
+  		...
+  	]
+
+  Essentially, this array is the same as that which the dataFormat method returns, but now contains the data assigned to each role.
+  The data array that is now a part of each object will contain whichever columns the user assigned to the graph, note that if multiple is set to false there will only ever be one column assigned.
+  This data will be accessed later, but for now we will go over the other mandatory behavior and methods for the graph.
+
+  Similar to dataFormat, the graph must also specify which options can be modified for the graph. These are up to the creator, their names, choices, effects, how they are implemented, but they need to be summarized and specified as such for the options menu in the graph view:
+
+  	[
+  		{
+  			type: "checkbox" OR "numeric" OR "select"
+  			label: any string
+  			values: Only necessary for the select option, an array of numbers or strings
+  			default: The default value of the option. Can be static values, i.e. true, 5, "left", or a function which will return one of those values (can be used to set bounds of axes based on data values, etc.)
+  		},
+  		...
+  	]
+
+  Finally, the destroy method should be implemented for cleaning up anything about your graph before it is destroyed, though often it is unnecessary.

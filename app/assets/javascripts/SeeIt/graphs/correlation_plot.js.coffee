@@ -33,7 +33,7 @@
 
       @eventCallbacks['data:created'] =  (options) ->
         prevOptions = options
-
+        
         if self.allRolesFilled()
           if !self.rendered
             self.rendered = true
@@ -378,7 +378,7 @@
             .enter()
             .append("rect")
               .attr("x", (d)->
-                if (d.above && line.m>0)||(!d.above && line.m<0) 
+                if (d.above && line.m>0)||(!d.above && line.m<=0) 
                   return xScale(d.x) - d.len
                 else
                   return xScale(d.x)
@@ -449,7 +449,7 @@
             .attr("x", (d)->
               tempAbove = newLine(d.x) <= d.ptY
               tempLen = Math.abs(yScale(newLine(d.x))-yScale(d.ptY))
-              if (tempAbove && line.m>0)||(!tempAbove && line.m<0)
+              if (tempAbove && line.m>0)||(!tempAbove && line.m<=0)
                 return xScale(d.x) - tempLen
               else
                 return xScale(d.x)

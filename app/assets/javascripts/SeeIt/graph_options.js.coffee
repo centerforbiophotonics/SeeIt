@@ -82,10 +82,17 @@
 			console.log "Updating some options"
 			for update in updates
 				thisId = ''
+				isCheck = false
 				for option in @options
-					if option.label() == update.label then thisId = option.id
+					if option.label() == update.label
+					  thisId = option.id
+					  if option.type() == "checkbox"
+					  	isCheck = true
 
-				$("##{thisId}").val(update.value)
+				if isCheck
+					@container.find("##{thisId}").bootstrapSwitch('state', update.value)
+				else
+					@container.find("##{thisId}").val(update.value)
 
 			@trigger('graph:update')
 		getValues: ->
