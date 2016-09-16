@@ -23,18 +23,20 @@
     init: ->
       @container.html("""
         <ul class="SeeIt dataset-list list-group">
-          <div class="SeeIt panel-heading">  
+          <div class="SeeIt panel-heading" id="data-panel-heading">  
             <label id="upload_modal" class="btn btn-primary btn-file SeeIt new-dataset-input">
               <span class='glyphicon glyphicon-upload' style=""></span>
                 Upload Data
             </label>
-            <button class="SeeIt hide_data btn btn-default" title='Hide Data' style="float:right"><span class="glyphicon glyphicon-arrow-left"></span></button>  
           </div>
         </ul>
       """)
 
+      @container.find('.panel-heading').append("""<button class="SeeIt hide_data btn btn-default" title='Hide Data' style="float:right"><span class="glyphicon glyphicon-arrow-left"></span></button>""")
+
       @initListeners()
       @initDatasetViewCollection()
+      @resizeListener()
 
     initListeners: ->
       self = @
@@ -92,6 +94,13 @@
           $(".data-drop-zone").css("background-color", "")
           $("#id-graphs").css("background-color", "")
       }
+
+    resizeListener: ->
+      $(window).on 'resize', ->
+        if $('.Globals').width() < 1003
+          $('#data-panel-heading > button').remove()
+        else if !$('#data-panel-heading > button').length
+          $('#data-panel-heading').append("""<button class="SeeIt hide_data btn btn-default" title='Hide Data' style="float:right"><span class="glyphicon glyphicon-arrow-left"></span></button>""")
 
     newDatasetMaker: ->
       @container.find('.dataset-list').append("""

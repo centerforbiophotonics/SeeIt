@@ -160,7 +160,7 @@
 
       widthOfSvg = @style.width + @style.margin.left + @style.margin.right
 
-      if widthOfSvg != 0
+      if widthOfSvg > 0
         @initSvg()
         @addedByClick = 0
 
