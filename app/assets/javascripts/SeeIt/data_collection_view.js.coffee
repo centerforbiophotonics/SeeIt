@@ -50,36 +50,23 @@
 
     init: ->
       @initHandlers()
-      if @data.datasets.length > 0
-        @container.html("""
-          <ul class="SeeIt dataset-list list-group">
-            <div class="SeeIt panel-heading" style=" background-color: #f5f5f5">  
-              <label id="upload_modal" class="btn btn-primary btn-file SeeIt new-dataset-input">
-                <span class='glyphicon glyphicon-upload'></span>
-                  Upload Data
-              </label>
-              <button class="SeeIt hide_data btn btn-default"  title='Hide Data' style="float:right"><span class="glyphicon glyphicon-arrow-left"></span></button>
-            </div>
-          </ul>
-        """)
-
-      else
-        @container.html("""
-          <ul class="SeeIt dataset-list list-group">
-            <div class="SeeIt panel-heading" style=" background-color: #f5f5f5">  
-              <label id="upload_modal" class="btn btn-primary btn-file SeeIt new-dataset-input">
-                <span class='glyphicon glyphicon-upload'></span>
-                  Upload Data
-              </label>
-              <button class="SeeIt hide_data btn btn-default"  title='Hide Data' style="float:right"><span class="glyphicon glyphicon-arrow-left"></span></button>
-            </div>
-            <div class="holder">
-              <h1 class="upload_msg ">Drop file here</h1>
-              <svg class="upload_icon " width="50" height="43" viewBox="0 0 50 43">
-                <path d="M48.4 26.5c-.9 0-1.7.7-1.7 1.7v11.6h-43.3v-11.6c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v13.2c0 .9.7 1.7 1.7 1.7h46.7c.9 0 1.7-.7 1.7-1.7v-13.2c0-1-.7-1.7-1.7-1.7zm-24.5 6.1c.3.3.8.5 1.2.5.4 0 .9-.2 1.2-.5l10-11.6c.7-.7.7-1.7 0-2.4s-1.7-.7-2.4 0l-7.1 8.3v-25.3c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v25.3l-7.1-8.3c-.7-.7-1.7-.7-2.4 0s-.7 1.7 0 2.4l10 11.6z"/></svg>
-            </div>
-          </ul>
-        """)
+      
+      @container.html("""
+        <ul class="SeeIt dataset-list list-group">
+          <div class="SeeIt panel-heading" style=" background-color: #f5f5f5">  
+            <label id="upload_modal" class="btn btn-primary btn-file SeeIt new-dataset-input">
+              <span class='glyphicon glyphicon-upload'></span>
+                Upload Data
+            </label>
+            <button class="SeeIt hide_data btn btn-default"  title='Hide Data' style="float:right"><span class="glyphicon glyphicon-arrow-left"></span></button>
+          </div>
+          <div class="holder #{if @data.datasets.length > 0 then 'hidden' else ''}">
+            <h1 class="upload_msg ">Drop file here</h1>
+            <svg class="upload_icon " width="50" height="43" viewBox="0 0 50 43">
+              <path d="M48.4 26.5c-.9 0-1.7.7-1.7 1.7v11.6h-43.3v-11.6c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v13.2c0 .9.7 1.7 1.7 1.7h46.7c.9 0 1.7-.7 1.7-1.7v-13.2c0-1-.7-1.7-1.7-1.7zm-24.5 6.1c.3.3.8.5 1.2.5.4 0 .9-.2 1.2-.5l10-11.6c.7-.7.7-1.7 0-2.4s-1.7-.7-2.4 0l-7.1 8.3v-25.3c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v25.3l-7.1-8.3c-.7-.7-1.7-.7-2.4 0s-.7 1.7 0 2.4l10 11.6z"/></svg>
+          </div>
+        </ul>
+      """)
 
 
       @initListeners()
