@@ -96,11 +96,14 @@
       }
 
     resizeListener: ->
+      self = @
       $(window).on 'resize', ->
         if $('.Globals').width() < 1003
           $('#data-panel-heading > button').remove()
         else if !$('#data-panel-heading > button').length
           $('#data-panel-heading').append("""<button class="SeeIt hide_data btn btn-default" title='Hide Data' style="float:right"><span class="glyphicon glyphicon-arrow-left"></span></button>""")
+          self.container.find('.hide_data').on 'click', () ->
+            self.app.handlers.toggleDataVisible()
 
     newDatasetMaker: ->
       @container.find('.dataset-list').append("""
@@ -367,7 +370,7 @@
       return datasetView
 
     toggleVisible: ->
-      @container.toggle()
+      @container.toggleClass('hidden')
       @visible = !@visible
 
   DataCollectionView
