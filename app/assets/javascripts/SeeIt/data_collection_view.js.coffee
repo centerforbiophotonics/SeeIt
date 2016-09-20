@@ -188,14 +188,11 @@
 
             data = event.originalEvent.dataTransfer.files
 
-            console.log data
-
             for i, current_file of data
-              console.log current_file
+
               if current_file == data.length
                 return false
               fileType = current_file.name.split('.')[1]
-              console.log current_file.name.split('.')[1] # it's splitting other values inside the hash that causes the error
 
               if fileType == 'csv'
                 self.handleDatasetCreate.call(self, 'csv-file', {file: current_file})
