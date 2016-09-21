@@ -53,12 +53,11 @@
       
       @container.html("""
         <ul class="SeeIt dataset-list list-group">
-          <div class="SeeIt panel-heading" style=" background-color: #f5f5f5">  
+          <div class="SeeIt panel-heading" id="data-panel-heading">  
             <label id="upload_modal" class="btn btn-primary btn-file SeeIt new-dataset-input">
               <span class='glyphicon glyphicon-upload'></span>
                 Upload Data
             </label>
-            <button class="SeeIt hide_data btn btn-default"  title='Hide Data' style="float:right"><span class="glyphicon glyphicon-arrow-left"></span></button>
           </div>
           <div class="holder #{if @data.datasets.length > 0 then 'hidden' else ''}">
             <h1 class="upload_msg ">Drop file here</h1>
@@ -68,9 +67,11 @@
         </ul>
       """)
 
+      @container.find('.panel-heading').append("""<button class="SeeIt hide_data btn btn-default" title='Hide Data' style="float:right"><span class="glyphicon glyphicon-arrow-left"></span></button>""")
 
       @initListeners()
       @initDatasetViewCollection()
+      @resizeListener()
 
     initListeners: ->
       self = @
@@ -125,17 +126,17 @@
       self.handlers = {
         column: {
           dragStartListener: (event) ->
-            console.log 'dragstart'
             event.originalEvent.dataTransfer.setData("text", event.target.id)
             event.originalEvent.dataTransfer.setData("datasetName", $(this).attr('name'))
             $(".data-drop-zone").css("background-color", "#FFAFAF")
-            
-
+            $("#id-graphs").css("background-color", "#FFAFAF")
+    
           dragEndListener: (event) ->
             event.preventDefault()
             $(".data-drop-zone").css("background-color", "")
+            $("#id-graphs").css("background-color", "")
             
-        }
+        },
         
         file: {
 
@@ -189,6 +190,16 @@
         }
 
       }
+
+    resizeListener: ->
+      self = @
+      $(window).on 'resize', ->
+        if $('.Globals').width() < 1003
+          $('#data-panel-heading > button').remove()
+        else if !$('#data-panel-heading > button').length
+          $('#data-panel-heading').append("""<button class="SeeIt hide_data btn btn-default" title='Hide Data' style="float:right"><span class="glyphicon glyphicon-arrow-left"></span></button>""")
+          self.container.find('.hide_data').on 'click', () ->
+            self.app.handlers.toggleDataVisible()
 
     newDatasetMaker: ->
       @container.find('.dataset-list').append("""
@@ -461,7 +472,7 @@
       return datasetView
 
     toggleVisible: ->
-      @container.toggle()
+      @container.toggleClass('hidden')
       @visible = !@visible
 
   DataCollectionView

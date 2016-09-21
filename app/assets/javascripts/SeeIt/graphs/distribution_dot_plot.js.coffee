@@ -24,12 +24,31 @@
         else
           self.clearGraph.call(self)
 
-      @eventCallbacks['data:assigned'] = @eventCallbacks['data:created']
-      @eventCallbacks['data:destroyed'] = @eventCallbacks['data:created']
+      @eventCallbacks['data:assigned'] = (options) ->
+        if self.allRolesFilled()
+          ops = options.map((op)->op.label)
+          minIdx = ops.indexOf('Graph Scale Min')
+          maxIdx = ops.indexOf('Graph Scale Max')
+          
+          minMax = self.minMaxWPadding(0)
+          updates = []
+          console.log minMax
+
+          if options[minIdx].value != minMax[0]
+            updates.push {label: 'Graph Scale Min', value:minMax[0]}
+
+          if options[maxIdx].value != minMax[1]
+            updates.push {label: 'Graph Scale Max', value:minMax[1]}
+
+          if updates.length
+            self.trigger 'option:update', updates
+          else
+            self.eventCallbacks['data:created'](options)
+      @eventCallbacks['data:destroyed'] = @eventCallbacks['data:assigned']
       @eventCallbacks['column:destroyed'] = @eventCallbacks['data:created']
       @eventCallbacks['size:change'] = @eventCallbacks['data:created']
       @eventCallbacks['options:update'] = @eventCallbacks['data:created']
-      @eventCallbacks['data:changed'] = @eventCallbacks['data:created']
+      @eventCallbacks['data:changed'] = @eventCallbacks['data:assigned']
       @eventCallbacks['filter:changed'] = @eventCallbacks['data:created']
 
       @eventCallbacks['label:changed'] = (options) ->
@@ -99,7 +118,6 @@
       maxIdx = options.map((option) -> option.label).indexOf("Graph Scale Max")
 
       @x.domain([options[minIdx].value, options[maxIdx].value])
-#      @x.domain(@minMaxWPadding(0))
       @y.domain([0,@style.height])
 
     placeData: ->
@@ -152,8 +170,6 @@
         .attr("transform", "translate(" + @style.margin.left + "," + @style.margin.top + ")")
         .on("click", -> 
           d3.event.stopPropagation())
-
-
 
     drawGraph: (options) ->
       self = @

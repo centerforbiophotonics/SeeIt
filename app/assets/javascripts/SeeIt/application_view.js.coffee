@@ -85,6 +85,7 @@
       if $(".Globals").width() < 1003
         $(".device-small").css("display", "block")
         $(".tab-pane").css("display", "")
+        $(".SeeIt.Data").removeClass('hidden')
 
         $(".SeeIt.Data").removeClass("col-md-3")
         $(".SeeIt.Graphs").removeClass("col-md-9")

@@ -1,0 +1,159 @@
+Making a Graph Module for SeeIt
+
+Getting Started
+	All graphs initialized in SeeIt share the same initialization objects, the Container that the graph lives in, and the Dataset that it visualizes.
+
+	The Container is a jquery DOM element of the class '.graph-wrapper'. Most graphs begin by adding an svg element within this DOM element, then creating the graph through the svg.
+	Using svg allows for easy management of the graph since you can create indiviudal g elements for different parts of the graph, e.g. axes, legends, the visualization, etc.
+	Selecting and modifying parts of a graph should always be done using jquery/d3/etc. select methods using the Container as the base, so that there are no accidental selections/modifications of elements in a different graph that share similar tags/ids/classes.
+
+	The Dataset is a little more complicated than the container and can vary from graph to graph. It relies on one the mandatory methods of every graph class, the dataFormat method.
+	This method describes what data is necessary for the graph to display by returning an array of objects that describe the data roles in the class like so:
+
+		[
+      {
+        name: "x-axis",
+        type: "numeric",
+        multiple: true
+      },
+      {
+        name: "y-axis",
+        type: "numeric",
+        multiple: true
+      }
+   	]	
+
+  The name of each data role is arbitrary and up to the graph maker on how they will be used.
+  The type value describes what kind of data can fill the role. These can be numeric(numbers), categorical(strings), or specified as any, which will accept eiither option. Again, this is up to the graph maker to decide how they will be used within the graph, but the specification will be enforced in other parts of the app outside of just the graph.
+  The multiple value can be either true or false, and specifies whether multiple columns of data are allowed to be assigned to the role at the same time. Once again, up to the creator to decide if/how their graph can or should handle the multiple columns at a time.
+
+  With that established, the Dataset that is passed in will have its structure based on that dataFormat. It will be an array of objects as followed, with one object for each data role:
+
+  	[
+  		{
+  			data: [ <--FilteredColumns Go Here --> ]
+  			name: ...
+  			type: ...
+  			multiple: ...
+  		},
+  		...
+  	]
+
+  Essentially, this array is the same as that which the dataFormat method returns, but now contains the data assigned to each role.
+  The data array that is now a part of each object will contain whichever columns the user assigned to the graph, note that if multiple is set to false there will only ever be one column assigned.
+  This data will be accessed later, but for now we will go over the other mandatory behavior and methods for the graph.
+
+  Similar to dataFormat, the graph must also specify which options can be modified for the graph. These are up to the creator, their names, choices, effects, how they are implemented, but they need to be summarized and specified as such for the options menu in the graph view:
+
+  	[
+  		{
+  			type: "checkbox" OR "numeric" OR "select"
+  			label: any string
+  			values: Only necessary for the select option, an array of numbers or strings
+  			default: The default value of the option. Can be static values, i.e. true, 5, "left", or a function which will return one of those values (can be used to set bounds of axes based on data values, etc.)
+  		},
+  		...
+  	]
+
+  Finally, the destroy method should be implemented for cleaning up anything about your graph before it is destroyed, though often it is unnecessary.
+
+The Data
+	Data access and modification is one of the trickier parts to understand at first glance with SeeIt graphs. With the way the Dataset structure is setup, accesses to data look complicated and cluttered, so a good first step to making the graph is to format the given data into something more usable for the graph at hand.
+	Most SeeIt graphs do this using a method called formatData (not to be confused with dataFormat). This method obviously varies depending on what the graph does with the data. 
+	For graphs with multiple data roles, this often will combine pieces of data from each role into a singular object, e.g. combining an x-coordinate and a y-coordinate into a point.
+	With a single data role it may be as simple as just pulling the array out from deeper within the dataset structure so it is simple to access.
+
+	It may be worthwhile to look at the functions already in other graphs to see examples of data access from the graph's perspective, as well as the FilteredColumn and DataColumn classes to understand the functions within them that are used to return data.
+	Some of the more common cases are as follows (using coffeescript):
+
+		SINGLE DATA ROLE AND COLUMN
+			myColumn = @dataset[0].data[0]
+			myData = myColumn.data().map( (datum) -> datum.value() )
+			
+
+		SINGLE DATA ROLE MULTIPLE COLUMNS
+			myData = []
+			@dataset[0].data.forEach (filteredColumn) ->
+
+				columnData = filteredColumn.data()
+				for datum in columnData
+					myData.push datum.value()
+
+		MULTIPLE DATA ROLES SINGLE COLUMN
+			myData = []
+			@dataset.forEach (dataRole) ->
+
+				myColumn = dataRole.data[0]
+				myColumn.forEach (datum, i) ->
+
+					if dataRole.name == 'x-axis'
+						myData[i]['x'] = datum.value()
+					else
+						myData[i]['y'] = datum.value()
+
+		MULTIPLE DATA ROLES AND COLUMNS
+			myData = {'datarole1':[], 'datarole2':[]}
+			@dataset.forEach (dataRole) -> 		
+
+				dataRole.data.forEach (filteredColumn) ->
+
+					columnData = filteredColumn.data()
+					columnData.forEach (datum) ->
+
+						if dataRole.name == 'datarole1'
+							myData.datarole1.push datum.value()
+						else
+							myData.datarole2.push datum.value()
+
+	Things to note in the above examples:
+		1. Filters can be applied to graphs to ignore some data points in columns. Using .data() from filteredColumns will return this filteredData. If you need access to the full data there are other methods in the filteredColumn class that allow this.
+		2. The .data() from filteredColumns returns an array of objects in the form of {label:label(), value:value()}, which is why datum.value() is used to access the actual data values.
+
+Drawing the Graph
+	This part is the most open-ended, just make the graph! 
+	Using visualization libraries like d3, which the majority of other graphs serve as examples of, it's time to take the formatted data and display it.
+	Usually graphs use a draw() function which holds the overview of the process, i.e. all of the functions that initialize and svg, draw axes, set up scales, draw points and squares and smiley faces, are called from here. 
+	Draw usually will manage the options of the graph, and typically are passed as the only argument to this function.
+	This array is a little different and simpler than the array created by the graph in the options() function. Instead it will just be an array of objects in the form {label, value}, where the label is the name of the option and the value is its value.
+	Most graphs also include a refresh() function, which can be used to just modify a few parts of the graph that change or whatever you would like, though a typical and simple approach is to just clear the html of the container and call draw() with the new options/data/etc.
+
+	The rest of the drawing is up to you! Make helper functions/classes, add interactivity, the svg is your canvas.
+
+Listeners
+	There are an array of events that trigger that graphs are expected to listen to. 
+	These include:
+		'data:created'
+		'data:assigned'
+		'data:destroyed'
+		'column:destroyed'
+		'size:change'
+		'options:update'
+		'data:changed'
+		'filter:changed'
+		'label:changed'
+		'header:changed'
+		'color:changed'
+		Window resize
+	Most graphs follow very simple behavior in response to these events, almost all events follow this function:
+
+		if self.allRolesFilled()
+      if !self.rendered
+        self.rendered = true
+        self.draw.call(self, options)
+      else
+        self.refresh.call(self, options)
+    else
+      self.clearGraph.call(self)
+
+  Obviously, you may not want to have to redraw the whole graph because of a small thing like a color change if your graph is very complex to setup, so feel free to make as many or as few unique callbacks as you feel is necessary.
+
+Interacting with Classes Outside of the Graph
+  
+  For the most part, the graph has its events triggered by another class. As of the time of writing there is only one event that the graph has that it triggers from within, which is the 'option:update' (not to be confused with the listener options:update, though they are somewhat intertwined).
+  The option:update event can be triggered and passed an array of {label, value} pairs which are sent to the graph-view and then graph-options class where options values are then changed. This allows you to programmatically change any graph option from within your graph.
+  This is only used for one case at this point (data being added to a graph outside of its display range, then changing axis min/max values in the options), which can be seen in use in the DistributionDotPlot and CorrelationPlot.
+
+  Data can also be added to DataColumns that the graph has access to, look at the FilteredColumn and DataColumn class for the methods that do this.
+
+  If other interaction is needed that is not already available to the graph, adding an event trigger within the graph and a listener in the graph_view class is the best avenue to start with the behavior. Graph modules inherently have very few references to things outside of themselves and their data columns, while the graph_view has many other parts of the app listening to and connected to it.
+

@@ -23,6 +23,9 @@
 
       @graph = new @graphType.class(@container.find('.graph-wrapper'),@filteredDataset)
 
+      @listenTo @graph, 'option:update', (updates) ->
+        self.options.updateOption(updates)
+
       if !@graph.options().length then @container.find('.options-button').hide()
 
       @initDataContainers()
