@@ -326,14 +326,10 @@
           event.preventDefault()
 
         dragEnterListener: (event) ->
-          event.preventDefault()
-          if !($(event.target).is("button")) && !($(event.target).is("span"))
-            event.target.style.background = '#BAEA65'
+          event.preventDefault()   
 
         dragLeaveListener: (event) ->
           event.preventDefault()
-          if !($(event.target).is("button")) && !($(event.target).is("span"))
-            event.target.style.background = '#FFAFAF'
           
         dragEndListener: (event) ->
           event.preventDefault()

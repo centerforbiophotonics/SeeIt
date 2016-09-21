@@ -94,7 +94,12 @@
 				fields: ["Label"],
 				data: []
 			}
-			
+			console.log @data
+
+			@data.forEach (d) -> 
+				console.log d.header
+				d.data().forEach (r) ->
+					console.log r.value()
 
 			@labels.forEach (l) ->
 				obj.data.push [l]
@@ -104,7 +109,7 @@
 				d.data().forEach (r,i) ->
 					obj.data[i].push r.value()
 
-			
+			console.log obj
 			Papa.unparse(obj)
 		# replace typeof
 		getType: (d) ->

@@ -65,6 +65,31 @@
         alert('Filename cannot be blank');
       else if filename && filename != "null" 
         saveAs(blob, filename+".json");
+
+    getJsonTitle: (file) ->
+      self = @
+      data = null
+      jsonTitle = null
+
+      if window.File && window.FileReader && window.FileList && window.Blob
+        filereader = new window.FileReader()
+
+        filereader.onload = ->
+          txtRes = filereader.result
+
+          try
+            data = JSON.parse txtRes
+            jsonTitle = data['title']
+            console.log jsonTitle
+            
+          catch e
+            console.log e
+
+        filereader.readAsText file
+        console.log jsonTitle
+        return jsonTitle
+      else 
+        console.log "Error reading JSON Data"
     
 
   getPathFromURL = (url) ->

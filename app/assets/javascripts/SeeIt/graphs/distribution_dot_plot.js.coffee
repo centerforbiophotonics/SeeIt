@@ -171,8 +171,6 @@
         .on("click", -> 
           d3.event.stopPropagation())
 
-
-
     drawGraph: (options) ->
       self = @
 

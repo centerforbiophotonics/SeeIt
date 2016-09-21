@@ -144,7 +144,6 @@
       @container.find('.title-edit-icon').off('click', @handlers.editTitle).on('click', @handlers.editTitle)
 
       @container.find('.export').off('click').on('click', (e) ->
-        
 
         element = document.createElement('a');
         element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(self.dataset.toCSV()));

@@ -19,15 +19,50 @@
           showEffect: "none"
         }
       )
+      @ErrorMsg = new Opentip(
+        @container, "Title is already in use", "",  
+        { 
+          showOn: null,  
+          style:"glass",  
+          stem: false,  
+          target: true,  
+          tipJoint: "center",  
+          targetJoint: "center",  
+          showEffectDuration: 0,  
+          showEffect: "none",
+          hideDelay: 0.5
+        }  
+      )
+      @DatasetErrorMsg = new Opentip(
+        @container, "Invalid file", "",  
+        { 
+          showOn: null,  
+          style:"glass",  
+          stem: false,  
+          target: true,  
+          tipJoint: "center",  
+          targetJoint: "center",  
+          showEffectDuration: 0,  
+          showEffect: "none",
+          hideDelay: 0.5
+        }  
+      )
 
     init: ->
+      @initHandlers()
+      
       @container.html("""
         <ul class="SeeIt dataset-list list-group">
           <div class="SeeIt panel-heading" id="data-panel-heading">  
             <label id="upload_modal" class="btn btn-primary btn-file SeeIt new-dataset-input">
-              <span class='glyphicon glyphicon-upload' style=""></span>
+              <span class='glyphicon glyphicon-upload'></span>
                 Upload Data
             </label>
+          </div>
+          <div class="holder #{if @data.datasets.length > 0 then 'hidden' else ''}">
+            <h1 class="upload_msg ">Drop file here</h1>
+            <svg class="upload_icon " width="50" height="43" viewBox="0 0 50 43">
+              <path d="M48.4 26.5c-.9 0-1.7.7-1.7 1.7v11.6h-43.3v-11.6c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v13.2c0 .9.7 1.7 1.7 1.7h46.7c.9 0 1.7-.7 1.7-1.7v-13.2c0-1-.7-1.7-1.7-1.7zm-24.5 6.1c.3.3.8.5 1.2.5.4 0 .9-.2 1.2-.5l10-11.6c.7-.7.7-1.7 0-2.4s-1.7-.7-2.4 0l-7.1 8.3v-25.3c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v25.3l-7.1-8.3c-.7-.7-1.7-.7-2.4 0s-.7 1.7 0 2.4l10 11.6z"/></svg>
           </div>
         </ul>
       """)
@@ -61,6 +96,12 @@
           d.trigger('graph:id:change', oldId, newId)
       )
 
+      @container.find('.dataset-list').off('drop').on('drop', @handlers.file.dropListener)
+      @container.find('.dataset-list').off('dragenter').on('dragenter', @handlers.file.dragEnterListener)
+      @container.find('.dataset-list').off('dragleave').on('dragleave', @handlers.file.dragLeaveListener)
+      @container.find('.dataset-list').off('dragover').on('dragover', @handlers.file.dragOverListener)
+      @container.find('.dataset-list').off('dragend').on('dragend', @handlers.file.dragEndListener)
+
     initDatasetListeners: (datasetView) ->
       self = @
 
@@ -83,16 +124,71 @@
     initHandlers: ->
       self = @
       self.handlers = {
-        dragStartListener: (event) ->
-          event.originalEvent.dataTransfer.setData("text", event.target.id)
-          event.originalEvent.dataTransfer.setData("datasetName", $(this).attr('name'))
-          $(".data-drop-zone").css("background-color", "#FFAFAF")
-          $("#id-graphs").css("background-color", "#FFAFAF")
+        column: {
+          dragStartListener: (event) ->
+            event.originalEvent.dataTransfer.setData("text", event.target.id)
+            event.originalEvent.dataTransfer.setData("datasetName", $(this).attr('name'))
+            $(".data-drop-zone").css("background-color", "#FFAFAF")
+            $("#id-graphs").css("background-color", "#FFAFAF")
+    
+          dragEndListener: (event) ->
+            event.preventDefault()
+            $(".data-drop-zone").css("background-color", "")
+            $("#id-graphs").css("background-color", "")
+            
+        },
+        
+        file: {
 
-        dragEndListener: (event) ->
-          event.preventDefault()
-          $(".data-drop-zone").css("background-color", "")
-          $("#id-graphs").css("background-color", "")
+          dragOverListener: (event) ->
+            event.preventDefault()
+            data = event.originalEvent.dataTransfer.items
+            if data[0].kind == 'file'
+              $('.dataset-list').addClass('hover')
+            return false
+
+          dragEnterListener: (event) ->
+            event.preventDefault()
+            $('.dataset-container, .panel-heading').removeClass('ignore_events')
+            return false
+
+          dragEndListener: (event) ->
+            event.preventDefault()
+            $('.dataset-list').removeClass('hover')
+            $('.dataset-container, .panel-heading').removeClass('ignore_events')
+            return false
+
+          dragLeaveListener: (event) ->
+            event.preventDefault()
+            $('.dataset-list').removeClass('hover')
+            $('.dataset-container, .panel-heading').removeClass('ignore_events')
+            return false
+
+          dropListener: (event) ->
+            event.preventDefault()
+            $('.dataset-list').removeClass('hover')
+            $('.dataset-container, .panel-heading').removeClass('ignore_events')
+
+            data = event.originalEvent.dataTransfer.files
+
+            for i, current_file of data
+
+              if current_file == data.length
+                return false
+              
+              fileType = current_file.name.split('.')[1]
+
+              if fileType == 'csv'
+                self.handleDatasetCreate.call(self, 'csv-file', {file: current_file})
+              else if fileType == 'json'
+                self.handleDatasetCreate.call(self, 'json-file', {file: current_file})
+              else
+                self.DatasetErrorMsg.show()
+                return false
+
+            return false
+        }
+
       }
 
     resizeListener: ->
@@ -202,7 +298,7 @@
 
     handleDatasetCreate: (selected, data = {}) ->
       self = @
-
+      $('.holder').remove()
       switch selected
         when "google"
           url = self.container.find('.dataset-spreadsheet-url').val()
@@ -328,13 +424,17 @@
 
           self.container.find(".csv-endpoint").val("")
         when "csv-file"
-          csv_manager = new SeeIt.CSVManager()
           filename = data.file.name.split('.')[0]
-          self.dataLoadingMsg.show()
-          csv_manager.handleUpload(data.file, (d) ->
-            self.trigger 'datasets:create', [{isLabeled: true, title: filename, dataset: d}]
-            self.dataLoadingMsg.hide()
-          )
+          if self.validateTitle(filename)
+            csv_manager = new SeeIt.CSVManager()
+            self.dataLoadingMsg.show()
+            csv_manager.handleUpload(data.file, (d) ->
+              self.trigger 'datasets:create', [{isLabeled: true, title: filename, dataset: d}]
+              self.dataLoadingMsg.hide()
+            )
+          else
+            @ErrorMsg.show()
+
 
     validateTitle: (title) ->
       for i in [0...@data.datasets.length]
@@ -346,8 +446,10 @@
       @newDatasetMaker()
 
       if !@app.ui.dataset_add_remove
-        $('.new-dataset').addClass("hidden")
-        $('.new-dataset-form').addClass("hidden")
+        $('#upload_modal').addClass("hidden")
+
+      if !@app.ui.toolbar
+        $('.hide_data').addClass('hidden')
 
       for i in [0...@data.datasets.length]
         @addDatasetView(@data.datasets[i])
@@ -355,9 +457,9 @@
     addDatasetView: (data) ->
       @container.find('.dataset-list .new-dataset').before("<div class='SeeIt dataset-container'></div>")
       datasetView = new SeeIt.DatasetView(@app, @container.find(".SeeIt.dataset-container:not(.new-dataset)").last(), data)
-      @initHandlers()
-      @container.find('.source').off('dragstart').on('dragstart', @handlers.dragStartListener)
-      @container.find('.source').off('dragend').on('dragend', @handlers.dragEndListener)
+      @container.find('.source').off('dragstart').on('dragstart', @handlers.column.dragStartListener)
+      @container.find('.source').off('dragend').on('dragend', @handlers.column.dragEndListener)
+
       @initDatasetListeners(datasetView)
       datasetView.trigger('populate:dropdowns')
       @datasetViewCollection.push(datasetView)

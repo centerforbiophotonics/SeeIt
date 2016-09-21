@@ -343,6 +343,7 @@
     toggleDataVisible: ->
       @dataCollectionView.toggleVisible()
       @graphCollectionView.toggleFullscreen()
+      $('#fixedbutton').toggleClass('hidden')
 
       if @ui.spreadsheet then @spreadsheetView.toggleFullscreen()
 

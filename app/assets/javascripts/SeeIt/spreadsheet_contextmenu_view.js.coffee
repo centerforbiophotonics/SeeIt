@@ -10,7 +10,8 @@
       self = @  
  
       @listenTo(@parent, 'spreadsheet:maximize', (num) ->  
-        self.print_function.call(self, num)  
+        self.print_function.call(self, num)
+        self.trigger('spreadsheet:maximize', num)
  
       )
  

@@ -87,6 +87,7 @@
               }
 
     refresh: (options) ->
+      $('.tooltip').remove()
       @container.html("")
       @draw(options)
 
