@@ -148,30 +148,25 @@
 
           dragEnterListener: (event) ->
             event.preventDefault()
-
-            $(".dataset-container").addClass('ignore_events')
-            $('.panel-heading').addClass('ignore_events')
+            $('.dataset-container, .panel-heading').removeClass('ignore_events')
             return false
 
           dragEndListener: (event) ->
             event.preventDefault()
             $('.dataset-list').removeClass('hover')
-            $(".dataset-container").removeClass('ignore_events')
-            $('.panel-heading').removeClass('ignore_events')
+            $('.dataset-container, .panel-heading').removeClass('ignore_events')
             return false
 
           dragLeaveListener: (event) ->
             event.preventDefault()
             $('.dataset-list').removeClass('hover')
-            $(".dataset-container").removeClass('ignore_events')
-            $('.panel-heading').removeClass('ignore_events')
+            $('.dataset-container, .panel-heading').removeClass('ignore_events')
             return false
 
           dropListener: (event) ->
             event.preventDefault()
             $('.dataset-list').removeClass('hover')
-            $(".dataset-container").removeClass('ignore_events')
-            $('.panel-heading').removeClass('ignore_events')
+            $('.dataset-container, .panel-heading').removeClass('ignore_events')
 
             data = event.originalEvent.dataTransfer.files
 
@@ -179,6 +174,7 @@
 
               if current_file == data.length
                 return false
+              
               fileType = current_file.name.split('.')[1]
 
               if fileType == 'csv'
