@@ -27,7 +27,8 @@
           else
             self.refresh.call(self, options)
         else
-          @container.html("")
+          self.container.html("")
+
       @eventCallbacks['data:assigned'] = @eventCallbacks['data:created']
       @eventCallbacks['data:destroyed'] = @eventCallbacks['data:created']
       @eventCallbacks['column:destroyed'] = @eventCallbacks['data:created']
@@ -113,7 +114,6 @@
         .append("g")
         .attr("transform", "translate(" + @style.margin.left + "," + @style.margin.top + ")")
 
-      console.log(gridSize)
       @yLabels = @svg.selectAll(".startLabel")
                       .data(self.yMembers)
                       .enter().append("text")
