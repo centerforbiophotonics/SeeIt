@@ -175,7 +175,7 @@
 
               if current_file == data.length
                 return false
-              
+
               fileType = current_file.name.split('.')[1]
 
               if fileType == 'csv'
@@ -380,11 +380,17 @@
 
           self.container.find(".json-endpoint").val("")
         when "json-file"
-          json_manager = new SeeIt.JsonManager()
-          self.dataLoadingMsg.show()
-          json_manager.handleUpload(data.file, (d) ->
-            self.trigger 'datasets:create', d
-            self.dataLoadingMsg.hide()
+          json_manager = new SeeIt.JsonManager()      
+          json_manager.getJsonTitle(data.file, (title) ->
+            if self.validateTitle(title)
+              self.dataLoadingMsg.show()
+              json_manager.handleUpload(data.file, (d) ->
+                self.trigger 'datasets:create', d
+                self.dataLoadingMsg.hide()
+                $('.show-in-spreadsheet').last().trigger('click')
+            )
+            else
+              self.ErrorMsg.show()
           )
         when "csv-endpoint"
           csv_manager = new SeeIt.CSVManager()
@@ -421,7 +427,6 @@
           catch error
             error_cb()
 
-
           self.container.find(".csv-endpoint").val("")
         when "csv-file"
           filename = data.file.name.split('.')[0]
@@ -431,6 +436,7 @@
             csv_manager.handleUpload(data.file, (d) ->
               self.trigger 'datasets:create', [{isLabeled: true, title: filename, dataset: d}]
               self.dataLoadingMsg.hide()
+              $('.show-in-spreadsheet').last().trigger('click')
             )
           else
             @ErrorMsg.show()
@@ -474,6 +480,7 @@
     toggleVisible: ->
       @container.toggleClass('hidden')
       @visible = !@visible
+      $('.spreadsheet').css('height', 270)
 
   DataCollectionView
 ).call(@)

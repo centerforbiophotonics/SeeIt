@@ -26,7 +26,7 @@
               <div class="btn-group SeeIt graph-buttons" role="group" style="float: right">
                 <button class="SeeIt export btn btn-default" title='Export Spreadsheet'><span class="glyphicon glyphicon glyphicon-save"></span></button>
                 <button class="SeeIt maximize btn btn-default" title='Maximize Spreadsheet'><span class="glyphicon glyphicon-resize-full"></span></button>
-                <button class="SeeIt remove btn btn-default" title="Remove Spreadsheet"><span class="glyphicon glyphicon-remove"></span></button>
+                <button class="SeeIt remove btn btn-default" title="Hide Spreadsheet"><span class="glyphicon glyphicon-remove"></span></button>
               </div>
           </div>
           <div class="SeeIt panel-body spreadsheet">
@@ -163,7 +163,8 @@
       )
 
       @container.find('.remove').off('click').on('click', () -> 
-        $("button:contains('#{self.dataset.title}')").siblings('.show-in-spreadsheet').trigger('click')
+        # $("button:contains('#{self.dataset.title}')").siblings('.show-in-spreadsheet').trigger('click')
+        $('.toggleSpreadsheet').trigger('click')
         
       )
 
