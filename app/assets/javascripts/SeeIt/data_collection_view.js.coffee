@@ -480,7 +480,7 @@
     toggleVisible: ->
       @container.toggleClass('hidden')
       @visible = !@visible
-      $('.spreadsheet').css('height', 270)
+      $('.SeeIt.Handsontable-Container').css('height', '-=20px')
 
   DataCollectionView
 ).call(@)

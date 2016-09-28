@@ -160,6 +160,7 @@
         self.trigger('spreadsheet:maximize', 6)
         self.container.find('.maximize .glyphicon').toggleClass('glyphicon-resize-full glyphicon-resize-small')
         self.container.toggleClass('spreadsheet_maximized')
+        self.handlers.resize()
       )
 
       @container.find('.remove').off('click').on('click', () -> 
@@ -276,7 +277,6 @@
         data: privateMethods.formatModelData(),
         columns: privateMethods.formatColumns(),
         className: "SeeIt-htCenter",
-        height: Math.max(270, self.container.find('.SeeIt.Handsontable-Container').parent().height()),
         colWidths: ->
           Math.max(
             (self.container.find('.SeeIt.Handsontable-Container').parent().width() - 50) / self.dataset.headers.length,

@@ -329,10 +329,16 @@
     ###
     toggleSpreadsheetVisible: ->
       if @ui.spreadsheet
+
         @spreadsheetView.toggleVisible()
         @spreadsheetVisible = !@spreadsheetVisible
 
-        if @spreadsheetVisible then @spreadsheetView.updateView()
+        if @spreadsheetVisible 
+          @spreadsheetView.updateView()
+          $('.SeeIt.Handsontable-Container').css('height', '+=20px')
+
+        else 
+          $('.SeeIt.Handsontable-Container').css('height', '-=20px')
 
         @trigger('height:toggle')
 
