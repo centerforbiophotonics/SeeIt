@@ -31,6 +31,15 @@
 			@eventCallbacks['label:changed'] = @eventCallbacks['data:created']
 			@eventCallbacks['header:changed'] = @eventCallbacks['data:created']
 			@eventCallbacks['color:changed'] = @eventCallbacks['data:created']
+			@eventCallbacks['option:clicked'] = (label, options) ->
+				if label == "Start"
+					self.svg.selectAll("#orbitLine").remove()
+					self.orbit(options)
+					console.log "Start the rotations!"
+				else if label == "Stop"
+					self.svg.select("#aquas").transition()
+					self.svg.select("#terra").transition()
+					console.log "Stop the rotations!"
 
 			for e, cb of @eventCallbacks
 				@on e, cb
@@ -42,15 +51,6 @@
 		draw: (options) ->
 			self = @
 
-			orbits1Idx = options.map((op)->op.label).indexOf("#1 Orbits")
-			orbits2Idx = options.map((op)->op.label).indexOf("#2 Orbits")
-
-			orbits1 = 0
-			orbits2 = 0
-
-			if orbits1Idx > -1 && options[orbits1Idx].value then orbits1 = Number(options[orbits1Idx].value)
-			if orbits2Idx > -1 && options[orbits2Idx].value then orbits2 = Number(options[orbits2Idx].value)
-
 			@container.html("<svg class='SeeIt graph-svg' style='width:100%; min-height: 270px; background-color: #000000'></svg>")
 			
 			width = @container.width()	
@@ -59,7 +59,6 @@
 			@svg = d3.select(self.container.find('.graph-svg')[0])
 				.attr("width", width)
 				.attr("height", height)
-			
 
 			@svg.append("circle")
 				.attr("r", 10)
@@ -85,9 +84,33 @@
 				.attr("fill", "green")
 				.attr("id", "terra")
 
+			@svg.append("text")
+				.text("Press the Start button in the options to start the orbits!")
+				.attr("fill", "white")
+				.attr("y", 12)
+				.attr("x", 0)
+
+		orbit: (options) -> 
+			
+			self = @
+
+			orbits1Idx = options.map((op)->op.label).indexOf("Aquas Orbits")
+			orbits2Idx = options.map((op)->op.label).indexOf("Terra Orbits")
+
+			orbits1 = 0
+			orbits2 = 0
+
+			if orbits1Idx > -1 && options[orbits1Idx].value then orbits1 = Number(options[orbits1Idx].value)
+			if orbits2Idx > -1 && options[orbits2Idx].value then orbits2 = Number(options[orbits2Idx].value)
+
 			ticks = Math.min(orbits1, orbits2) * 180
 			perTick1 = (orbits1 * 360)/ticks
 			perTick2 = (orbits2 * 360)/ticks
+
+			width = @container.width()	
+			height = Math.max(270, @container.height())
+			outerRadius = 3*height/7
+			innerRadius = height/3 
 
 			circle1 = (deg) ->
 				x = (outerRadius * Math.cos((deg/360)*2*Math.PI)) + (width/2)
@@ -99,49 +122,51 @@
 				y = (innerRadius * Math.sin((deg/360)*2*Math.PI)) + (height/2)
 				return [x,y]
 
+			tickPts = []
+			tick = 0
+
 			for i in [1..ticks]
+				#console.log "tick ", i
 				aquasRot = (perTick1*i)%360
 				terraRot = (perTick2*i)%360
 				aquasPos = circle1(aquasRot)
 				terraPos = circle2(terraRot)
 
-				endCall = (aquasPos, terraPos) ->
-					console.log "An End!"
+				tickPts.push({"apos":aquasPos, "tpos":terraPos})
+					
+				endCall = () ->
+					#console.log "An End!", tick
+					d = tickPts[tick]
+					tick++
 					self.svg.append("line")
-						.attr("x1", aquasPos[0])
-						.attr("x2", terraPos[0])
-						.attr("y1", aquasPos[1])
-						.attr("y2", terraPos[1])
-						.attr("stroke", "white")
-						.attr("stroke-width", "0.2")
+							.attr("x1", d.apos[0])
+							.attr("x2", d.tpos[0])
+							.attr("y1", d.apos[1])
+							.attr("y2", d.tpos[1])
+							.attr("stroke", "white")
+							.attr("stroke-width", 0.3)
+							.attr("id", "orbitLine")
 
 				@svg.select("#aquas")
 					.transition()
-						.duration(20)
-						.delay(i*20)
+						.duration(40)
+						.delay(i*40)
 						.ease((t)->t)
 						.attr("cx", aquasPos[0]).attr("cy", aquasPos[1])
 
 				@svg.select("#terra")
-					.on("end", endCall(aquasPos, terraPos))
 					.transition()
-					.duration(20)
-					.delay(i*20)
-					.ease((t)->t)
-					.attr("cx",terraPos[0]).attr("cy", terraPos[1])
-
-#				t = d3.transition()
-					
-#				@svg.select("#aquas")
-#					.transition(t)
-#						.attr("transform", "rotate(#{aquasRot}, #{width/2}, #{height/2})")
-
-#				@svg.select("#terra")
-#					.transition(t)
-#						.attr("transform", "rotate(#{terraRot}, #{width/2}, #{height/2})")
+						.duration(40)
+						.delay(i*40)
+						.ease((t)->t)
+						.attr("cx", terraPos[0]).attr("cy", terraPos[1])
+						.each("end", -> endCall())
 
 
 		refresh: (options) ->
+			self=@
+			@svg.select("#aquas").transition()
+			@svg.select("#terra").transition().each("end", -> self.svg.select("#orbitLine").remove())
 			@container.html("")
 			@draw(options)
 		dataFormat: ->
@@ -156,14 +181,22 @@
 		options: ->
 			[
 				{
-					label: "#1 Orbits",
+					label: "Aquas Orbits",
 					type: "numeric",
 					default: 3
 				},
 				{
-					label: "#2 Orbits", 
+					label: "Terra Orbits", 
 					type: "numeric",
 					default: 5
+				},
+				{
+					label: "Start",
+					type: "button"
+				},
+				{
+					label: "Stop",
+					type: "button"
 				}
 			]
 
