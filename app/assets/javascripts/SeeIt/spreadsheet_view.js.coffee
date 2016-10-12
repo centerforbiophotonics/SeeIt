@@ -90,7 +90,6 @@
 
       @listenTo(@app, 'spreadsheet:unload', ->
         self.updateDataset.call(self, null)
-        $('.toggleSpreadsheet').trigger('click')
       )
 
       @listenTo(@app, 'width:toggle', ->
