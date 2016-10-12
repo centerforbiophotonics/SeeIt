@@ -508,7 +508,7 @@
       if index != null
         @datasetViewCollection[index].destroy()
         @datasetViewCollection.splice(index, 1)
-        $('.toggleSpreadsheet').trigger('click')
+        @trigger('spreadsheet:unload')
 
     findIndexByID: (dataset_id) ->
       index = null

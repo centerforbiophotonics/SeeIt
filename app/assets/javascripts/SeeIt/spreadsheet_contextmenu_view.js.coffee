@@ -7,17 +7,7 @@
       @initHandlers()  
  
     initHandlers: ->  
-      self = @  
- 
-      @listenTo(@parent, 'spreadsheet:maximize', (num) ->  
-        self.print_function.call(self, num)
-        self.trigger('spreadsheet:maximize', num)
- 
-      )
- 
-    print_function: (num) ->  
-      console.log 'hi there from contextmenu: ' + num
-
+      
     display_row_menu: (key, options) ->
 
       self = @

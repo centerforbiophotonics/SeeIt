@@ -42,9 +42,6 @@
       @initHandlers()
       @resetTable()
       @toggleVisible()
-  
-    maximize: ->  
-      console.log "Maximize"
 
     toggleFullscreen: ->
       if @isFullscreen 
@@ -93,6 +90,7 @@
 
       @listenTo(@app, 'spreadsheet:unload', ->
         self.updateDataset.call(self, null)
+        $('.toggleSpreadsheet').trigger('click')
       )
 
       @listenTo(@app, 'width:toggle', ->
@@ -103,10 +101,6 @@
 
       @listenTo(@app, 'data:changed', (origin) ->
         #Do nothing
-      )
-
-      @listenTo(self, 'spreadsheet:maximize', (num) ->  
-        self.maximize.call(self, num)
       )
 
       @handlers = {
@@ -157,8 +151,6 @@
       )
 
       @container.find('.maximize').off('click').on('click', () -> 
-        console.log 'max button'
-        self.trigger('spreadsheet:maximize', 6)
         self.container.find('.maximize .glyphicon').toggleClass('glyphicon-resize-full glyphicon-resize-small')
         self.container.toggleClass('spreadsheet_maximized')
         self.handlers.resize()
@@ -171,7 +163,37 @@
       )
 
       @container.find('.delete').off('click').on('click', () ->
-        self.trigger('dataset:remove', self.dataset.ID)
+        self.container.find('.SeeIt .spreadsheet').append("""
+          <div id="dataset_remove_modal" class="modal fade">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title" id='delete_modal_title'></h4>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="SeeIt btn btn-primary" id="confirm_delete" data-loading-text="<span class='SeeIt glyphicon glyphicon-refresh spin'></span>">
+                      Confirm
+                    </button>
+                  </div>
+                </div>
+            </div>
+          </div>
+        """)
+        $('#dataset_remove_modal').modal('show')
+        $('#delete_modal_title').text("Delete " + self.dataset.title + "?")
+
+        $(document).off("keypress").on("keypress", ":input:not(textarea)", (e) ->    
+          if e.keyCode == 13
+            e.preventDefault()
+            $('#confirm_delete').click()
+        );
+
+        $('#confirm_delete').on('click', () ->
+          self.trigger('dataset:remove', self.dataset.ID)
+          $('#dataset_remove_modal').modal('hide')
+        );
       )
 
     validateUniqueness: (val, data, ignore) ->
