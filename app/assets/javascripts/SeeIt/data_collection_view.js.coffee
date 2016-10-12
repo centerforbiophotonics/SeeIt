@@ -96,11 +96,19 @@
           d.trigger('graph:id:change', oldId, newId)
       )
 
+      @listenTo @app, 'dataset:remove', (dataset_id) ->
+        self.removeDatasetView.call(self, dataset_id)
+        self.data.removeDataset(dataset_id)
+        
+
       @container.find('.dataset-list').off('drop').on('drop', @handlers.file.dropListener)
       @container.find('.dataset-list').off('dragenter').on('dragenter', @handlers.file.dragEnterListener)
       @container.find('.dataset-list').off('dragleave').on('dragleave', @handlers.file.dragLeaveListener)
       @container.find('.dataset-list').off('dragover').on('dragover', @handlers.file.dragOverListener)
       @container.find('.dataset-list').off('dragend').on('dragend', @handlers.file.dragEndListener)
+
+      @container.find('.dataset-title').off('dragstart').on('dragstart', @handlers.remove.dragStartListener)
+      @container.find('.dataset-title').off('dragend').on('dragend', @handlers.remove.dragEndListener)
 
     initDatasetListeners: (datasetView) ->
       self = @
@@ -143,7 +151,8 @@
           dragOverListener: (event) ->
             event.preventDefault()
             data = event.originalEvent.dataTransfer.items
-            if data[0].kind == 'file'
+
+            if data[0] != undefined && data[0].kind == 'file'
               $('.dataset-list').addClass('hover')
             return false
 
@@ -187,6 +196,22 @@
                 return false
 
             return false
+        },
+
+        remove: {
+
+          dragStartListener: (event) ->
+            event.preventDefault()
+            console.log 'dragstart'
+
+            $(".data-drop-zone").css("background-color", "#FFAFAF")
+
+          dragEndListener: (event) ->
+            event.preventDefault()
+            console.log 'dragend'
+
+            $(".data-drop-zone").css("background-color", "")
+
         }
 
       }
@@ -476,6 +501,22 @@
       )
 
       return datasetView
+
+    removeDatasetView: (dataset_id) ->
+      index = @findIndexByID(dataset_id)
+
+      if index != null
+        @datasetViewCollection[index].destroy()
+        @datasetViewCollection.splice(index, 1)
+        $('.toggleSpreadsheet').trigger('click')
+
+    findIndexByID: (dataset_id) ->
+      index = null
+      @datasetViewCollection.forEach (d, i) ->
+        if d.dataset.ID == dataset_id
+          index = i
+
+      return index
 
     toggleVisible: ->
       @container.toggleClass('hidden')

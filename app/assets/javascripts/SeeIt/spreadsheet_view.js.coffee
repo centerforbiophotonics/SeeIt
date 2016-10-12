@@ -24,6 +24,7 @@
             <span class='title'>#{if @dataset && @dataset.data.length then @dataset.title else ""}</span>
             <span class="SeeIt title-edit-icon glyphicon glyphicon-pencil"></span>
               <div class="btn-group SeeIt graph-buttons" role="group" style="float: right">
+                <button class="SeeIt delete btn btn-default" title='Delete Dataset' style="right: 20px"><span class="glyphicon glyphicon-trash"></span></button>
                 <button class="SeeIt export btn btn-default" title='Export Spreadsheet'><span class="glyphicon glyphicon glyphicon-save"></span></button>
                 <button class="SeeIt maximize btn btn-default" title='Maximize Spreadsheet'><span class="glyphicon glyphicon-resize-full"></span></button>
                 <button class="SeeIt remove btn btn-default" title="Hide Spreadsheet"><span class="glyphicon glyphicon-remove"></span></button>
@@ -161,12 +162,16 @@
         self.container.find('.maximize .glyphicon').toggleClass('glyphicon-resize-full glyphicon-resize-small')
         self.container.toggleClass('spreadsheet_maximized')
         self.handlers.resize()
+        $('.SeeIt.Handsontable-Container').css('height', '-=20px')
       )
 
       @container.find('.remove').off('click').on('click', () -> 
         # $("button:contains('#{self.dataset.title}')").siblings('.show-in-spreadsheet').trigger('click')
         $('.toggleSpreadsheet').trigger('click')
-        
+      )
+
+      @container.find('.delete').off('click').on('click', () ->
+        self.trigger('dataset:remove', self.dataset.ID)
       )
 
     validateUniqueness: (val, data, ignore) ->

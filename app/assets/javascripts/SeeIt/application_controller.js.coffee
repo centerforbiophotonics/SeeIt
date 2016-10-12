@@ -269,6 +269,10 @@
         self.trigger('data:changed', origin)
       )
 
+      @listenTo(self.spreadsheetView, 'dataset:remove', (dataset_id) ->
+        self.trigger('dataset:remove', dataset_id)
+      )
+
       @listenTo(self.dataCollectionView, 'graph:addData', (graphData) ->
         self.trigger('graph:addData', graphData)
       )
@@ -322,6 +326,7 @@
       # listen for trigger in graphCollectionView and will trigger the actual function in graphCollectionView
       @listenTo self.graphCollectionView, 'graph:addData', (dataGraph) ->
         self.trigger 'graph:addData', dataGraph
+
 
 
     ###*

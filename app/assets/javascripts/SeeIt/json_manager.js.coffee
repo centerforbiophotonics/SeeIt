@@ -41,21 +41,21 @@
         filereader = new window.FileReader()
 
         filereader.onload = ->
-        	txtRes = filereader.result
+          txtRes = filereader.result
 
-        	try
-        		data = JSON.parse txtRes
+          try
+            data = JSON.parse txtRes
 
-        		if !$.isArray(data) then data = [data]
+            if !$.isArray(data) then data = [data]
 
-        		callback data
-        	catch e
-        		console.log e
+            callback data
+          catch e
+            console.log e
 
         filereader.readAsText file
       else 
-      	console.log "Error uploading JSON Data"
-        	
+        console.log "Error uploading JSON Data"
+
 
     handleDownload: (dataCollection) ->
       blob = new Blob([JSON.stringify(dataCollection.toJson())]);
@@ -83,6 +83,7 @@
             callback(jsonTitle)
           catch e
             console.log e
+            alert(e)
 
         filereader.readAsText file
 
