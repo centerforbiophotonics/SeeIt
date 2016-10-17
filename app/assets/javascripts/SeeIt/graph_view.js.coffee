@@ -252,6 +252,9 @@
 
         self.listenTo self.options, 'graph:update', ->
           self.graph.trigger('options:update', self.options.getValues())
+
+        self.listenTo self.options, 'option:clicked', (label, options) ->
+          self.graph.trigger('option:clicked', label, options)
       )
 
     updateFilters: (filterData) ->

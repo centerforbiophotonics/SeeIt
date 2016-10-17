@@ -52,10 +52,17 @@
 					self.container.find('.panel-body').append(self.generateOption.call(self, d))
 					self.setDefaultValue.call(self, d)
 
-			@options.forEach (d) ->
-				if d.type() != "checkbox"
+			#@options.forEach (d) ->
+				if d.type() == "button"
+					self.container.find('.panel-body').append(self.generateOption.call(self, d))
+					idStr = d.label().replace(/\s+/g, '')
+					self.container.find("##{idStr}").click (event) ->
+						values = self.getValues()
+						self.trigger('option:clicked', d.label(), values)
+				if d.type() != "checkbox" && d.type() != "button"
 					self.container.find('.panel-body').append(self.generateOption.call(self, d))
 					self.setDefaultValue.call(self, d)
+
 
 
 			@container.find('.SeeIt.switch').bootstrapSwitch()
@@ -140,6 +147,11 @@
 					option.id = id
 
 					return numericInputStr
+
+				when "button"
+					#Generate button
+					labelStr = option.label().replace(/\s+/g, '')
+					buttonStr = "<button class='option-custom btn btn-info' id='#{labelStr}' role='button' style='width: 55%; margin-bottom: 5px'>#{option.label()}</button>"
 				else return ""
 
 		initHandlers: ->
