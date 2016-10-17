@@ -561,10 +561,35 @@
       @container.remove()
 
     maximize: ->
+      self = @
       if @collapsed
         @container.find(".collapse-btn").trigger('click')
         
       @container.toggleClass('maximized')
+      if !@maximized
+        $(".SeeIt.Data").hide()
+        $(".SeeIt.Spreadsheet").hide()
+        $(".SeeIt.navbar").hide()
+        $(".SeeIt.Graphs").removeClass("col-md-9").addClass("col-md-12")
+        @container.find(".panel-footer:first").hide()
+        @container.find(".panel-heading:first").hide()
+        @container.siblings().hide()
+        @container.find(".panel-body:first").append('<span class="maximized-options glyphicon glyphicon-wrench" style="position:absolute; top:14px; left:18px; color:grey; font-size:25px; opacity:.7; cursor:pointer"></span><span class="maximized-close glyphicon glyphicon-remove" style="position:absolute; top:12px; right:17px; color:grey; font-size:25px; opacity:.7;cursor:pointer"></span>')
+        @container.find(".maximized-options").on("click", -> 
+          self.container.find(".options-button").trigger("click")
+        )
+        @container.find(".maximized-close").on("click", @handlers.maximize)
+
+      else
+        @container.find(".maximized-options").remove()
+        @container.find(".maximized-close").remove()
+        $(".SeeIt.Data").show()
+        $(".SeeIt.Spreadsheet").show()
+        $(".SeeIt.navbar").show()
+        $(".SeeIt.Graphs").removeClass("col-md-12").addClass("col-md-9")
+        @container.siblings().show()
+        @container.find(".panel-heading").show()
+        @container.find(".panel-footer").show()
       @container.find('.maximize .glyphicon').toggleClass('glyphicon-resize-full glyphicon-resize-small')
       @maximized = !@maximized
 
@@ -577,6 +602,7 @@
 
       @container.find(".graph-panel-content").toggleClass('in')
       @container.find('.collapse-btn .glyphicon').toggleClass('glyphicon-collapse-down glyphicon-collapse-up')
+
       if @collapsed
         @graph.trigger('data:created', @options.getValues())
       @collapsed = !@collapsed
