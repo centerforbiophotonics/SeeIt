@@ -568,8 +568,11 @@
       @container.toggleClass('maximized')
       if !@maximized
         $(".SeeIt.Data").hide()
-        $(".SeeIt.Spreadsheet").hide()
-        $(".SeeIt.navbar").hide()
+        @oldDataVisible = @app.dataCollectionView.visible
+        @app.dataCollectionView.visible = false
+        @oldSSVisible = !$(".SeeIt.Spreadsheet").hasClass("hidden")
+        if @oldSSVisible then $(".SeeIt.Spreadsheet").addClass("hidden")
+        $(".SeeIt.navbar").addClass("hidden")
         $(".SeeIt.Graphs").removeClass("col-md-9").addClass("col-md-12")
         @container.find(".panel-footer:first").hide()
         @container.find(".panel-heading:first").hide()
@@ -583,10 +586,13 @@
       else
         @container.find(".maximized-options").remove()
         @container.find(".maximized-close").remove()
-        $(".SeeIt.Data").show()
-        $(".SeeIt.Spreadsheet").show()
-        $(".SeeIt.navbar").show()
-        $(".SeeIt.Graphs").removeClass("col-md-12").addClass("col-md-9")
+        if @oldDataVisible
+          $(".SeeIt.Graphs").removeClass("col-md-12").addClass("col-md-9")
+          $(".SeeIt.Data").show()
+        @app.dataCollectionView.visible = @oldDataVisible
+        if @oldSSVisible then $(".SeeIt.Spreadsheet").removeClass("hidden")
+        $(".SeeIt.navbar").removeClass("hidden")
+        
         @container.siblings().show()
         @container.find(".panel-heading").show()
         @container.find(".panel-footer").show()
