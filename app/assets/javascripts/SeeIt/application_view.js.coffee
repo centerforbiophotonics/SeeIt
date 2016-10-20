@@ -98,12 +98,13 @@
         $(".device-small").css("display", "none")
         $(".tab-pane").css("display", "block")
 
-        $(".SeeIt.Data").removeClass("col-md-12")
-        $(".SeeIt.Graphs").removeClass("col-md-12")
-        $(".SeeIt.Spreadsheet").removeClass("col-md-12")
-        $(".SeeIt.Data").addClass("col-md-3")
-        $(".SeeIt.Graphs").addClass("col-md-9")
-        $(".SeeIt.Spreadsheet").addClass("col-md-9")
+        if $(".SeeIt.Data").is(":visible") == true
+          $(".SeeIt.Data").removeClass("col-md-12")
+          $(".SeeIt.Graphs").removeClass("col-md-12")
+          $(".SeeIt.Spreadsheet").removeClass("col-md-12")
+          $(".SeeIt.Data").addClass("col-md-3")
+          $(".SeeIt.Graphs").addClass("col-md-9")
+          $(".SeeIt.Spreadsheet").addClass("col-md-9")
 
     resizeListener: ->
       self = @
