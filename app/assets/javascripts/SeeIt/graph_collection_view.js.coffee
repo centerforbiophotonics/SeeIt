@@ -194,7 +194,6 @@
               graph.saveFilters()
 
             
-
       newGraph.trigger('request:dataRoles', (dataRoles) ->
         self.trigger('graph:created', self.graphId, dataRoles)
       )
@@ -204,6 +203,11 @@
         self.trigger('graph:addData', dataGraph)
       )
 
+    removeFooterFromDataset: (dataset_title) ->
+      self = @
+
+      for i, graph of @graphs
+        graph.removeData(dataset_title)
 
     toggleFullscreen: ->
       if @isFullscreen 

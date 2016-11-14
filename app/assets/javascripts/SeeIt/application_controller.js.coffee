@@ -269,10 +269,6 @@
         self.trigger('data:changed', origin)
       )
 
-      @listenTo(self.spreadsheetView, 'dataset:remove', (dataset_id) ->
-        self.trigger('dataset:remove', dataset_id)
-      )
-
       @listenTo(self.dataCollectionView, 'graph:addData', (graphData) ->
         self.trigger('graph:addData', graphData)
       )
@@ -377,6 +373,13 @@
         alert('Filename cannot be blank');
       else if filename && filename != "null"
         saveAs(blob, filename+".json");
+
+    destroyDataset: (dataset_id, dataset_title) ->
+      @model.removeDataset(dataset_id)
+      @dataCollectionView.removeDatasetView(dataset_id)
+      @graphCollectionView.removeFooterFromDataset(dataset_title)
+      
+
 
   ApplicationController
 ).call(@)

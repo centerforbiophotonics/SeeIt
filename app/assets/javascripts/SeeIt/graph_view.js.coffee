@@ -172,11 +172,12 @@
 
     addDataToFooter: (data) ->
       self = @
+
       @container.find(".data-drop-zone[data-id='#{data.name}']").append("""
         <div class="SeeIt data-rep btn-group" role="group" data-id='#{data.data.header}'>
           <button class="SeeIt data-rep-color btn btn-default" style="background-color: #{data.data.getColor()}"></button>
           <button class="SeeIt data-rep-text btn btn-default">#{data.data.header}</button>
-          <button class="SeeIt data-rep-remove btn btn-default" title='Remove Data'><span class="glyphicon glyphicon-remove"></span></button>
+          <button class="SeeIt data-rep-remove btn btn-default" datasetName="#{data.data.datasetTitle}" title='Remove Data'><span class="glyphicon glyphicon-remove"></span></button>
         </div>
       """)
 
@@ -220,17 +221,24 @@
 
     # remove previous tab in data-drop-zone
     removeDataFromFooterMultiple: ->
-      @container.find(".data-drop-zone .data-rep:first").remove()    
+      @container.find(".data-drop-zone .data-rep:first").remove()
 
     removeData: (data) ->
-      dataset_idx = @filteredDataset.map((d) -> d.name).indexOf(data.name)
+      
+      console.log data
 
-      if dataset_idx >= 0
-        idx = @filteredDataset[dataset_idx].data.indexOf(data.data)
-        if idx >= 0
-          @filteredDataset[dataset_idx].data.splice(idx, 1)
-          @graph.trigger('data:destroyed', @options.getValues())
-          @removeDataFromFooter(data)
+      if typeof data == 'string'
+        @container.find(".data-rep-remove[datasetName='#{data}']").click()
+
+      else
+        dataset_idx = @filteredDataset.map((d) -> d.name).indexOf(data.name) # finds the matched data to delete
+
+        if dataset_idx >= 0
+          idx = @filteredDataset[dataset_idx].data.indexOf(data.data)
+          if idx >= 0
+            @filteredDataset[dataset_idx].data.splice(idx, 1)
+            @graph.trigger('data:destroyed', @options.getValues())
+            @removeDataFromFooter(data) # use this function to remove footer
 
     initGraph: ->
       self = @

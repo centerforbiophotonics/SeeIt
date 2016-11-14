@@ -94,12 +94,7 @@
       @listenTo(@app, 'graph:id:change', (oldId, newId) ->
         self.datasetViewCollection.forEach (d) ->
           d.trigger('graph:id:change', oldId, newId)
-      )
-
-      @listenTo @app, 'dataset:remove', (dataset_id) ->
-        self.removeDatasetView.call(self, dataset_id)
-        self.data.removeDataset(dataset_id)
-        
+      ) 
 
       @container.find('.dataset-list').off('drop').on('drop', @handlers.file.dropListener)
       @container.find('.dataset-list').off('dragenter').on('dragenter', @handlers.file.dragEnterListener)

@@ -190,8 +190,8 @@
         );
 
         $('#confirm_delete').on('click', () ->
-          self.trigger('dataset:remove', self.dataset.ID)
           $('#dataset_remove_modal').modal('hide')
+          self.app.destroyDataset(self.dataset.ID, self.dataset.title)
         );
       )
 
