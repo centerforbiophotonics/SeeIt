@@ -92,7 +92,6 @@
               else
                 @filteredDataset[datasetIdx].data.push(this_data)
              
-
               @addDataToFooter(new_data)
 
               self = @
@@ -172,7 +171,6 @@
 
     addDataToFooter: (data) ->
       self = @
-
       @container.find(".data-drop-zone[data-id='#{data.name}']").append("""
         <div class="SeeIt data-rep btn-group" role="group" data-id='#{data.data.header}'>
           <button class="SeeIt data-rep-color btn btn-default" style="background-color: #{data.data.getColor()}"></button>
@@ -224,11 +222,23 @@
       @container.find(".data-drop-zone .data-rep:first").remove()
 
     removeData: (data) ->
-      
-      console.log data
 
       if typeof data == 'string'
-        @container.find(".data-rep-remove[datasetName='#{data}']").click()
+       
+        filteredDatasetIdx = dataRoleIdx = -1
+        dataRoleName = null
+        @filteredDataset.forEach (data_role, i) ->
+          data_role.data.forEach (data_col, j) ->
+            if data_col.datasetTitle == data
+              filteredDatasetIdx = i
+              dataRoleIdx = j
+              dataRoleName = data_role.name
+
+        if filteredDatasetIdx != -1 && dataRoleIdx != -1
+          removedColumn = @filteredDataset[filteredDatasetIdx].data.splice(dataRoleIdx, 1)
+          dataToRemove = {name: dataRoleName, data: removedColumn[0]}
+          @graph.trigger('data:destroyed', @options.getValues())
+          @removeDataFromFooter(dataToRemove)
 
       else
         dataset_idx = @filteredDataset.map((d) -> d.name).indexOf(data.name) # finds the matched data to delete

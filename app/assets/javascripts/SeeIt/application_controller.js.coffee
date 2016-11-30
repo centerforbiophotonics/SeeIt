@@ -375,6 +375,7 @@
         saveAs(blob, filename+".json");
 
     destroyDataset: (dataset_id, dataset_title) ->
+      
       @model.removeDataset(dataset_id)
       @dataCollectionView.removeDatasetView(dataset_id)
       @graphCollectionView.removeFooterFromDataset(dataset_title)
