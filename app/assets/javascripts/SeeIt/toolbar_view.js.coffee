@@ -149,17 +149,23 @@
 
     registerEvents: ->
       toolbar  = @
-        
+      graph_created = false
       @navElements.forEach (el) ->
         if el.handler
           toolbar.container.find(".#{el.class}").off('click', el.handler).on('click', el.handler)
 
+      $("#graph-modal").on 'hidden.bs.modal', (event) -> 
+        if graph_created
+          $('a[href="#graphs_tab"]').tab('show')
+          $("#graphs_tab").animate({ scrollTop: $("#graphs_tab")[0].scrollHeight })
+          graph_created = false
+
       toolbar.container.find("#create-graph").on 'click', (event) ->
-        $('#graph-modal').modal('hide')
         selectedGraph = toolbar.container.find("#dropdown-form").val()
         $(".addGraph[data-id='"+selectedGraph+"']").trigger("click")
-        $('a[href="#graphs_tab"]').tab('show')
-        $("html, body").animate({ scrollTop: $(document).height() - $(window).height() })
+        graph_created = true
+        $('#graph-modal').modal('hide')
+        
 
     resizeListener: ->
       self = @       
