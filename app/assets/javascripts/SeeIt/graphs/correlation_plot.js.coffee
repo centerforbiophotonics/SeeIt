@@ -286,22 +286,34 @@
           )
           .call(drag)
 
-      regressionIdx = options.map((op) -> op.label).indexOf("Show Least Squares Regression Line")
-      squaresIdx = options.map((op) -> op.label).indexOf("Show Squares")
+      ops = options.map((op) -> op.label)
+      regressionIdx = ops.indexOf("Show Least Squares Regression Line")
+      squaresIdx = ops.indexOf("LSR Show Squares")
       squares = false
       if squaresIdx > -1 && options[squaresIdx].value then squares = true
       if regressionIdx > -1 && options[regressionIdx].value
         @drawLeastSquares(xScale, yScale, min, max, tooltip, squares)
 
-      medMedIdx = options.map((op) -> op.label).indexOf("Median-Median")
-      if medMedIdx > -1 && options[medMedIdx].value
-        @drawMedianMedian(xScale, yScale)
+      medMedIdx = ops.indexOf("Median-Median Line")
+      medMedSqrs = ops.indexOf("MM Show Divisions")
+      medMedPts = ops.indexOf("MM Show Points")
+      mmLine = false
+      if medMedIdx > -1 && options[medMedIdx].value then mmLine = true
+      mmSquares = false
+      if medMedSqrs > -1 && options[medMedSqrs].value then mmSquares = true
+      mmPts = false
+      if medMedPts  > -1 && options[medMedPts].value then mmPts = true
+      if mmLine or mmSquares or mmPts
+        @drawMedianMedian(xScale, yScale, mmLine, mmSquares, mmPts)
 
-      dyoLstSqrIdx = options.map((op) -> op.label).indexOf("Draw Your Least Squares Line")
+      dyoLstSqrIdx = ops.indexOf("Draw Your Least Squares Line")
       if dyoLstSqrIdx > -1 && options[dyoLstSqrIdx].value
-        @drawYourOwnLeastSquares(xScale, yScale)
+        dyoSqrsIdx = ops.indexOf("Show Your Squares")
+        dyoSqrs = false
+        if dyoSqrsIdx > -1 && options[dyoSqrsIdx].value then dyoSqrs = true
+        @drawYourOwnLeastSquares(xScale, yScale, dyoSqrs)
 
-      ellipseIdx = options.map((op) -> op.label).indexOf("Show Ellipse")
+      ellipseIdx = ops.indexOf("Show Ellipse")
       if ellipseIdx > -1 && options[ellipseIdx].value
         @drawEllipse(xScale, yScale, min, max)
 
@@ -397,7 +409,7 @@
               .style("fill-opacity", .05)
               .attr("id", "leastSquare")
 
-    drawYourOwnLeastSquares: (xScale, yScale) ->
+    drawYourOwnLeastSquares: (xScale, yScale, squares) ->
       self = @
 
       minMax = self.minMaxPadded(false) #minMax[0] = [xMin, xMax], [1] = [yMin, yMax]
@@ -559,7 +571,7 @@
             .style("fill-opacity", .05)
             .attr("id", "userLeastSquare")
 
-      drawSquares()
+      if squares then drawSquares()
 
       sumOfSquares = (myLine) ->
         myData = self.data.map((d)->{'x':d.x(), 'y':d.y()})
@@ -840,7 +852,7 @@
         .attr("text-anchor", "middle")
         .style("font-weight", "bold") 
 
-    drawMedianMedian: (xScale, yScale) ->
+    drawMedianMedian: (xScale, yScale, line, squares, points) ->
       data = @data.map((d)->{'x':d.x(), 'y':d.y()})
       data.sort((a,b)->a.x-b.x)
 
@@ -884,48 +896,48 @@
       maxX = medians[2].maxX
       maxY = medMedLine(maxX)
 
-      @svg.append("text")
-        .text("Median-Median Line: y = #{medMedSlope.toFixed(5)}x + #{medMedB.toFixed(5)}")
-        .attr("x", 15)
-        .attr("y", 0)
-        .attr("fill", "blue")
-        .attr("font-weight", "bold")
-
-      @svg.append("line")
-        .attr("x1", xScale(minX))
-        .attr("x2", xScale(maxX))
-        .attr("y1", yScale(minY))
-        .attr("y2", yScale(maxY))
-        .attr("stroke", "blue")
-        .attr("stroke-width", 2)
-        .attr("id", "#medMedLine")
-
-      @svg.selectAll("#medianPt")
-        .data(medians)
-        .enter()
-        .append("path")
-          .attr("d","M-10,-10L10,10M10,-10,L-10,10")
-          .attr("transform",(d)->"translate(#{xScale(d.x)},#{yScale(d.y)}) rotate(45)")
-          .attr("stroke","blue")
-          .attr("stroke-width",1)
-
-      @svg.selectAll("#medianGrp")
-        .data(medians)
-        .enter()
-        .append("rect")
-          .attr("x", (d)->xScale(d.minX))
-          .attr("y", (d)->yScale(d.maxY))
-          .attr("width", (d)->xScale(d.maxX)-xScale(d.minX))
-          .attr("height", (d)->yScale(d.minY)-yScale(d.maxY))
-          .attr("id", "medianGrp")
+      if line
+        @svg.append("text")
+          .text("Median-Median Line: y = #{medMedSlope.toFixed(5)}x + #{medMedB.toFixed(5)}")
+          .attr("x", 15)
+          .attr("y", 0)
           .attr("fill", "blue")
-          .attr("fill-opacity", 0.05)
-          .attr("stroke", "blue")
-          .attr("stroke-width", .5)
-
+          .attr("font-weight", "bold")
 
       
+        @svg.append("line")
+          .attr("x1", xScale(minX))
+          .attr("x2", xScale(maxX))
+          .attr("y1", yScale(minY))
+          .attr("y2", yScale(maxY))
+          .attr("stroke", "blue")
+          .attr("stroke-width", 2)
+          .attr("id", "#medMedLine")
 
+      if points
+        @svg.selectAll("#medianPt")
+          .data(medians)
+          .enter()
+          .append("path")
+            .attr("d","M-10,-10L10,10M10,-10,L-10,10")
+            .attr("transform",(d)->"translate(#{xScale(d.x)},#{yScale(d.y)}) rotate(45)")
+            .attr("stroke","blue")
+            .attr("stroke-width",1)
+
+      if squares
+        @svg.selectAll("#medianGrp")
+          .data(medians)
+          .enter()
+          .append("rect")
+            .attr("x", (d)->xScale(d.minX))
+            .attr("y", (d)->yScale(d.maxY))
+            .attr("width", (d)->xScale(d.maxX)-xScale(d.minX))
+            .attr("height", (d)->yScale(d.minY)-yScale(d.maxY))
+            .attr("id", "medianGrp")
+            .attr("fill", "blue")
+            .attr("fill-opacity", 0.05)
+            .attr("stroke", "blue")
+            .attr("stroke-width", .5)
 
     clearGraph: ->
       @container.html("")
@@ -946,7 +958,7 @@
           default: false
         },
         {
-          label: "Show Squares",
+          label: "LSR Show Squares",
           type: "checkbox",
           default: false
         },
@@ -956,14 +968,29 @@
           default: false
         },
         {
-          label: "Median-Median",
+          label: "Median-Median Line",
+          type: "checkbox",
+          default: false
+        },
+        {
+          label: "MM Show Divisions",
+          type: "checkbox",
+          default: false
+        },
+        {
+          label: "MM Show Points",
           type: "checkbox",
           default: false
         },
         {
           label: "Draw Your Least Squares Line",
           type:"checkbox",
-          default: true
+          default: false
+        },
+        {
+          label: "Show Your Squares",
+          type:"checkbox",
+          default: false
         },
         {
           label: "X Axis Min",
