@@ -602,3 +602,16 @@ td:not(.htNumeric).SeeIt-htCenter {
 .affix {
   top:50px;
 }
+
+/*make spreadsheet container resizable from user*/
+.spreadsheet_popup {
+  position: absolute;
+  left: 24.5%;
+  z-index: 2;
+} 
+
+#data_tab,
+#graphs_tab {
+  overflow: auto;
+  height: 92vh;
+}

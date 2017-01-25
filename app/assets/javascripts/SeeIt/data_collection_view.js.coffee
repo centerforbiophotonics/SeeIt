@@ -518,5 +518,6 @@
       @visible = !@visible
       $('.SeeIt.Handsontable-Container').css('height', '-=20px')
 
+
   DataCollectionView
 ).call(@)

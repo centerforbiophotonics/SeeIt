@@ -379,8 +379,6 @@
       @model.removeDataset(dataset_id)
       @dataCollectionView.removeDatasetView(dataset_id)
       @graphCollectionView.removeFooterFromDataset(dataset_title)
-      
-
 
   ApplicationController
 ).call(@)
