@@ -42,14 +42,23 @@
 
     formatData: ->
       retdata = []
-      groups = {}
-      
-      @dataset[0].data.forEach (dataColumn) -> #for each dataColumn in the default part of dataset
-        vals =[]
-        dataColumn.data().forEach (d) -> #for each row in the column
-          vals.push({x: d.label(), y: d.value()})
+      xdata = []
+      @dataset.forEach (dataRole) ->
+        if dataRole.name == 'x-axis'
+          xdata = dataRole.data[0].data().map((datum)->datum.value())
+        else if dataRole.name == 'y-axis'
+          dataRole.data.forEach (dataColumn, i) ->
+            vals = []
+            dataColumn.data().forEach (datum, j) ->
+              vals.push({'x':xdata[j], 'y':datum.value()})
+            retdata.push({values: vals, key: dataColumn.getHeader(), color:dataColumn.getColor()})
+
+#      @dataset[0].data.forEach (dataColumn) -> #for each dataColumn in the default part of dataset
+#        vals =[]
+#        dataColumn.data().forEach (d) -> #for each row in the column
+#          vals.push({x: d.label(), y: d.value()})
           
-        retdata.push({values: vals, key: dataColumn.header, color: dataColumn.getColor()})
+#        retdata.push({values: vals, key: dataColumn.header, color: dataColumn.getColor()})
 
       return retdata
 
@@ -86,7 +95,12 @@
     dataFormat: ->
       [
         {
-          name: "default",
+          name: "x-axis",
+          type: "numeric",
+          multiple: false
+        },
+        {
+          name: "y-axis",
           type: "numeric",
           multiple: true
         }
