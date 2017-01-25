@@ -115,6 +115,21 @@
 
       return dataset
 
+
+    removeDataset: (dataset_id) ->
+
+      index = @findIndexByID(dataset_id)
+      if index != null
+        @datasets.splice(index, 1)
+
+    findIndexByID: (dataset_id) ->
+      index = null
+      @datasets.forEach (d, i) ->
+        if d.ID == dataset_id
+          index = i
+
+      return index
+
     toJson: ->
       obj = []
 

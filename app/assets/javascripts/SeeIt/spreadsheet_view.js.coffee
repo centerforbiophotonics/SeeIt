@@ -24,9 +24,10 @@
             <span class='title'>#{if @dataset && @dataset.data.length then @dataset.title else ""}</span>
             <span class="SeeIt title-edit-icon glyphicon glyphicon-pencil"></span>
               <div class="btn-group SeeIt graph-buttons" role="group" style="float: right">
+                <button class="SeeIt delete btn btn-default" title='Delete Dataset' style="right: 20px"><span class="glyphicon glyphicon-trash"></span></button>
                 <button class="SeeIt export btn btn-default" title='Export Spreadsheet'><span class="glyphicon glyphicon glyphicon-save"></span></button>
                 <button class="SeeIt maximize btn btn-default" title='Maximize Spreadsheet'><span class="glyphicon glyphicon-resize-full"></span></button>
-                <button class="SeeIt remove btn btn-default" title="Remove Spreadsheet"><span class="glyphicon glyphicon-remove"></span></button>
+                <button class="SeeIt remove btn btn-default" title="Hide Spreadsheet"><span class="glyphicon glyphicon-remove"></span></button>
               </div>
           </div>
           <div class="SeeIt panel-body spreadsheet">
@@ -41,9 +42,6 @@
       @initHandlers()
       @resetTable()
       @toggleVisible()
-  
-    maximize: ->  
-      console.log "Maximize"
 
     toggleFullscreen: ->
       if @isFullscreen 
@@ -104,10 +102,6 @@
         #Do nothing
       )
 
-      @listenTo(self, 'spreadsheet:maximize', (num) ->  
-        self.maximize.call(self, num)
-      )
-
       @handlers = {
         editTitle: ->
           if !self.editingTitle
@@ -156,15 +150,49 @@
       )
 
       @container.find('.maximize').off('click').on('click', () -> 
-        console.log 'max button'
-        self.trigger('spreadsheet:maximize', 6)
         self.container.find('.maximize .glyphicon').toggleClass('glyphicon-resize-full glyphicon-resize-small')
         self.container.toggleClass('spreadsheet_maximized')
+        self.handlers.resize()
+        $('.SeeIt.Handsontable-Container').css('height', '-=20px')
       )
 
       @container.find('.remove').off('click').on('click', () -> 
-        $("button:contains('#{self.dataset.title}')").siblings('.show-in-spreadsheet').trigger('click')
-        
+        # $("button:contains('#{self.dataset.title}')").siblings('.show-in-spreadsheet').trigger('click')
+        $('.toggleSpreadsheet').trigger('click')
+      )
+
+      @container.find('.delete').off('click').on('click', () ->
+        self.container.find('.SeeIt .spreadsheet').append("""
+          <div id="dataset_remove_modal" class="modal fade">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title" id='delete_modal_title'></h4>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="SeeIt btn btn-primary" id="confirm_delete" data-loading-text="<span class='SeeIt glyphicon glyphicon-refresh spin'></span>">
+                      Confirm
+                    </button>
+                  </div>
+                </div>
+            </div>
+          </div>
+        """)
+        $('#dataset_remove_modal').modal('show')
+        $('#delete_modal_title').text("Delete " + self.dataset.title + "?")
+
+        $(document).off("keypress").on("keypress", ":input:not(textarea)", (e) ->    
+          if e.keyCode == 13
+            e.preventDefault()
+            $('#confirm_delete').click()
+        );
+
+        $('#confirm_delete').on('click', () ->
+          $('#dataset_remove_modal').modal('hide')
+          self.app.destroyDataset(self.dataset.ID, self.dataset.title)
+        );
       )
 
     validateUniqueness: (val, data, ignore) ->
@@ -275,7 +303,6 @@
         data: privateMethods.formatModelData(),
         columns: privateMethods.formatColumns(),
         className: "SeeIt-htCenter",
-        height: Math.max(270, self.container.find('.SeeIt.Handsontable-Container').parent().height()),
         colWidths: ->
           Math.max(
             (self.container.find('.SeeIt.Handsontable-Container').parent().width() - 50) / self.dataset.headers.length,

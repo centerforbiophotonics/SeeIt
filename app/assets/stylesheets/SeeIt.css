@@ -277,7 +277,7 @@
 }
 
 .SeeIt.dataset-list {
-  height: 100vh;
+  height: calc(100vh - 75px);
 }
 
 div.SeeIt.footer-row.row, div.SeeIt.footer-expanded-row.row {

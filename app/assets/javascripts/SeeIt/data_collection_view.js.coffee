@@ -94,13 +94,16 @@
       @listenTo(@app, 'graph:id:change', (oldId, newId) ->
         self.datasetViewCollection.forEach (d) ->
           d.trigger('graph:id:change', oldId, newId)
-      )
+      ) 
 
       @container.find('.dataset-list').off('drop').on('drop', @handlers.file.dropListener)
       @container.find('.dataset-list').off('dragenter').on('dragenter', @handlers.file.dragEnterListener)
       @container.find('.dataset-list').off('dragleave').on('dragleave', @handlers.file.dragLeaveListener)
       @container.find('.dataset-list').off('dragover').on('dragover', @handlers.file.dragOverListener)
       @container.find('.dataset-list').off('dragend').on('dragend', @handlers.file.dragEndListener)
+
+      @container.find('.dataset-title').off('dragstart').on('dragstart', @handlers.remove.dragStartListener)
+      @container.find('.dataset-title').off('dragend').on('dragend', @handlers.remove.dragEndListener)
 
     initDatasetListeners: (datasetView) ->
       self = @
@@ -143,7 +146,8 @@
           dragOverListener: (event) ->
             event.preventDefault()
             data = event.originalEvent.dataTransfer.items
-            if data[0].kind == 'file'
+
+            if data[0] != undefined && data[0].kind == 'file'
               $('.dataset-list').addClass('hover')
             return false
 
@@ -175,7 +179,7 @@
 
               if current_file == data.length
                 return false
-              
+
               fileType = current_file.name.split('.')[1]
 
               if fileType == 'csv'
@@ -187,6 +191,22 @@
                 return false
 
             return false
+        },
+
+        remove: {
+
+          dragStartListener: (event) ->
+            event.preventDefault()
+            console.log 'dragstart'
+
+            $(".data-drop-zone").css("background-color", "#FFAFAF")
+
+          dragEndListener: (event) ->
+            event.preventDefault()
+            console.log 'dragend'
+
+            $(".data-drop-zone").css("background-color", "")
+
         }
 
       }
@@ -380,11 +400,17 @@
 
           self.container.find(".json-endpoint").val("")
         when "json-file"
-          json_manager = new SeeIt.JsonManager()
-          self.dataLoadingMsg.show()
-          json_manager.handleUpload(data.file, (d) ->
-            self.trigger 'datasets:create', d
-            self.dataLoadingMsg.hide()
+          json_manager = new SeeIt.JsonManager()      
+          json_manager.getJsonTitle(data.file, (title) ->
+            if self.validateTitle(title)
+              self.dataLoadingMsg.show()
+              json_manager.handleUpload(data.file, (d) ->
+                self.trigger 'datasets:create', d
+                self.dataLoadingMsg.hide()
+                $('.show-in-spreadsheet').last().trigger('click')
+            )
+            else
+              self.ErrorMsg.show()
           )
         when "csv-endpoint"
           csv_manager = new SeeIt.CSVManager()
@@ -421,7 +447,6 @@
           catch error
             error_cb()
 
-
           self.container.find(".csv-endpoint").val("")
         when "csv-file"
           filename = data.file.name.split('.')[0]
@@ -431,6 +456,7 @@
             csv_manager.handleUpload(data.file, (d) ->
               self.trigger 'datasets:create', [{isLabeled: true, title: filename, dataset: d}]
               self.dataLoadingMsg.hide()
+              $('.show-in-spreadsheet').last().trigger('click')
             )
           else
             @ErrorMsg.show()
@@ -471,9 +497,26 @@
 
       return datasetView
 
+    removeDatasetView: (dataset_id) ->
+      index = @findIndexByID(dataset_id)
+
+      if index != null
+        @datasetViewCollection[index].destroy()
+        @datasetViewCollection.splice(index, 1)
+        $('.toggleSpreadsheet').trigger('click')
+
+    findIndexByID: (dataset_id) ->
+      index = null
+      @datasetViewCollection.forEach (d, i) ->
+        if d.dataset.ID == dataset_id
+          index = i
+
+      return index
+
     toggleVisible: ->
       @container.toggleClass('hidden')
       @visible = !@visible
+      $('.SeeIt.Handsontable-Container').css('height', '-=20px')
 
   DataCollectionView
 ).call(@)

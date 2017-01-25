@@ -92,7 +92,6 @@
               else
                 @filteredDataset[datasetIdx].data.push(this_data)
              
-
               @addDataToFooter(new_data)
 
               self = @
@@ -176,7 +175,7 @@
         <div class="SeeIt data-rep btn-group" role="group" data-id='#{data.data.header}'>
           <button class="SeeIt data-rep-color btn btn-default" style="background-color: #{data.data.getColor()}"></button>
           <button class="SeeIt data-rep-text btn btn-default">#{data.data.header}</button>
-          <button class="SeeIt data-rep-remove btn btn-default" title='Remove Data'><span class="glyphicon glyphicon-remove"></span></button>
+          <button class="SeeIt data-rep-remove btn btn-default" datasetName="#{data.data.datasetTitle}" title='Remove Data'><span class="glyphicon glyphicon-remove"></span></button>
         </div>
       """)
 
@@ -220,17 +219,36 @@
 
     # remove previous tab in data-drop-zone
     removeDataFromFooterMultiple: ->
-      @container.find(".data-drop-zone .data-rep:first").remove()    
+      @container.find(".data-drop-zone .data-rep:first").remove()
 
     removeData: (data) ->
-      dataset_idx = @filteredDataset.map((d) -> d.name).indexOf(data.name)
 
-      if dataset_idx >= 0
-        idx = @filteredDataset[dataset_idx].data.indexOf(data.data)
-        if idx >= 0
-          @filteredDataset[dataset_idx].data.splice(idx, 1)
+      if typeof data == 'string'
+       
+        filteredDatasetIdx = dataRoleIdx = -1
+        dataRoleName = null
+        @filteredDataset.forEach (data_role, i) ->
+          data_role.data.forEach (data_col, j) ->
+            if data_col.datasetTitle == data
+              filteredDatasetIdx = i
+              dataRoleIdx = j
+              dataRoleName = data_role.name
+
+        if filteredDatasetIdx != -1 && dataRoleIdx != -1
+          removedColumn = @filteredDataset[filteredDatasetIdx].data.splice(dataRoleIdx, 1)
+          dataToRemove = {name: dataRoleName, data: removedColumn[0]}
           @graph.trigger('data:destroyed', @options.getValues())
-          @removeDataFromFooter(data)
+          @removeDataFromFooter(dataToRemove)
+
+      else
+        dataset_idx = @filteredDataset.map((d) -> d.name).indexOf(data.name) # finds the matched data to delete
+
+        if dataset_idx >= 0
+          idx = @filteredDataset[dataset_idx].data.indexOf(data.data)
+          if idx >= 0
+            @filteredDataset[dataset_idx].data.splice(idx, 1)
+            @graph.trigger('data:destroyed', @options.getValues())
+            @removeDataFromFooter(data) # use this function to remove footer
 
     initGraph: ->
       self = @

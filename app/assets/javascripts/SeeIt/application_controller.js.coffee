@@ -324,15 +324,22 @@
         self.trigger 'graph:addData', dataGraph
 
 
+
     ###*
       # Toggles visibility of SpreadsheetView
     ###
     toggleSpreadsheetVisible: ->
       if @ui.spreadsheet
+
         @spreadsheetView.toggleVisible()
         @spreadsheetVisible = !@spreadsheetVisible
 
-        if @spreadsheetVisible then @spreadsheetView.updateView()
+        if @spreadsheetVisible 
+          @spreadsheetView.updateView()
+          $('.SeeIt.Handsontable-Container').css('height', '+=20px')
+
+        else 
+          $('.SeeIt.Handsontable-Container').css('height', '-=20px')
 
         @trigger('height:toggle')
 
@@ -366,6 +373,14 @@
         alert('Filename cannot be blank');
       else if filename && filename != "null"
         saveAs(blob, filename+".json");
+
+    destroyDataset: (dataset_id, dataset_title) ->
+      
+      @model.removeDataset(dataset_id)
+      @dataCollectionView.removeDatasetView(dataset_id)
+      @graphCollectionView.removeFooterFromDataset(dataset_title)
+      
+
 
   ApplicationController
 ).call(@)
