@@ -51,7 +51,7 @@
       @container.find('.tab-content').append("<div role='tabpanel' class='tab-pane SeeIt Data active' id='data_tab'></div>")
       @layoutContainers['Data'] = @container.find(".Data")
         
-      @container.find('.tab-content').append("<div role='tabpanel' class='tab-pane SeeIt Spreadsheet pull-right' id='spreadsheets_tab'></div>")
+      @container.find('.tab-content').append("<div role='tabpanel' class='tab-pane SeeIt Spreadsheet' id='spreadsheets_tab'></div>")
       @layoutContainers['Spreadsheet'] = @container.find(".Spreadsheet")
 
       @container.find('.tab-content').append("<div role='tabpanel' class='tab-pane SeeIt Graphs' id='graphs_tab'></div>")
@@ -70,7 +70,8 @@
 
         $(".SeeIt.Data").addClass("col-md-3")
         $(".SeeIt.Graphs").addClass("col-md-9")
-        $(".SeeIt.Spreadsheet").addClass("col-md-9")
+        # $(".SeeIt.Spreadsheet").addClass("col-md-9")
+        $(".SeeIt.Spreadsheet").addClass("spreadsheet_popup")
         
       @container.find('.tab-button').off('dragenter').on('dragenter', @handlers.dragEnterListener)
       
@@ -89,7 +90,7 @@
 
         $(".SeeIt.Data").removeClass("col-md-3")
         $(".SeeIt.Graphs").removeClass("col-md-9")
-        $(".SeeIt.Spreadsheet").removeClass("col-md-9")
+        $(".SeeIt.Spreadsheet").removeClass("spreadsheet_popup")
         $(".SeeIt.Data").addClass("col-md-12")
         $(".SeeIt.Graphs").addClass("col-md-12")
         $(".SeeIt.Spreadsheet").addClass("col-md-12")
@@ -104,11 +105,15 @@
           $(".SeeIt.Spreadsheet").removeClass("col-md-12")
           $(".SeeIt.Data").addClass("col-md-3")
           $(".SeeIt.Graphs").addClass("col-md-9")
-          $(".SeeIt.Spreadsheet").addClass("col-md-9")
+          $(".SeeIt.Spreadsheet").removeClass("col-md-9")
+          $(".SeeIt.Spreadsheet").addClass("spreadsheet_popup")
+
+        else if !@app.dataCollectionView.visible
+          $(".SeeIt.Spreadsheet").removeClass("spreadsheet_popup")
+          $(".SeeIt.Spreadsheet").addClass("col-md-12")
 
         else if $(".SeeIt.Graphs").hasClass("col-md-9")
           $(".SeeIt.Graphs").removeClass("col-md-9")
-          $(".SeeIt.Spreadsheet").removeClass("col-md-9")
           $(".SeeIt.Graphs").addClass("col-md-12")
           $(".SeeIt.Spreadsheet").addClass("col-md-12")
 

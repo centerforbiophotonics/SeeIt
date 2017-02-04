@@ -112,7 +112,7 @@
                 </a>
               </div>
 
-              <div class="modal" id="graph-modal" role="dialog">
+              <div class="modal fade" id="graph-modal" role="dialog">
                 <div class="modal-dialog">
                   <div class="modal-content">
                     <div class="modal-header">

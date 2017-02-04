@@ -49,7 +49,8 @@
         </div>
       """)
 
-      $('#myModal').modal('show')
+      $('#myModal').insertAfter($('body'))
+      $('#myModal').modal('show')      
 
       $(document).off("keypress").on("keypress", ":input:not(textarea)", (e) ->    
         if e.keyCode == 13
@@ -142,6 +143,7 @@
           </div>
       """)
 
+      $('#myModal').insertAfter($('body'))
       $('#myModal').modal('show')
 
       $(document).off("keypress").on("keypress", ":input:not(textarea)", (e) ->       

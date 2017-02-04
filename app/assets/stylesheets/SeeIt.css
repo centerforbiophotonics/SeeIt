@@ -603,12 +603,17 @@ td:not(.htNumeric).SeeIt-htCenter {
   top:50px;
 }
 
-/*make spreadsheet container resizable from user*/
 .spreadsheet_popup {
-  position: absolute;
-  left: 24.5%;
+  position: fixed;
+  left: 25.5%;
   z-index: 2;
+  width: 72.5%;
+  height: 91.5vh;
 } 
+
+#myModal {
+  font-size: 14px;
+}
 
 #data_tab,
 #graphs_tab {
