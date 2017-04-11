@@ -3,8 +3,10 @@
     _.extend(@prototype, Backbone.Events)
 
     constructor: (@app, @container, @navElements) ->
+      @modal_register = false
       @init()
       @resizeListener()
+      
 
     init: ->
       @container.html(
@@ -57,7 +59,7 @@
             htmlStr += """
                 <li class="#{@navElements[i].class}">#{icon}<a href="#" style="color: #777">#{@navElements[i].title}</a></li> 
               </ul>
-              <div class="modal fade" id="graph-modal" role="dialog">
+              <div class="modal fade" id="graph-modal" role="dialog" data-backdrop="false" style="background-color: rgba(0, 0, 0, 0.5);">
                 <div class="modal-dialog">
                   <div class="modal-content">
                     <div class="modal-header">
@@ -112,7 +114,7 @@
                 </a>
               </div>
 
-              <div class="modal fade" id="graph-modal" role="dialog">
+              <div class="modal fade" id="graph-modal" role="dialog" data-backdrop="false" style="background-color: rgba(0, 0, 0, 0.5);">
                 <div class="modal-dialog">
                   <div class="modal-content">
                     <div class="modal-header">
@@ -148,24 +150,26 @@
       return htmlStr+"</ul>"
 
     registerEvents: ->
-      toolbar  = @
+      self = @
       graph_created = false
+
       @navElements.forEach (el) ->
         if el.handler
-          toolbar.container.find(".#{el.class}").off('click', el.handler).on('click', el.handler)
+          $(".#{el.class}").off('click', el.handler).on('click', el.handler)
 
       $("#graph-modal").on 'hidden.bs.modal', (event) -> 
         if graph_created
           $('a[href="#graphs_tab"]').tab('show')
           $("#graphs_tab").animate({ scrollTop: $("#graphs_tab")[0].scrollHeight })
           graph_created = false
-
-      toolbar.container.find("#create-graph").on 'click', (event) ->
-        selectedGraph = toolbar.container.find("#dropdown-form").val()
+          
+      $("#create-graph").on 'click', (event) ->
+        selectedGraph = $("#dropdown-form").val()
         $(".addGraph[data-id='"+selectedGraph+"']").trigger("click")
         graph_created = true
         $('#graph-modal').modal('hide')
-        
+
+      self.modal_register = true
 
     resizeListener: ->
       self = @       

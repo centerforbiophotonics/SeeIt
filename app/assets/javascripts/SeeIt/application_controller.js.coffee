@@ -174,11 +174,10 @@
         toggleSpreadsheetVisible: ->
           self.toggleSpreadsheetVisible.call(self)
         addGraph: ->
-          inputGraphName = self.container.find("#inputGraphName").val()
+          inputGraphName = $("#inputGraphName").val()
           graphName = $(@).attr('data-id')
           graphType = self.graphTypes.filter((g) -> g.name == graphName)[0]
-          self.container.find("#inputGraphName").val("")
-
+          $("#inputGraphName").val("")
 
           self.trigger('graph:create', graphType, inputGraphName)
           # app.graphCollectionView.addGraph()

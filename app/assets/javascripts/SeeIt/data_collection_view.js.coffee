@@ -69,6 +69,9 @@
 
       @container.find('.panel-heading').append("""<button class="SeeIt hide_data btn btn-default" title='Hide Data' style="float:right"><span class="glyphicon glyphicon-arrow-left"></span></button>""")
 
+      if $(".Globals").width() < 1003
+        $(".hide_data").addClass('hidden')
+
       @initListeners()
       @initDatasetViewCollection()
       @resizeListener()
@@ -215,11 +218,11 @@
       self = @
       $(window).on 'resize', ->
         if $('.Globals').width() < 1003
-          $('#data-panel-heading > button').remove()
-        else if !$('#data-panel-heading > button').length
-          $('#data-panel-heading').append("""<button class="SeeIt hide_data btn btn-default" title='Hide Data' style="float:right"><span class="glyphicon glyphicon-arrow-left"></span></button>""")
-          self.container.find('.hide_data').on 'click', () ->
-            self.app.handlers.toggleDataVisible()
+          $(".hide_data").addClass("hidden")
+          # $('#data-panel-heading > button').remove()
+        else if $('.Globals').width() >= 1003 && $(".SeeIt.Graphs").hasClass("col-md-12")
+          self.visible = false
+          $(".hide_data").removeClass("hidden") 
 
     newDatasetMaker: ->
       @container.find('.dataset-list').append("""
@@ -228,7 +231,7 @@
       """)
 
       @container.find('.dataset-list').append("""
-        <div id="newdata_modal" class="modal fade">
+        <div id="newdata_modal" class="modal fade" data-backdrop="false" style="background-color: rgba(0, 0, 0, 0.5);">
           <div class="modal-dialog modal-sm">
               <div class="modal-content">
                 <div class="modal-header">
@@ -272,17 +275,17 @@
       """)
 
       self = @
-      self.container.find("#dataset-select").on "change", (event) ->
-        self.container.find("#create-dataset").show()
+      $("#dataset-select").on "change", (event) ->
+        $("#create-dataset").show()
 
         if $(@).val() == "json-file" || $(@).val() == "csv-file"
-          self.container.find("#create-dataset").hide()
+          $("#create-dataset").hide()
 
-        selected = self.container.find("#dataset-select").val()
-        self.container.find(".new-dataset-input").val("")
-        self.container.find(".new-dataset-input:not(.#{selected})").addClass("hidden")
-        self.container.find(".#{selected}").removeClass("hidden")
-        self.container.find("#upload_modal").removeClass("hidden")
+        selected = $("#dataset-select").val()
+        $(".new-dataset-input").val("")
+        $(".new-dataset-input:not(.#{selected})").addClass("hidden")
+        $(".#{selected}").removeClass("hidden")
+        $("#upload_modal").removeClass("hidden")
 
       toggleForm = ->
         $(@).toggleClass('active')
@@ -290,7 +293,7 @@
         $(@).parent().parent().find('.new-dataset-form').slideToggle()
 
       $(document).off("keypress").on("keypress", ":input:not(textarea)", (e) ->
-        selected = self.container.find("#dataset-select").val()
+        selected = $("#dataset-select").val()
         if e.keyCode == 13 && (selected != 'json-file' || selected != 'csv-file')
           e.preventDefault()
           $('#create-dataset').click()
@@ -299,14 +302,15 @@
       self.container.find('.hide_data').on 'click', () ->
         self.app.handlers.toggleDataVisible()
 
-      self.container.find("#create-dataset").on 'click', (event) ->
+      $("#create-dataset").on 'click', (event) ->
         $('#newdata_modal').modal('hide')
-        return self.handleDatasetCreate.call(self, self.container.find("#dataset-select").val())
+        return self.handleDatasetCreate.call(self, $("#dataset-select").val())
 
-      self.container.find(".json-file input, .csv-file input").on 'change', (event) ->
-        return self.handleDatasetCreate.call(self, self.container.find("#dataset-select").val(), {file: @files[0]})
+      $(".json-file input, .csv-file input").on 'change', (event) ->
+        return self.handleDatasetCreate.call(self, $("#dataset-select").val(), {file: @files[0]})
 
-      self.container.find("#upload_modal").on 'click', (e) ->
+      $("#upload_modal").on 'click', (e) ->
+        $('#newdata_modal').insertAfter($('body'))
         $('#newdata_modal').modal('show')
 
       $(".json-file, .csv-file").on "click", () ->
@@ -321,35 +325,35 @@
       $('.holder').remove()
       switch selected
         when "google"
-          url = self.container.find('.dataset-spreadsheet-url').val()
+          url = $('.dataset-spreadsheet-url').val()
 
           if url.length
-            button = self.container.find("#create-dataset")[0]
+            button = $("#create-dataset")[0]
             $(button).button('loading')
 
-            googleSpreadsheet = new SeeIt.GoogleSpreadsheetManager(self.container.find('.dataset-spreadsheet-url').val(), (success, collection) ->
+            googleSpreadsheet = new SeeIt.GoogleSpreadsheetManager($('.dataset-spreadsheet-url').val(), (success, collection) ->
               if success
                 self.trigger('datasets:create', collection)
                 $(button).button('reset')
-                self.container.find(".new-dataset-input").val("")
-                self.container.find(".dataset-name").val("")
+                $(".new-dataset-input").val("")
+                $(".dataset-name").val("")
                 # window.onerror = oldOnError
               else
-                self.container.find(".new-dataset-msg").addClass("error").html("Error loading from spreadsheet")
+                $(".new-dataset-msg").addClass("error").html("Error loading from spreadsheet")
                 $(button).button('reset')
-                self.container.find(".new-dataset-input").val("")
-                self.container.find(".dataset-name").val("")
+                $(".new-dataset-input").val("")
+                $(".dataset-name").val("")
 
                 setTimeout(->
-                  self.container.find(".new-dataset-msg").removeClass("error").html("")
+                  $(".new-dataset-msg").removeClass("error").html("")
                 ,5000)
             )
             googleSpreadsheet.getData()
 
           else
-            self.container.find('.dataset-spreadsheet-url').val("")
+            $('.dataset-spreadsheet-url').val("")
             msg = "URL cannot be blank"
-            tip = new Opentip($(this), msg, {style: "alert", target: self.container.find(".dataset-spreadsheet-url"), showOn: "creation"})
+            tip = new Opentip($(this), msg, {style: "alert", target: $(".dataset-spreadsheet-url"), showOn: "creation"})
             tip.setTimeout(->
               tip.hide.call(tip)
               return
@@ -358,15 +362,15 @@
 
           return false
         when "spreadsheet"
-          title = self.container.find(".dataset-name").val()
+          title = $(".dataset-name").val()
           if title.length && self.validateTitle.call(self, title)
-            self.container.find(".new-dataset-input").val("")
-            self.container.find(".new-dataset-li").trigger('click')
+            $(".new-dataset-input").val("")
+            $(".new-dataset-li").trigger('click')
             self.trigger("dataset:create", title)
           else
-            self.container.find(".dataset-name").val("")
+            $(".dataset-name").val("")
             msg = if title.length then "Title must be unique" else "Title cannot be blank"
-            tip = new Opentip($(this), msg, {style: "alert", target: self.container.find(".dataset-name"), showOn: "creation"})
+            tip = new Opentip($(this), msg, {style: "alert", target: $(".dataset-name"), showOn: "creation"})
             tip.setTimeout(->
               tip.hide.call(tip)
               return
@@ -374,21 +378,21 @@
             return false
         when "json-endpoint"
           json_manager = new SeeIt.JsonManager()
-          button = self.container.find("#create-dataset")[0]
+          button = $("#create-dataset")[0]
           $(button).button('loading')
 
           error_cb = ->
-            self.container.find(".new-dataset-msg").addClass("error").html("Error loading JSON")
-            self.container.find(".new-dataset-input").val("")
+            $(".new-dataset-msg").addClass("error").html("Error loading JSON")
+            $(".new-dataset-input").val("")
 
             setTimeout(->
-              self.container.find(".new-dataset-msg").removeClass("error").html("")
+              $(".new-dataset-msg").removeClass("error").html("")
             ,5000)
 
             $(button).button('reset')
 
           try
-            json_manager.downloadFromServer(self.container.find(".json-endpoint").val(),
+            json_manager.downloadFromServer($(".json-endpoint").val(),
               ((data) ->
                 self.trigger 'datasets:create', [data]
                 $(button).button('reset')
@@ -398,7 +402,7 @@
           catch error
             error_cb()
 
-          self.container.find(".json-endpoint").val("")
+          $(".json-endpoint").val("")
         when "json-file"
           json_manager = new SeeIt.JsonManager()      
           json_manager.getJsonTitle(data.file, (title) ->
@@ -414,21 +418,21 @@
           )
         when "csv-endpoint"
           csv_manager = new SeeIt.CSVManager()
-          button = self.container.find("#create-dataset")[0]
+          button = $("#create-dataset")[0]
           $(button).button('loading')
 
           error_cb = ->
-            self.container.find(".new-dataset-msg").addClass("error").html("Error loading CSV")
-            self.container.find(".new-dataset-input").val("")
+            $(".new-dataset-msg").addClass("error").html("Error loading CSV")
+            $(".new-dataset-input").val("")
 
             setTimeout(->
-              self.container.find(".new-dataset-msg").removeClass("error").html("")
+              $(".new-dataset-msg").removeClass("error").html("")
             ,5000)
 
             $(button).button('reset')
 
           try
-            csv_manager.downloadFromServer(self.container.find(".csv-endpoint").val(),
+            csv_manager.downloadFromServer($(".csv-endpoint").val(),
               ((data) ->
 
                 csvData = SeeIt.CSVManager.parseCSV(data.data)
@@ -447,7 +451,7 @@
           catch error
             error_cb()
 
-          self.container.find(".csv-endpoint").val("")
+          $(".csv-endpoint").val("")
         when "csv-file"
           filename = data.file.name.split('.')[0]
           if self.validateTitle(filename)

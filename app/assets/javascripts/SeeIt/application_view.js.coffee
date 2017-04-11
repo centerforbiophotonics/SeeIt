@@ -63,15 +63,16 @@
         $(".SeeIt.Data").addClass("col-md-12")
         $(".SeeIt.Graphs").addClass("col-md-12")
         $(".SeeIt.Spreadsheet").addClass("col-md-12")
+        $(".hide_data").addClass("hidden")
 
       else
         $(".device-small").css("display", "none")
         $(".tab-content > .tab-pane").css("display", "block")
+        $(".hide_data").removeClass("hidden")
 
         $(".SeeIt.Data").addClass("col-md-3")
         $(".SeeIt.Graphs").addClass("col-md-9")
-        # $(".SeeIt.Spreadsheet").addClass("col-md-9")
-        $(".SeeIt.Spreadsheet").addClass("spreadsheet_popup")
+        $(".SeeIt.Spreadsheet").addClass("col-md-9")
         
       @container.find('.tab-button').off('dragenter').on('dragenter', @handlers.dragEnterListener)
       
@@ -87,10 +88,11 @@
         $(".device-small").css("display", "block")
         $(".tab-pane").css("display", "")
         $(".SeeIt.Data").removeClass('hidden')
+        $(".hide_data").addClass("hidden")
 
         $(".SeeIt.Data").removeClass("col-md-3")
+        $(".SeeIt.Spreadsheet").removeClass("col-md-9")
         $(".SeeIt.Graphs").removeClass("col-md-9")
-        $(".SeeIt.Spreadsheet").removeClass("spreadsheet_popup")
         $(".SeeIt.Data").addClass("col-md-12")
         $(".SeeIt.Graphs").addClass("col-md-12")
         $(".SeeIt.Spreadsheet").addClass("col-md-12")
@@ -98,22 +100,26 @@
       else if $(".Globals").width() >= 1003
         $(".device-small").css("display", "none")
         $(".tab-pane").css("display", "block")
+        $(".hide_data").removeClass("hidden")
+        $(".SeeIt.Data").removeClass("col-md-12")
+        $(".SeeIt.Graphs").removeClass("col-md-12")
+        $(".SeeIt.Spreadsheet").removeClass("col-md-12")
+        # @app.dataCollectionView.visible = true
 
-        if @app.dataCollectionView.visible 
+        if @app.dataCollectionView.visible
           $(".SeeIt.Data").removeClass("col-md-12")
           $(".SeeIt.Graphs").removeClass("col-md-12")
           $(".SeeIt.Spreadsheet").removeClass("col-md-12")
           $(".SeeIt.Data").addClass("col-md-3")
           $(".SeeIt.Graphs").addClass("col-md-9")
-          $(".SeeIt.Spreadsheet").removeClass("col-md-9")
-          $(".SeeIt.Spreadsheet").addClass("spreadsheet_popup")
+          $(".SeeIt.Spreadsheet").addClass("col-md-9")
+
+        # else if !@app.dataCollectionView.visible # ?
+        #   $(".SeeIt.Spreadsheet").addClass("col-md-12")
 
         else if !@app.dataCollectionView.visible
-          $(".SeeIt.Spreadsheet").removeClass("spreadsheet_popup")
-          $(".SeeIt.Spreadsheet").addClass("col-md-12")
-
-        else if $(".SeeIt.Graphs").hasClass("col-md-9")
           $(".SeeIt.Graphs").removeClass("col-md-9")
+          $(".SeeIt.Spreadsheet").removeClass("col-md-9")
           $(".SeeIt.Graphs").addClass("col-md-12")
           $(".SeeIt.Spreadsheet").addClass("col-md-12")
 

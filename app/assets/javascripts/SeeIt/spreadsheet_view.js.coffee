@@ -163,7 +163,7 @@
 
       @container.find('.delete').off('click').on('click', () ->
         self.container.find('.SeeIt .spreadsheet').append("""
-          <div id="dataset_remove_modal" class="modal fade">
+          <div id="dataset_remove_modal" class="modal fade" data-backdrop="false" style="background-color: rgba(0, 0, 0, 0.5);">
             <div class="modal-dialog modal-sm">
                 <div class="modal-content">
                   <div class="modal-header">
@@ -180,14 +180,9 @@
             </div>
           </div>
         """)
+        $('#dataset_remove_modal').insertAfter($('body'))
         $('#dataset_remove_modal').modal('show')
         $('#delete_modal_title').text("Delete " + self.dataset.title + "?")
-
-        $(document).off("keypress").on("keypress", ":input:not(textarea)", (e) ->    
-          if e.keyCode == 13
-            e.preventDefault()
-            $('#confirm_delete').click()
-        );
 
         $('#confirm_delete').on('click', () ->
           $('#dataset_remove_modal').modal('hide')

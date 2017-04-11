@@ -603,20 +603,38 @@ td:not(.htNumeric).SeeIt-htCenter {
   top:50px;
 }
 
-.spreadsheet_popup {
+#data_tab {
   position: fixed;
-  left: 25.5%;
   z-index: 2;
-  width: 72.5%;
-  height: 91.5vh;
-} 
+  top: 7.8vh;
+  overflow: auto;
+  height: 92vh;
+}
 
-#myModal {
+#spreadsheets_tab {
+  float: right;
+  top: 7.8vh;
+}
+
+#graphs_tab {
+  float: right;
+  overflow: auto;
+  height: 92vh;
+  top: 7.8vh;
+}
+
+#graph-modal {
   font-size: 14px;
 }
 
-#data_tab,
-#graphs_tab {
-  overflow: auto;
-  height: 92vh;
+.SeeIt.navbar {
+  position: fixed;
+  width: 100%;
+  z-index: 1003;
+}
+
+.tab-button {
+  z-index: 1040;
+  top: 10px;
+  left: 30%;
 }

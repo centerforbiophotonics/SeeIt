@@ -14,7 +14,7 @@
       input = 1
 
       self.parent.container.find('.SeeIt .spreadsheet').append("""
-        <div id="myModal" class="modal fade">
+        <div id="myModal" class="modal fade" data-backdrop="false" style="background-color: rgba(0, 0, 0, 0.5);">
             <div class="modal-dialog modal-sm">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -49,14 +49,8 @@
         </div>
       """)
 
-      $('#myModal').insertAfter($('body'))
-      $('#myModal').modal('show')      
-
-      $(document).off("keypress").on("keypress", ":input:not(textarea)", (e) ->    
-        if e.keyCode == 13
-          e.preventDefault()
-          $('#done_button').click()
-      );
+      # $('#myModal').insertAfter($('body'))
+      $('#myModal').modal('show')
       
       $('label').click( () ->
         $('label').removeClass('selectedBackground')
@@ -95,7 +89,7 @@
       input = 1
 
       self.parent.container.find('.SeeIt .spreadsheet').append("""
-        <div id="myModal" class="modal fade">
+        <div id="myModal" class="modal fade" data-backdrop="false" style="background-color: rgba(0, 0, 0, 0.5);">
           <div class="modal-dialog modal-sm">
               <div class="modal-content">
                   <div class="modal-header">
@@ -143,14 +137,8 @@
           </div>
       """)
 
-      $('#myModal').insertAfter($('body'))
+      # $('#myModal').insertAfter($('body'))
       $('#myModal').modal('show')
-
-      $(document).off("keypress").on("keypress", ":input:not(textarea)", (e) ->       
-        if e.keyCode == 13
-          e.preventDefault()
-          $('#done_button').click()
-      );
 
       $('label').click( () ->
         $('label').removeClass('selectedBackground')
